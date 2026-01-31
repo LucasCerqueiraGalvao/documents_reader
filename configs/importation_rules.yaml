@@ -1,0 +1,16 @@
+﻿# importation_rules.yaml (stub)
+invoice_required_fields:
+  - exporter_name_address
+  - importer_name_address
+  - goods_specification
+  - marks_numbers
+  - packages_quantity_type
+  - gross_weight
+  - net_weight
+  - country_of_origin
+  - country_of_acquisition
+  - country_of_provenance
+  - unit_price_and_total
+  - freight_and_other_expenses
+  - payment_terms_currency
+  - incoterm

@@ -1,0 +1,152 @@
+{
+  "source": {
+    "stage01_file": "INVOICE_extracted.json",
+    "original_file": "INVOICE.pdf",
+    "doc_kind": "invoice"
+  },
+  "generated_at": "2026-01-30T01:48:38",
+  "fields": {
+    "invoice_number": {
+      "present": true,
+      "required": true,
+      "value": "DN-24139",
+      "evidence": [
+        "INVOICE NO. DN-24139"
+      ],
+      "method": "regex"
+    },
+    "invoice_date": {
+      "present": true,
+      "required": true,
+      "value": "AUG. 28,2025",
+      "evidence": [
+        "AUG. 28,2025"
+      ],
+      "method": "regex"
+    },
+    "payment_terms": {
+      "present": true,
+      "required": true,
+      "value": "ADVANCE PAYMENT",
+      "evidence": [
+        "ADVANCE PAYMENT"
+      ],
+      "method": "regex"
+    },
+    "importer_name": {
+      "present": true,
+      "required": true,
+      "value": "GHANDI SECAF VEICULOS LTDA.",
+      "evidence": [
+        "GHANDI SECAF VEICULOS LTDA."
+      ],
+      "method": "heuristic_line_before_cnpj"
+    },
+    "importer_cnpj": {
+      "present": true,
+      "required": true,
+      "value": "03562381000603",
+      "evidence": [
+        "CNPJ: 03.562.381/0006-03"
+      ],
+      "method": "regex"
+    },
+    "consignee_cnpj": {
+      "present": true,
+      "required": true,
+      "value": "03562381000603",
+      "evidence": [
+        "CNPJ: 03.562.381/0006-03"
+      ],
+      "method": "alias"
+    },
+    "shipper_name": {
+      "present": true,
+      "required": true,
+      "value": "SUZUKI OUTBOARD MOTORS F.C.A",
+      "evidence": [
+        "SUZUKI OUTBOARD MOTORS F.C.A"
+      ],
+      "method": "heuristic_regex"
+    },
+    "currency": {
+      "present": true,
+      "required": true,
+      "value": "JPY",
+      "evidence": [
+        "CURRENCY : JPY"
+      ],
+      "method": "regex"
+    },
+    "incoterm": {
+      "present": true,
+      "required": true,
+      "value": "FCA",
+      "evidence": [
+        "F.C.A"
+      ],
+      "method": "regex_incoterm"
+    },
+    "country_of_origin": {
+      "present": true,
+      "required": true,
+      "value": "OUTBOARD MOTORS",
+      "evidence": [
+        "COUNTRY OF ORIGIN:\n OUTBOARD MOTORS"
+      ],
+      "method": "regex"
+    },
+    "country_of_acquisition": {
+      "present": true,
+      "required": true,
+      "value": "JAPAN",
+      "evidence": [
+        "COUNTRY OF ACQUISITION : JAPAN"
+      ],
+      "method": "regex"
+    },
+    "country_of_provenance": {
+      "present": true,
+      "required": true,
+      "value": "JAPAN",
+      "evidence": [
+        "COUNTRY OF PROVENANCE : JAPAN"
+      ],
+      "method": "regex"
+    },
+    "net_weight_kg": {
+      "present": true,
+      "required": true,
+      "value": 7980.0,
+      "evidence": [
+        "NET WEIGHT: 7,980.00KGS"
+      ],
+      "method": "regex_number"
+    },
+    "gross_weight_kg": {
+      "present": true,
+      "required": true,
+      "value": 9825.0,
+      "evidence": [
+        "GROSS WEIGHT: 9,825.00KGS"
+      ],
+      "method": "regex_number"
+    },
+    "freight_and_expenses": {
+      "present": false,
+      "required": true,
+      "value": false,
+      "evidence": [],
+      "method": "keyword_scan"
+    },
+    "line_items": {
+      "present": false,
+      "required": false,
+      "value": null,
+      "evidence": [],
+      "method": "regex_items"
+    }
+  },
+  "missing_required_fields": [],
+  "warnings": []
+}

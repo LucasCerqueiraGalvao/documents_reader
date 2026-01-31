@@ -1,0 +1,152 @@
+{
+  "source": {
+    "stage01_file": "COMMERCIAL_INVOICE_I-000725_extracted.json",
+    "original_file": "COMMERCIAL INVOICE I-000725.pdf",
+    "doc_kind": "draft_bl"
+  },
+  "generated_at": "2025-12-19T09:21:37",
+  "fields": {
+    "freight_mode": {
+      "present": false,
+      "required": true,
+      "value": null,
+      "evidence": [],
+      "method": "regex"
+    },
+    "incoterm": {
+      "present": false,
+      "required": true,
+      "value": null,
+      "evidence": [],
+      "method": "regex"
+    },
+    "ncm": {
+      "present": false,
+      "required": true,
+      "value": null,
+      "evidence": [],
+      "method": "regex"
+    },
+    "due": {
+      "present": false,
+      "required": true,
+      "value": null,
+      "evidence": [],
+      "method": "regex"
+    },
+    "ruc": {
+      "present": false,
+      "required": true,
+      "value": null,
+      "evidence": [],
+      "method": "regex"
+    },
+    "booking_number": {
+      "present": false,
+      "required": false,
+      "value": null,
+      "evidence": [],
+      "method": "regex"
+    },
+    "wooden_packing": {
+      "present": false,
+      "required": true,
+      "value": null,
+      "evidence": [],
+      "method": "regex"
+    },
+    "containers": {
+      "present": false,
+      "required": true,
+      "value": null,
+      "evidence": [],
+      "method": "line_parse"
+    },
+    "total_cartons": {
+      "present": false,
+      "required": true,
+      "value": null,
+      "evidence": [],
+      "method": "regex"
+    },
+    "net_weight_kg_total": {
+      "present": false,
+      "required": true,
+      "value": null,
+      "evidence": [],
+      "method": "regex"
+    },
+    "gross_weight_kg_total": {
+      "present": false,
+      "required": true,
+      "value": null,
+      "evidence": [],
+      "method": "regex"
+    },
+    "cubic_meters_total": {
+      "present": false,
+      "required": true,
+      "value": null,
+      "evidence": [],
+      "method": "regex"
+    },
+    "exporter_cnpj": {
+      "present": false,
+      "required": true,
+      "value": null,
+      "evidence": [],
+      "method": "regex"
+    },
+    "exporter_name": {
+      "present": false,
+      "required": true,
+      "value": null,
+      "evidence": [],
+      "method": "regex"
+    },
+    "phones_found": {
+      "present": true,
+      "required": false,
+      "value": [
+        "(19)3545-8660"
+      ],
+      "evidence": [
+        "(19)3545-8660"
+      ],
+      "method": "phone_heuristic"
+    },
+    "importer_name": {
+      "present": true,
+      "required": true,
+      "value": "1 de 1",
+      "evidence": [
+        "O FORM-26e REVISÃO 02 29/07/2013 F A C T U R A C O M E R C I A L Fecha Para HOME & THINGS Consignee HOME & THINGS 1 de 1 Hoja 12/09/2025 17 OLD HOPE ROAD 17 OLD HOPE ROAD Invoice Nr. I-0007/25 KINGSTON 5 KINGSTO"
+      ],
+      "method": "regex"
+    },
+    "notify_party_name": {
+      "present": false,
+      "required": true,
+      "value": null,
+      "evidence": [],
+      "method": "regex"
+    }
+  },
+  "missing_required_fields": [
+    "freight_mode",
+    "incoterm",
+    "ncm",
+    "due",
+    "ruc",
+    "wooden_packing",
+    "containers",
+    "total_cartons",
+    "net_weight_kg_total",
+    "gross_weight_kg_total",
+    "cubic_meters_total",
+    "exporter_cnpj",
+    "exporter_name",
+    "notify_party_name"
+  ],
+  "warnings": []
+}

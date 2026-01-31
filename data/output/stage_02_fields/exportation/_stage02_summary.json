@@ -1,0 +1,67 @@
+{
+  "generated_at": "2025-12-19T09:21:37",
+  "flow": "exportation",
+  "items": [
+    {
+      "file": "COMMERCIAL INVOICE I-000725.pdf",
+      "stage01": "COMMERCIAL_INVOICE_I-000725_extracted.json",
+      "doc_kind": "draft_bl",
+      "missing_required_fields": [
+        "freight_mode",
+        "incoterm",
+        "ncm",
+        "due",
+        "ruc",
+        "wooden_packing",
+        "containers",
+        "total_cartons",
+        "net_weight_kg_total",
+        "gross_weight_kg_total",
+        "cubic_meters_total",
+        "exporter_cnpj",
+        "exporter_name",
+        "notify_party_name"
+      ],
+      "warnings": []
+    },
+    {
+      "file": "DADOS CNTR.pdf",
+      "stage01": "DADOS_CNTR_extracted.json",
+      "doc_kind": "container_data",
+      "missing_required_fields": [
+        "containers"
+      ],
+      "warnings": []
+    },
+    {
+      "file": "DRAFT - I-0007-25 - HOME  THINGS.pdf",
+      "stage01": "DRAFT_-_I-0007-25_-_HOME_THINGS_extracted.json",
+      "doc_kind": "draft_bl",
+      "missing_required_fields": [
+        "due",
+        "containers",
+        "notify_party_name"
+      ],
+      "warnings": []
+    },
+    {
+      "file": "I-0007-25 - HOME & THINGS (DRAFT).pdf",
+      "stage01": "I-0007-25_-_HOME_THINGS_DRAFT_extracted.json",
+      "doc_kind": "certificate_of_origin",
+      "missing_required_fields": [],
+      "warnings": []
+    },
+    {
+      "file": "PACKING LIST I-000725.pdf",
+      "stage01": "PACKING_LIST_I-000725_extracted.json",
+      "doc_kind": "packing_list",
+      "missing_required_fields": [
+        "gross_weight_kg",
+        "net_weight_kg",
+        "container_count",
+        "containers"
+      ],
+      "warnings": []
+    }
+  ]
+}

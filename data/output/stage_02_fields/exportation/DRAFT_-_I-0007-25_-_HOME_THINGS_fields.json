@@ -1,0 +1,180 @@
+{
+  "source": {
+    "stage01_file": "DRAFT_-_I-0007-25_-_HOME_THINGS_extracted.json",
+    "original_file": "DRAFT - I-0007-25 - HOME  THINGS.pdf",
+    "doc_kind": "draft_bl"
+  },
+  "generated_at": "2025-12-19T09:21:37",
+  "fields": {
+    "freight_mode": {
+      "present": true,
+      "required": true,
+      "value": "COLLECT",
+      "evidence": [
+        "-0007/25 RUC: 5BR5525482520000000000000000I000725 NCM/NALADI: 6907.22.00 HS CODE: 6907.22 FREIGHT COLLECT / INCOTERM: FOB SHIPPED ON BOARD WOODEN PACKAGE: TREATED / CERTIFIED NCM: 69072200 HS COD"
+      ],
+      "method": "regex"
+    },
+    "incoterm": {
+      "present": true,
+      "required": true,
+      "value": "FOB",
+      "evidence": [
+        "525482520000000000000000I000725 NCM/NALADI: 6907.22.00 HS CODE: 6907.22 FREIGHT COLLECT / INCOTERM: FOB SHIPPED ON BOARD WOODEN PACKAGE: TREATED / CERTIFIED NCM: 69072200 HS CODE: 690722 RUC: 5"
+      ],
+      "method": "regex"
+    },
+    "ncm": {
+      "present": true,
+      "required": true,
+      "value": "6907.22.00",
+      "evidence": [
+        "QUALITY 76,980 m³ COMMERCIAL INVOICE: I-0007/25 RUC: 5BR5525482520000000000000000I000725 NCM/NALADI: 6907.22.00 HS CODE: 6907.22 FREIGHT COLLECT / INCOTERM: FOB SHIPPED ON BOARD WOODEN PACKAGE: TREATED"
+      ],
+      "method": "regex"
+    },
+    "due": {
+      "present": false,
+      "required": true,
+      "value": null,
+      "evidence": [],
+      "method": "regex"
+    },
+    "ruc": {
+      "present": true,
+      "required": true,
+      "value": "5BR5525482520000000000000000I000725",
+      "evidence": [
+        "5 PALLETS WITH GLAZED CERAMIC TILES 1 ST. QUALITY 76,980 m³ COMMERCIAL INVOICE: I-0007/25 RUC: 5BR5525482520000000000000000I000725 NCM/NALADI: 6907.22.00 HS CODE: 6907.22 FREIGHT COLLECT / INCOTERM: FOB SHIPPED ON BOARD"
+      ],
+      "method": "regex"
+    },
+    "booking_number": {
+      "present": true,
+      "required": false,
+      "value": "SSZ1672454",
+      "evidence": [
+        ") 906.0126 # 13008343 (gold) 011 B/L Number Page 1/2 Carrier's Reference Number [AM89718] SSZ1672454 Notify HOME & THINGS 17 OLD HOPE ROAD KINGSTON 5 KINGSTON/JAMAICA - JAMAICA Phone: (876)"
+      ],
+      "method": "regex"
+    },
+    "wooden_packing": {
+      "present": true,
+      "required": true,
+      "value": "TREATED / CERTIFIED",
+      "evidence": [
+        "NCM/NALADI: 6907.22.00 HS CODE: 6907.22 FREIGHT COLLECT / INCOTERM: FOB SHIPPED ON BOARD WOODEN PACKAGE: TREATED / CERTIFIED NCM: 69072200 HS CODE: 690722 RUC: 5BR5525482520000000000000000I000725 DUE: . Gross Weigh"
+      ],
+      "method": "regex"
+    },
+    "containers": {
+      "present": false,
+      "required": true,
+      "value": null,
+      "evidence": [],
+      "method": "line_parse"
+    },
+    "total_cartons": {
+      "present": true,
+      "required": true,
+      "value": 4,
+      "evidence": [
+        "and Numbers Number/Kind Of Packages Description of packages and goods Weight Measurement 4.662 CARTONS Net Weight: 133111,100 kg 05 X 20' DRY CONTAINERS SAID TO CONTAIN 4.662 CARTONS ON 75 PAL"
+      ],
+      "method": "regex"
+    },
+    "net_weight_kg_total": {
+      "present": true,
+      "required": true,
+      "value": 133111.1,
+      "evidence": [
+        "umber/Kind Of Packages Description of packages and goods Weight Measurement 4.662 CARTONS Net Weight: 133111,100 kg 05 X 20' DRY CONTAINERS SAID TO CONTAIN 4.662 CARTONS ON 75 PALLETS WITH GLAZED CERAMIC T"
+      ],
+      "method": "regex"
+    },
+    "gross_weight_kg_total": {
+      "present": true,
+      "required": true,
+      "value": 133780.0,
+      "evidence": [
+        "/ CERTIFIED NCM: 69072200 HS CODE: 690722 RUC: 5BR5525482520000000000000000I000725 DUE: . Gross Weight: 133780,000 kg Release Type: Express Release. This info won't be shown in the final document RECEVEID by"
+      ],
+      "method": "regex"
+    },
+    "cubic_meters_total": {
+      "present": true,
+      "required": true,
+      "value": 76.98,
+      "evidence": [
+        "INERS SAID TO CONTAIN 4.662 CARTONS ON 75 PALLETS WITH GLAZED CERAMIC TILES 1 ST. QUALITY 76,980 m³ COMMERCIAL INVOICE: I-0007/25 RUC: 5BR5525482520000000000000000I000725 NCM/NALADI: 6907.2"
+      ],
+      "method": "regex"
+    },
+    "exporter_cnpj": {
+      "present": true,
+      "required": true,
+      "value": "55254825000205",
+      "evidence": [
+        "CIO PASCON, S/N - KM 1 - 13514-002 - SANTA GERTRUDES - SP - BRAZIL Phone: 55(19)3545-8660 CNPJ: 55.254.825/0002-05 CONSIGNEE (not negotiable unless consigned to order) BILL OF LANDING FOR COMBINED TRANSPO"
+      ],
+      "method": "regex"
+    },
+    "exporter_name": {
+      "present": true,
+      "required": true,
+      "value": "INCOPISOS IND. E COMERCIO PISOS LTDA",
+      "evidence": [
+        "[PAGE 1] Shipper INCOPISOS IND. E COMERCIO PISOS LTDA ESTRADA JOSE HORACIO PASCON, S/N - KM 1 - 13514-002 - SANTA GERTRUDES - SP - BRAZIL Phone:"
+      ],
+      "method": "regex"
+    },
+    "phones_found": {
+      "present": true,
+      "required": false,
+      "value": [
+        "(19)3545-8660",
+        "000000000000",
+        "1017101\n2130",
+        "1017111\n2200",
+        "1017115\n2230",
+        "1017120\n2100",
+        "1024218\n2100",
+        "18769975250",
+        "552548252000"
+      ],
+      "evidence": [
+        "(19)3545-8660",
+        "000000000000",
+        "1017101\n2130",
+        "1017111\n2200",
+        "1017115\n2230",
+        "1017120\n2100",
+        "1024218\n2100",
+        "18769975250"
+      ],
+      "method": "phone_heuristic"
+    },
+    "importer_name": {
+      "present": true,
+      "required": true,
+      "value": "BILL OF LANDING FOR COMBINED TRANSPORT OR PORT TO PORT SHIPMENT",
+      "evidence": [
+        "13514-002 - SANTA GERTRUDES - SP - BRAZIL Phone: 55(19)3545-8660 CNPJ: 55.254.825/0002-05 CONSIGNEE (not negotiable unless consigned to order) BILL OF LANDING FOR COMBINED TRANSPORT OR PORT TO PORT SHIPMENT HOME & THINGS 17 OLD HOPE ROAD KINGSTON 5 KINGSTON/JAMAICA - JAMAICA Phone: (876) 906.0126"
+      ],
+      "method": "regex"
+    },
+    "notify_party_name": {
+      "present": false,
+      "required": true,
+      "value": null,
+      "evidence": [],
+      "method": "regex"
+    }
+  },
+  "missing_required_fields": [
+    "due",
+    "containers",
+    "notify_party_name"
+  ],
+  "warnings": []
+}

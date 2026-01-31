@@ -1,0 +1,85 @@
+{
+  "source": {
+    "stage01_file": "I-0007-25_-_HOME_THINGS_DRAFT_extracted.json",
+    "original_file": "I-0007-25 - HOME & THINGS (DRAFT).pdf",
+    "doc_kind": "certificate_of_origin"
+  },
+  "generated_at": "2025-12-19T09:21:37",
+  "fields": {
+    "invoice_number": {
+      "present": true,
+      "required": true,
+      "value": "I-0007/25",
+      "evidence": [
+        "ra Nº y la Fecha Fatura Nº e a Data KINGSTON JAMAICA P a r a c o n f e r ê n c i a By Sea I-0007/25 09/12/2025 8 ITEM Article Articulo Artigo Weight (gross & net) Poids (Brut et net) Peso ("
+      ],
+      "method": "regex"
+    },
+    "certificate_date": {
+      "present": true,
+      "required": true,
+      "value": "09/12/2025",
+      "evidence": [
+        "Fecha Fatura Nº e a Data KINGSTON JAMAICA P a r a c o n f e r ê n c i a By Sea I-0007/25 09/12/2025 8 ITEM Article Articulo Artigo Weight (gross & net) Poids (Brut et net) Peso (Bruto y net"
+      ],
+      "method": "regex"
+    },
+    "transport_mode": {
+      "present": true,
+      "required": true,
+      "value": "By Sea",
+      "evidence": [
+        "e Factura Nº y la Fecha Fatura Nº e a Data KINGSTON JAMAICA P a r a c o n f e r ê n c i a By Sea I-0007/25 09/12/2025 8 ITEM Article Articulo Artigo Weight (gross & net) Poids (Brut et n"
+      ],
+      "method": "regex"
+    },
+    "exporter_name": {
+      "present": true,
+      "required": true,
+      "value": "NON-PREFERENTIAL CERTIFICATE OF ORIGIN OR PROVENANCE",
+      "evidence": [
+        "[PAGE 1] Exporter / Exportateur / Exportador / Exportador Name, address, local, country 1 NON-PREFERENTIAL CERTIFICATE OF ORIGIN OR PROVENANCE CERTIFICAT D'ORIGINE NON PRÉFÉRENTIELLE OU DE PROVENANCE CERTIFICADO DE ORIGEN NO PREFEREN"
+      ],
+      "method": "regex"
+    },
+    "importer_name": {
+      "present": true,
+      "required": true,
+      "value": "HOME & THINGS",
+      "evidence": [
+        "Fax: +55 (11) 3549-4472 e-mail: certificadodeorigem@fiesp.com.br http://www.fiesp.com.br Consignee / Consignataire / Consignatario / Consignatário 3 HOME & THINGS 17 OLD HOPE ROAD, KINGSTON 5 - KINGSTON JAMAICA City of destination/Ville de destination C"
+      ],
+      "method": "regex"
+    },
+    "net_weight_kg": {
+      "present": true,
+      "required": true,
+      "value": 133111.1,
+      "evidence": [
+        "cación de las mercancías Especificações das mercadorias 1 CERAMIC TILES 9.560,600 m²/Box 133.780,000 KGS 133.111,100 KGS 9 Observation / Observation / Observación / Observação P a r a c o n f e"
+      ],
+      "method": "regex_findall"
+    },
+    "gross_weight_kg": {
+      "present": true,
+      "required": true,
+      "value": 133780.0,
+      "evidence": [
+        "cación de las mercancías Especificações das mercadorias 1 CERAMIC TILES 9.560,600 m²/Box 133.780,000 KGS 133.111,100 KGS 9 Observation / Observation / Observación / Observação P a r a c o n f e",
+        "rcancías Especificações das mercadorias 1 CERAMIC TILES 9.560,600 m²/Box 133.780,000 KGS 133.111,100 KGS 9 Observation / Observation / Observación / Observação P a r a c o n f e r ê n c i a 10 1"
+      ],
+      "method": "regex_findall"
+    },
+    "total_m2": {
+      "present": true,
+      "required": true,
+      "value": 9560.6,
+      "evidence": [
+        "handises Especificación de las mercancías Especificações das mercadorias 1 CERAMIC TILES 9.560,600 m²/Box 133.780,000 KGS 133.111,100 KGS 9 Observation / Observation / Observación / Observaçã"
+      ],
+      "method": "regex"
+    }
+  },
+  "missing_required_fields": [],
+  "warnings": []
+}

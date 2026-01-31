@@ -1,0 +1,47 @@
+[
+  {
+    "file": "COMMERCIAL INVOICE I-000725.pdf",
+    "pages": 1,
+    "direct_pages": 1,
+    "ocr_pages": 0,
+    "ocr_unavailable": 0,
+    "ocr_error": 0,
+    "total_chars": 2440
+  },
+  {
+    "file": "DADOS CNTR.pdf",
+    "pages": 1,
+    "direct_pages": 1,
+    "ocr_pages": 0,
+    "ocr_unavailable": 0,
+    "ocr_error": 0,
+    "total_chars": 1023
+  },
+  {
+    "file": "DRAFT - I-0007-25 - HOME  THINGS.pdf",
+    "pages": 3,
+    "direct_pages": 3,
+    "ocr_pages": 0,
+    "ocr_unavailable": 0,
+    "ocr_error": 0,
+    "total_chars": 58216
+  },
+  {
+    "file": "I-0007-25 - HOME & THINGS (DRAFT).pdf",
+    "pages": 1,
+    "direct_pages": 1,
+    "ocr_pages": 0,
+    "ocr_unavailable": 0,
+    "ocr_error": 0,
+    "total_chars": 2784
+  },
+  {
+    "file": "PACKING LIST I-000725.pdf",
+    "pages": 1,
+    "direct_pages": 1,
+    "ocr_pages": 0,
+    "ocr_unavailable": 0,
+    "ocr_error": 0,
+    "total_chars": 3167
+  }
+]

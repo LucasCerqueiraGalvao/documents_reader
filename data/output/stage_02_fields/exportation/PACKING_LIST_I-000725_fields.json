@@ -1,0 +1,81 @@
+{
+  "source": {
+    "stage01_file": "PACKING_LIST_I-000725_extracted.json",
+    "original_file": "PACKING LIST I-000725.pdf",
+    "doc_kind": "packing_list"
+  },
+  "generated_at": "2025-12-19T09:21:37",
+  "fields": {
+    "packing_list_number": {
+      "present": true,
+      "required": true,
+      "value": "I-0007/25",
+      "evidence": [
+        "Packing Nr. -> I-0007/25"
+      ],
+      "method": "line_heuristic"
+    },
+    "packing_date": {
+      "present": true,
+      "required": true,
+      "value": "29/07/2013",
+      "evidence": [
+        "5.008.141-117 C.N.P.J. 55.254.825/0002-05 www.incopisos.com.br CÓDIGO FORM-26f REVISÃO 02 29/07/2013 L I S T A D E E M B A R Q U E Fecha Para Consignee HOME & THINGS 1 de 1 Hoja HOME & THING"
+      ],
+      "method": "regex"
+    },
+    "gross_weight_kg": {
+      "present": false,
+      "required": true,
+      "value": null,
+      "evidence": [],
+      "method": "regex"
+    },
+    "net_weight_kg": {
+      "present": false,
+      "required": true,
+      "value": null,
+      "evidence": [],
+      "method": "regex"
+    },
+    "ncm": {
+      "present": true,
+      "required": true,
+      "value": "6907.22.00",
+      "evidence": [
+        "rigen BRASIL Peso Neto (Kg) SANTOS PORT KINGSTON 133.111,10 Descripción de las mercancías N.C.M 6907.22.00 Contenedor Nr. Sello Nr. M2 M3 Cajas Paletas Tamaño(cm Peso Bruto Peso Neto Pisos Ceramic"
+      ],
+      "method": "regex"
+    },
+    "incoterm": {
+      "present": true,
+      "required": true,
+      "value": "LOS",
+      "evidence": [
+        "A - JAMAICA (876) 906.0126 Phone: (876) 906.0126 Phone: C o n d i c i o n e s d e P a g o Incoterms COBRANZA A LOS 120 DÍAS DE LA FECHA BL FOB INCOTERMS 2020 Obs: VALIDAD 20-JANUARY-2025 # 13008343 (gold"
+      ],
+      "method": "regex"
+    },
+    "container_count": {
+      "present": false,
+      "required": true,
+      "value": null,
+      "evidence": [],
+      "method": "regex"
+    },
+    "containers": {
+      "present": false,
+      "required": true,
+      "value": null,
+      "evidence": [],
+      "method": "line_parse"
+    }
+  },
+  "missing_required_fields": [
+    "gross_weight_kg",
+    "net_weight_kg",
+    "container_count",
+    "containers"
+  ],
+  "warnings": []
+}

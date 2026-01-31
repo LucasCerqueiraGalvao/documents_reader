@@ -1,0 +1,39 @@
+{
+  "source": {
+    "stage01_file": "DADOS_CNTR_extracted.json",
+    "original_file": "DADOS CNTR.pdf",
+    "doc_kind": "container_data"
+  },
+  "generated_at": "2025-12-19T09:21:37",
+  "fields": {
+    "invoice_number": {
+      "present": true,
+      "required": true,
+      "value": "I-0007/25",
+      "evidence": [
+        "09/25 D-LINE DRAFT: 12/09/25 17:00 SIM D-LINE CARGA: EXPORT: INCOPISOS 16/09/25 18:00 NÃO FATURA: I-0007/25 VOLUME: 05X20 DRY RETIRADA VAZIOS: LECHMAN FOTOS ENTREGA CHEIOS: SANTOS BRASIL SIM BOOKIN"
+      ],
+      "method": "regex"
+    },
+    "booking_number": {
+      "present": true,
+      "required": true,
+      "value": "SSZ1672454",
+      "evidence": [
+        "007/25 VOLUME: 05X20 DRY RETIRADA VAZIOS: LECHMAN FOTOS ENTREGA CHEIOS: SANTOS BRASIL SIM BOOKING: SSZ1672454 QTD PORTO ORIGEM: SANTOS ARMADOR: CMA CGM KINGSTON PORTO DESTINO: Nº SIGLAS / NÚMEROS LA"
+      ],
+      "method": "regex"
+    },
+    "containers": {
+      "present": false,
+      "required": true,
+      "value": null,
+      "evidence": [],
+      "method": "line_parse"
+    }
+  },
+  "missing_required_fields": [
+    "containers"
+  ],
+  "warnings": []
+}

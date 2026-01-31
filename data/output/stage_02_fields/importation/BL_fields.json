@@ -1,0 +1,95 @@
+{
+  "source": {
+    "stage01_file": "BL_extracted.json",
+    "original_file": "BL.pdf",
+    "doc_kind": "bl"
+  },
+  "generated_at": "2026-01-30T01:48:38",
+  "fields": {
+    "shipper_name": {
+      "present": false,
+      "required": true,
+      "value": null,
+      "evidence": [],
+      "method": "block(shipper)"
+    },
+    "consignee_name": {
+      "present": true,
+      "required": true,
+      "value": "FESS) R",
+      "evidence": [
+        "fess) r\nGHANDI SECAF VEICU LOS LTDA. Received by the Carrier from the Shipper in apparent good order and condition unless otherwise indicated herein, the\nCNPJ: 03.562.381/0006-03 c"
+      ],
+      "method": "block(consignee)"
+    },
+    "consignee_cnpj": {
+      "present": true,
+      "required": true,
+      "value": "03562381000603",
+      "evidence": [
+        "fess) r\nGHANDI SECAF VEICU LOS LTDA. Received by the Carrier from the Shipper in apparent good order and condition unless otherwise indicated herein, the\nCNPJ: 03.562.381/0006-03 conor appearing onthe face an back of hs "
+      ],
+      "method": "regex(cnpj)"
+    },
+    "importer_name": {
+      "present": true,
+      "required": true,
+      "value": "FESS) R",
+      "evidence": [
+        "fess) r\nGHANDI SECAF VEICU LOS LTDA. Received by the Carrier from the Shipper in apparent good order and condition unless otherwise indicated herein, the\nCNPJ: 03.562.381/0006-03 c"
+      ],
+      "method": "alias(consignee_name)"
+    },
+    "importer_cnpj": {
+      "present": true,
+      "required": true,
+      "value": "03562381000603",
+      "evidence": [
+        "fess) r\nGHANDI SECAF VEICU LOS LTDA. Received by the Carrier from the Shipper in apparent good order and condition unless otherwise indicated herein, the\nCNPJ: 03.562.381/0006-03 conor appearing onthe face an back of hs "
+      ],
+      "method": "alias(consignee_cnpj)"
+    },
+    "freight_payment": {
+      "present": true,
+      "required": true,
+      "value": "COLLECT",
+      "evidence": [
+        "COLLECT"
+      ],
+      "method": "regex(freight)"
+    },
+    "gross_weight_kg": {
+      "present": true,
+      "required": true,
+      "value": 9825.0,
+      "evidence": [
+        "... 9,825.000 KG ..."
+      ],
+      "method": "regex(number+KG,max)"
+    },
+    "total_packages": {
+      "present": true,
+      "required": true,
+      "value": 33,
+      "evidence": [
+        "33"
+      ],
+      "method": "regex(packages)"
+    },
+    "ncm_or_hs_code": {
+      "present": true,
+      "required": true,
+      "value": "8407",
+      "evidence": [
+        "NCM/HS 8407"
+      ],
+      "method": "regex(ncm/hs)"
+    }
+  },
+  "missing_required_fields": [
+    "shipper_name"
+  ],
+  "warnings": [
+    "NCM/HS encontrado com 4 dígitos (8407). Pode ser HS (4/6) e não NCM completo (8)."
+  ]
+}

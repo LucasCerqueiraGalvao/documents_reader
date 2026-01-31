@@ -1,0 +1,18 @@
+﻿# exportation_rules.yaml (stub)
+draft_bl_required_fields:
+  - freight_mode
+  - ncm
+  - incoterms
+  - due
+  - ruc
+  - container_and_type
+  - tare_seal
+  - wooden_packing
+  - volume_qty_total_and_per_container
+  - gross_weight_per_container_and_total
+  - net_weight_per_container_and_total
+  - cbm_total_and_per_container
+  - exporter_cnpj
+  - exporter_contact
+  - importer_contact
+  - notify_party_contact

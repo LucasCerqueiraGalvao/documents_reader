@@ -1,0 +1,379 @@
+{
+  "generated_at": "2026-01-30T09:17:24",
+  "flow": "importation",
+  "inputs": {
+    "stage01_dir": "C:\\Users\\lucas\\Documents\\Projects\\professional\\Documents Reader\\data\\output\\stage_01_text\\importation",
+    "stage02_dir": "C:\\Users\\lucas\\Documents\\Projects\\professional\\Documents Reader\\data\\output\\stage_02_fields\\importation",
+    "stage03_file": "C:\\Users\\lucas\\Documents\\Projects\\professional\\Documents Reader\\data\\output\\stage_03_compare\\importation\\_stage03_comparison.json"
+  },
+  "overall": {
+    "status": "FAIL",
+    "reasons": [
+      "missing_required_fields_em_algum_documento",
+      "divergencias_stage03=5"
+    ]
+  },
+  "stage01_quality": {
+    "documents": [
+      {
+        "file": "BL.pdf",
+        "extracted_json": "BL_extracted.json",
+        "pages": 2,
+        "methods": [
+          "ocr",
+          "ocr"
+        ],
+        "chars_by_page": [
+          2834,
+          354
+        ],
+        "has_ocr": true,
+        "all_direct": false
+      },
+      {
+        "file": "INVOICE.pdf",
+        "extracted_json": "INVOICE_extracted.json",
+        "pages": 2,
+        "methods": [
+          "direct",
+          "direct"
+        ],
+        "chars_by_page": [
+          1184,
+          1261
+        ],
+        "has_ocr": false,
+        "all_direct": true
+      },
+      {
+        "file": "PACKING LIST.pdf",
+        "extracted_json": "PACKING LIST_extracted.json",
+        "pages": 3,
+        "methods": [
+          "direct",
+          "direct",
+          "direct"
+        ],
+        "chars_by_page": [
+          1139,
+          906,
+          391
+        ],
+        "has_ocr": false,
+        "all_direct": true
+      }
+    ],
+    "summary": {
+      "total_docs": 3,
+      "docs_with_ocr_pages": 1,
+      "docs_all_direct": 2
+    }
+  },
+  "stage02": {
+    "documents": [
+      {
+        "label": "bl | BL.pdf",
+        "doc_kind": "bl",
+        "original_file": "BL.pdf",
+        "stage01_file": "BL_extracted.json",
+        "missing_required_fields": [
+          "shipper_name"
+        ],
+        "warnings": [
+          "NCM/HS encontrado com 4 dígitos (8407). Pode ser HS (4/6) e não NCM completo (8)."
+        ],
+        "fields_present_count": 8,
+        "fields_total_count": 9,
+        "severity": {
+          "level": "FAIL",
+          "reason": "missing_required_fields=1"
+        }
+      },
+      {
+        "label": "invoice | INVOICE.pdf",
+        "doc_kind": "invoice",
+        "original_file": "INVOICE.pdf",
+        "stage01_file": "INVOICE_extracted.json",
+        "missing_required_fields": [],
+        "warnings": [],
+        "fields_present_count": 14,
+        "fields_total_count": 16,
+        "severity": {
+          "level": "OK",
+          "reason": "no_missing_no_warnings"
+        }
+      },
+      {
+        "label": "packing_list | PACKING LIST.pdf",
+        "doc_kind": "packing_list",
+        "original_file": "PACKING LIST.pdf",
+        "stage01_file": "PACKING LIST_extracted.json",
+        "missing_required_fields": [],
+        "warnings": [],
+        "fields_present_count": 9,
+        "fields_total_count": 9,
+        "severity": {
+          "level": "OK",
+          "reason": "no_missing_no_warnings"
+        }
+      }
+    ]
+  },
+  "stage03": {
+    "summary": {
+      "total": 11,
+      "matches": 6,
+      "divergences": 5,
+      "skipped": 0
+    },
+    "counts": {
+      "matches": 6,
+      "divergent": 5,
+      "skipped": 0
+    }
+  },
+  "lists": {
+    "divergent": [
+      {
+        "pair": "invoice_vs_packing | INVOICE.pdf <> PACKING LIST.pdf",
+        "check": "Gross weight (kg)",
+        "status": "divergent",
+        "a_key_used": "gross_weight_kg",
+        "b_key_used": "gross_weight_kg_total_calc",
+        "a_value": 9825.0,
+        "b_value": 4584.857,
+        "tolerance": {
+          "abs_tol": 1.0,
+          "rel_tol": 0.01
+        },
+        "evidence": {
+          "a": [
+            "GROSS WEIGHT: 9,825.00KGS"
+          ],
+          "b": []
+        },
+        "bucket": "pair",
+        "evidence_a": "GROSS WEIGHT: 9,825.00KGS",
+        "evidence_b": ""
+      },
+      {
+        "pair": "invoice_vs_packing | INVOICE.pdf <> PACKING LIST.pdf",
+        "check": "Net weight (kg)",
+        "status": "divergent",
+        "a_key_used": "net_weight_kg",
+        "b_key_used": "net_weight_kg_total_calc",
+        "a_value": 7980.0,
+        "b_value": 5429.23,
+        "tolerance": {
+          "abs_tol": 1.0,
+          "rel_tol": 0.01
+        },
+        "evidence": {
+          "a": [
+            "NET WEIGHT: 7,980.00KGS"
+          ],
+          "b": []
+        },
+        "bucket": "pair",
+        "evidence_a": "NET WEIGHT: 7,980.00KGS",
+        "evidence_b": ""
+      },
+      {
+        "pair": "invoice_vs_bl | INVOICE.pdf <> BL.pdf",
+        "check": "Consignee name",
+        "status": "divergent",
+        "a_key_used": "importer_name",
+        "b_key_used": "consignee_name",
+        "a_value": "GHANDI SECAF VEICULOS LTDA.",
+        "b_value": "FESS) R",
+        "evidence": {
+          "a": [
+            "GHANDI SECAF VEICULOS LTDA."
+          ],
+          "b": [
+            "fess) r\nGHANDI SECAF VEICU LOS LTDA. Received by the Carrier from the Shipper in apparent good order and condition unless otherwise indicated herein, the\nCNPJ: 03.562.381/0006-03 c"
+          ]
+        },
+        "bucket": "pair",
+        "evidence_a": "GHANDI SECAF VEICULOS LTDA.",
+        "evidence_b": "fess) r\nGHANDI SECAF VEICU LOS LTDA. Received by the Carrier from the Shipper in apparent good order and condition unless otherwise indicated herein, the\nCNPJ: 03.562.381/0006-03 c"
+      },
+      {
+        "pair": "packing_vs_bl | PACKING LIST.pdf <> BL.pdf",
+        "check": "Consignee name",
+        "status": "divergent",
+        "a_key_used": "consignee_name",
+        "b_key_used": "consignee_name",
+        "a_value": "GHANDI SECAF VEICULOS LTDA. AUG. 28,2025",
+        "b_value": "FESS) R",
+        "evidence": {
+          "a": [
+            "GHANDI SECAF VEICULOS LTDA. AUG. 28,2025"
+          ],
+          "b": [
+            "fess) r\nGHANDI SECAF VEICU LOS LTDA. Received by the Carrier from the Shipper in apparent good order and condition unless otherwise indicated herein, the\nCNPJ: 03.562.381/0006-03 c"
+          ]
+        },
+        "bucket": "pair",
+        "evidence_a": "GHANDI SECAF VEICULOS LTDA. AUG. 28,2025",
+        "evidence_b": "fess) r\nGHANDI SECAF VEICU LOS LTDA. Received by the Carrier from the Shipper in apparent good order and condition unless otherwise indicated herein, the\nCNPJ: 03.562.381/0006-03 c"
+      },
+      {
+        "pair": "packing_vs_bl | PACKING LIST.pdf <> BL.pdf",
+        "check": "Gross weight (kg)",
+        "status": "divergent",
+        "a_key_used": "gross_weight_kg_total_calc",
+        "b_key_used": "gross_weight_kg",
+        "a_value": 4584.857,
+        "b_value": 9825.0,
+        "tolerance": {
+          "abs_tol": 1.0,
+          "rel_tol": 0.01
+        },
+        "evidence": {
+          "a": [],
+          "b": [
+            "... 9,825.000 KG ..."
+          ]
+        },
+        "bucket": "pair",
+        "evidence_a": "",
+        "evidence_b": "... 9,825.000 KG ..."
+      }
+    ],
+    "skipped": [],
+    "matches": [
+      {
+        "pair": "invoice_vs_packing | INVOICE.pdf <> PACKING LIST.pdf",
+        "check": "Invoice vs Packing reference number",
+        "status": "match",
+        "a_key_used": "invoice_number",
+        "b_key_used": "packing_list_number",
+        "a_value": "DN-24139",
+        "b_value": "DN-24139-P",
+        "note": "accepts trailing '-P' / 'P' on one side",
+        "evidence": {
+          "a": [
+            "INVOICE NO. DN-24139"
+          ],
+          "b": [
+            "DN-24139-P"
+          ]
+        },
+        "bucket": "pair",
+        "evidence_a": "INVOICE NO. DN-24139",
+        "evidence_b": "DN-24139-P"
+      },
+      {
+        "pair": "invoice_vs_packing | INVOICE.pdf <> PACKING LIST.pdf",
+        "check": "Consignee name",
+        "status": "match",
+        "a_key_used": "importer_name",
+        "b_key_used": "consignee_name",
+        "a_value": "GHANDI SECAF VEICULOS LTDA.",
+        "b_value": "GHANDI SECAF VEICULOS LTDA. AUG. 28,2025",
+        "evidence": {
+          "a": [
+            "GHANDI SECAF VEICULOS LTDA."
+          ],
+          "b": [
+            "GHANDI SECAF VEICULOS LTDA. AUG. 28,2025"
+          ]
+        },
+        "bucket": "pair",
+        "evidence_a": "GHANDI SECAF VEICULOS LTDA.",
+        "evidence_b": "GHANDI SECAF VEICULOS LTDA. AUG. 28,2025"
+      },
+      {
+        "pair": "invoice_vs_packing | INVOICE.pdf <> PACKING LIST.pdf",
+        "check": "Consignee CNPJ",
+        "status": "match",
+        "a_key_used": "importer_cnpj",
+        "b_key_used": "consignee_cnpj",
+        "a_value": "03562381000603",
+        "b_value": "03562381000603",
+        "a_digits": "03562381000603",
+        "b_digits": "03562381000603",
+        "evidence": {
+          "a": [
+            "CNPJ: 03.562.381/0006-03"
+          ],
+          "b": [
+            "CNPJ: 03.562.381/0006-03"
+          ]
+        },
+        "bucket": "pair",
+        "evidence_a": "CNPJ: 03.562.381/0006-03",
+        "evidence_b": "CNPJ: 03.562.381/0006-03"
+      },
+      {
+        "pair": "invoice_vs_bl | INVOICE.pdf <> BL.pdf",
+        "check": "Consignee CNPJ",
+        "status": "match",
+        "a_key_used": "importer_cnpj",
+        "b_key_used": "consignee_cnpj",
+        "a_value": "03562381000603",
+        "b_value": "03562381000603",
+        "a_digits": "03562381000603",
+        "b_digits": "03562381000603",
+        "evidence": {
+          "a": [
+            "CNPJ: 03.562.381/0006-03"
+          ],
+          "b": [
+            "fess) r\nGHANDI SECAF VEICU LOS LTDA. Received by the Carrier from the Shipper in apparent good order and condition unless otherwise indicated herein, the\nCNPJ: 03.562.381/0006-03 conor appearing onthe face an back of hs "
+          ]
+        },
+        "bucket": "pair",
+        "evidence_a": "CNPJ: 03.562.381/0006-03",
+        "evidence_b": "fess) r\nGHANDI SECAF VEICU LOS LTDA. Received by the Carrier from the Shipper in apparent good order and condition unless otherwise indicated herein, the\nCNPJ: 03.562.381/0006-03 conor appearing onthe face an back of hs"
+      },
+      {
+        "pair": "invoice_vs_bl | INVOICE.pdf <> BL.pdf",
+        "check": "Gross weight (kg)",
+        "status": "match",
+        "a_key_used": "gross_weight_kg",
+        "b_key_used": "gross_weight_kg",
+        "a_value": 9825.0,
+        "b_value": 9825.0,
+        "tolerance": {
+          "abs_tol": 1.0,
+          "rel_tol": 0.01
+        },
+        "evidence": {
+          "a": [
+            "GROSS WEIGHT: 9,825.00KGS"
+          ],
+          "b": [
+            "... 9,825.000 KG ..."
+          ]
+        },
+        "bucket": "pair",
+        "evidence_a": "GROSS WEIGHT: 9,825.00KGS",
+        "evidence_b": "... 9,825.000 KG ..."
+      },
+      {
+        "pair": "packing_vs_bl | PACKING LIST.pdf <> BL.pdf",
+        "check": "Consignee CNPJ",
+        "status": "match",
+        "a_key_used": "consignee_cnpj",
+        "b_key_used": "consignee_cnpj",
+        "a_value": "03562381000603",
+        "b_value": "03562381000603",
+        "a_digits": "03562381000603",
+        "b_digits": "03562381000603",
+        "evidence": {
+          "a": [
+            "CNPJ: 03.562.381/0006-03"
+          ],
+          "b": [
+            "fess) r\nGHANDI SECAF VEICU LOS LTDA. Received by the Carrier from the Shipper in apparent good order and condition unless otherwise indicated herein, the\nCNPJ: 03.562.381/0006-03 conor appearing onthe face an back of hs "
+          ]
+        },
+        "bucket": "pair",
+        "evidence_a": "CNPJ: 03.562.381/0006-03",
+        "evidence_b": "fess) r\nGHANDI SECAF VEICU LOS LTDA. Received by the Carrier from the Shipper in apparent good order and condition unless otherwise indicated herein, the\nCNPJ: 03.562.381/0006-03 conor appearing onthe face an back of hs"
+      }
+    ]
+  }
+}

@@ -1,0 +1,21 @@
+{
+  "file": "INVOICE.pdf",
+  "tesseract": "C:\\Program Files\\Tesseract-OCR\\tesseract.exe",
+  "pages": [
+    {
+      "page": 1,
+      "method": "direct",
+      "text_chars": 1184,
+      "text": "P. 1\n DN-24139 AUG. 28,2025\n ADVANCE PAYMENT\n GHANDI SECAF VEICULOS LTDA.\n CNPJ: 03.562.381/0006-03\n AV. CEM, S/N, QUADRA 01,\n LOTE M04, M05, M06 FUNDOS -\n SALA 06, TIMS, CEP 29.161-384,\n SERRA - ES, BRAZIL\n THE SAME MAERSK NINGBO\n ETA OCT. 26,2025\n NAGOYA (JAPAN)\n VITORIA,BRAZIL\n SUZUKI OUTBOARD MOTORS F.C.A.\n NAGOYA\n CURRENCY : JPY\n CGD-4936 SALES NO. CGD-4936\n VITORIA ORDER NO. -\n BRAZIL\n MADE IN JAPAN\n NO.\n ( MODEL ) ( Q'TY )\n * DF140BTL 3 UNITS @703,200.- 2,109,600.-\n 19 - 21 COLOR BLACK 3\n CGD-4937 SALES NO. CGD-4937\n VITORIA ORDER NO. -\n BRAZIL\n MADE IN JAPAN\n NO.\n ( MODEL ) ( Q'TY )\n * DF250TX 2 UNITS @1,213,400.- 2,426,800.-\n 3 - 4 COLOR NEW WHITE 2\n CGD-4989 SALES NO. CGD-4989\n VITORIA ORDER NO. -\n BRAZIL\n MADE IN JAPAN\n NO.\n ( MODEL ) ( Q'TY )\n * DF100BTL 6 UNITS @597,500.- 3,585,000.-\n 16 - 21 COLOR BLACK 6\n * DF140BTL 4 UNITS @703,200.- 2,812,800.-\n 22 - 25 COLOR BLACK 4\n * DF200TX 3 UNITS @1,058,100.- 3,174,300.-\n 29 - 31 COLOR BLACK 3\n * DF200ZX 2 UNITS @1,050,600.- 2,101,200.-\n 32 - 33 COLOR BLACK 2\nＩ Ｎ Ｖ Ｏ Ｉ Ｃ Ｅ\nNo.\nHamamatsu,\nAccount of\nPayment\nConsignee\nShipped per\nFrom\nTo\nFinal destination\nMarks & Nos.\nDescription\nUnit Price\nAmount\n－ E. & O. E. －",
+      "note": ""
+    },
+    {
+      "page": 2,
+      "method": "direct",
+      "text_chars": 1261,
+      "text": "INVOICE NO. DN-24139 P. 2\n F.C.A.\n NAGOYA\n ( MODEL ) ( Q'TY ) CURRENCY : JPY\n CGD-4990 SALES NO. CGD-4990\n VITORIA ORDER NO. -\n BRAZIL\n MADE IN JAPAN\n NO.\n ( MODEL ) ( Q'TY )\n * DF250TX 4 UNITS @1,213,400.- 4,853,600.-\n 7 - 10 COLOR NEW WHITE 4\n * DF300APX 2 UNITS @1,344,100.- 2,688,200.-\n 11 - 12 COLOR NEW WHITE 2\n CGD-5008 SALES NO. CGD-5008\n VITORIA ORDER NO. -\n BRAZIL\n MADE IN JAPAN\n NO.\n ( MODEL ) ( Q'TY )\n * DF100BTL 4 UNITS @597,500.- 2,390,000.-\n 5 - 8 COLOR BLACK 4\n CGD-5009 SALES NO. CGD-5009\n VITORIA ORDER NO. -\n BRAZIL\n MADE IN JAPAN\n NO.\n ( MODEL ) ( Q'TY )\n * DF250TX 2 UNITS @1,213,400.- 2,426,800.-\n 1 - 2 COLOR NEW WHITE 2\n * DF300APXX 1 UNIT @1,354,100.- 1,354,100.-\n 5 COLOR NEW WHITE 1\n --------------------------------------------------------------------\n TOTAL 33 UNITS 29,922,400.-\n -------------------------- -----------------\n 33 CARTONS\n REMARKS:\n 1. COUNTRY OF ORIGIN:\n OUTBOARD MOTORS - JAPAN\n FUEL TANKS - CANADA\n 2. NO FUEL TANKS MADE IN CANADA ARE PACKED WITH THE ASTERISKED (*) MODELS.\n COUNTRY OF ORIGIN : JAPAN \n COUNTRY OF ACQUISITION : JAPAN \n COUNTRY OF PROVENANCE : JAPAN \n NET WEIGHT: 7,980.00KGS\n GROSS WEIGHT: 9,825.00KGS\n SUZUKI MOTOR CORPORATION\n MANAGER\nMarks & Nos.\nDescription\nUnit Price\nAmount\n－ E. & O. E. －",
+      "note": ""
+    }
+  ],
+  "warnings": []
+}

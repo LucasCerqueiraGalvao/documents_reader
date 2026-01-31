@@ -1,0 +1,93 @@
+FILE: BL.pdf
+TESSERACT: C:\Program Files\Tesseract-OCR\tesseract.exe
+==== EXTRACTED TEXT ====
+
+--- PAGE 001 | method=ocr | chars=2834 ---
+a BILL OF LADING fons a
+First Original
+Shipper Booking No. B/L No.
+SUZUKI MOTOR CORPORATION 258255821A
+300 TAKATSUKA-CHO CHUO-KU
+HAMAMATSU-SHI SHIZUOKA 432-8611
+JAPAN
+GIOGIX SEINO LOGIX Co.,LTD.
+Consignee fess) r
+GHANDI SECAF VEICU LOS LTDA. Received by the Carrier from the Shipper in apparent good order and condition unless otherwise indicated herein, the
+CNPJ: 03.562.381/0006-03 conor appearing onthe face an back of hs Bil ef Ladng bythe vesse named herein or any substue othe Case"
+AV CEM S/N QUADRA 01 ceton andlor other means. “ yranspor from the place oF receipt or the port of loading to the port of discharge or the place
+* 7 t a of delivery shown herein and there to be delivered unto order or assigns.
+LOTE M04, MOS, M06 FUNDOS - Ir cceapine, i bilo Lacing the Merchant gree to be bound by al the stpulatons, exceptions, tems ad conditions on
+SALA 06, TIMS, CEP 29.1 61-384, the face and back hereof and of the Carrier's applicable tariff, whether written, typed, stamped or printed, as fully as if
+SERRA - ES, BRAZIL trent exgeuentonte and ts orang n comocton th the Carage of Goous are superseded by ths BillofLacing,
+TEL: (1 9) 3581.1668 Party to contact for cargo release
+Notify Party CRAFT MULTIMODAL LTDA on .
+GHANDI SECAF VEICULOS LTDA. CNPJ: 01.831.941/0001-30 AV JURUBATUBA, |" # #6 #
+CNP J: 03.562.381/0006-03 73 -9- ANDAR - SALA A -CONJ 91 VILA Hicok hme
+AV. CEM, S/N, QUADRA 01, CORDEIRO AKERBRE
+LOTE M04, M05, M06 FUNDOS - SAO PAULO SP 04583-912 % “
+SALA 06, TIMS, CEP 29.161-384, BRAZIL
+SERRA - ES, BRAZIL Ph:+551 130434053
+TEL : (19) 3581.1668
+Vessel Voy. No. Place of Receipt
+MAERSK NINGBO 5358 NAGOYA CY
+Port of Loading Port of Discharge Place of Delivery
+NAGOYA,JAPAN VITORIA, BRAZIL VITORIA CY
+"Container No. No. of Kind of Packages; Description of Goods Gross Weight ' Measurement
+‘ Seal No. : Containers ‘ ‘in kilo's ‘in cbm
+J MESBagsE 1 Peas ' 9,825.000 KG 53.772 M3
+VITORIA ‘ CONTAINER(S
+; BRAZIL ) 33 CARTONS
+: MADE IN JAPAN ;
+NO.19-21 ‘ SUZUKI OUTBOARD MOTORS '
+' NCM NO.8407
+CGD-4937 ‘ ' WOODEN PACKAGE : NOT APPLICABLE :
+| VITORIA : (NOT USED)
+: BRAZIL
+MADE IN JAPAN ‘ : OF 5.009,00 USD ‘
+CGD-4989 | |
+| VITORIA |
+: : : ! : WEIGHT,
+| FREIGHT COLLECT | SAID TO CONTAIN
+‘Total number of Containers . .
+‘or other Packages or Units ONE (1) CONTAINER(S) ONLY Continuation Page Follows...
+: {in words)
+Freight and Charges Revenue Tons . ; Rate Per ; Prepaid Collect
+Total Amount !
+Exchange Rete | PRAGOYA, JAPAN PSESTINATION NAGOYA; JAPAN 28-Aug-2025
+g
+Nor qfypsigipal Payle In witness whereof, the undersigned has signed the number of
+Bill(s) of Lading stated herein, all of this tenor and date, one of
+which being accomplished, the others to stand void.
+Laden on Board the Vessel
+vessMIAERSK NINGBO 5358S ‘Date «28-Aug-2025 SEINO LOGIX CO., LTD.
+rortotLoading NAGOYA, JAPAN ‘ey G— As Carrier
+BY ws
+
+--- PAGE 002 | method=ocr | chars=354 ---
+PAGE: 2 OF 2
+H.B/LNo. 258255821A
+—ATTACHED SHEET(S)- :
+Marks & Nos. Description of Goods
+BRAZIL
+MADE IN JAPAN
+NO.16-25,29-33
+CGD-4990
+VITORIA
+BRAZIL
+MADE IN JAPAN
+NO.7-12
+CGD-5008
+VITORIA
+BRAZIL
+MADE IN JAPAN
+NO.5-8
+CGD-5009
+VITORIA
+BRAZIL
+MADE IN JAPAN
+NO.1-2,5
+Container Seals Type
+CAAU7014303 ML-JP0291683 40HC
+SEINO LOGIX CO.,LTD.
+As Carrier
+BY Wi la

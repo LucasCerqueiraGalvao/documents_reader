@@ -1,0 +1,547 @@
+FILE: DRAFT - I-0007-25 - HOME  THINGS.pdf
+GENERATED_AT: 2025-12-19T09:14:48
+MODE: blocks
+TESSERACT: C:\Program Files\Tesseract-OCR\tesseract.exe
+==== EXTRACTED TEXT ====
+
+--- PAGE 001 | method=direct | chars=2826 ---
+Shipper
+INCOPISOS IND. E COMERCIO PISOS LTDA
+ESTRADA JOSE HORACIO PASCON,
+S/N - KM 1 - 13514-002 -
+SANTA GERTRUDES - SP - BRAZIL
+Phone: 55(19)3545-8660
+CNPJ: 55.254.825/0002-05
+CONSIGNEE (not negotiable unless consigned to order)
+BILL OF LANDING FOR COMBINED TRANSPORT OR PORT TO PORT SHIPMENT
+HOME & THINGS
+17 OLD HOPE ROAD
+KINGSTON 5
+KINGSTON/JAMAICA - JAMAICA
+Phone: (876) 906.0126
+# 13008343 (gold) 011
+B/L Number
+Page 1/2
+Carrier's Reference Number
+[AM89718] SSZ1672454
+Notify
+HOME & THINGS
+17 OLD HOPE ROAD
+KINGSTON 5
+KINGSTON/JAMAICA - JAMAICA
+Phone: (876) 906.0126
+# 13008343 (gold) 011
+Also Notify
+Vessel and Voyage
+Pre-carriage by*
+For delivery of goods apply to
+ALESSIA / 1GB0GN1MA
+Roy Star Shipping Ltd. 6-12 Newport Boulevard, Newport West,
+Kingston, Jamaica TAX ID 002864789 TEL 18769975250
+roystarshippingltd@gmail.com
+Place of Receipt
+Port of Loading
+SANTOS ( BRSSZ) - Brasil
+Port of Discharge
+Place of Delivery
+KINGSTON ( JMKIN) - Jamaica
+BELOW PARTICULARS FURNISHED BY SHIPPER - CARRIER NOT RESPONSIBLE - FOR MERCHANT'S USE ONLY AND NOT PART OF THE BILL OF LADING CONTRACT
+Marks and Numbers
+Number/Kind Of Packages
+Description of packages and goods
+Weight
+Measurement
+4.662 CARTONS
+Net Weight:
+133111,100
+kg
+05 X 20' DRY CONTAINERS SAID TO CONTAIN
+4.662 CARTONS ON 75 PALLETS WITH GLAZED
+CERAMIC TILES 1 ST. QUALITY
+76,980
+m³
+COMMERCIAL INVOICE: I-0007/25
+RUC: 5BR5525482520000000000000000I000725
+NCM/NALADI: 6907.22.00
+HS CODE: 6907.22
+FREIGHT COLLECT / INCOTERM: FOB
+SHIPPED ON BOARD
+WOODEN PACKAGE: TREATED / CERTIFIED
+NCM: 69072200
+HS CODE: 690722
+RUC: 5BR5525482520000000000000000I000725
+DUE: .
+Gross Weight:
+133780,000
+kg
+Release Type: Express Release.
+This info won't be shown in the final document
+RECEVEID by the carrier in external apparent good order and condition unless otherwise stated the number of containers, packages or other customary freight units to be transported to such place as agreed, authorized or permitted herein and subject all the terms
+and conditions appearing on the front and reverse of this Bill of Landing either written, printed or stamped or otherwise incorporated by which the Merchant agrees to be bound in accepting this Bill of Landing. he particulars given above as stated by the Merchant and
+the weight, measure, quantity, marks, condition, content and value of the Goods considered unknown by the Carrier in witness whereof the number of original Bills of Landing stated on this side have been signed and wherever one original Bill of Landing has been
+surrendered any others shall be void
+Freight & Charges
+Prepaid
+Collect
+Freight Payable At
+Number of Originals
+AS PER AGREEMENT
+DESTINATION
+Declared Cargo Value
+Place and date of issue
+Lucas Thome de Souza
+086.266.319-95
+https://www.amtrans.com.br/
+(*) Applicable for Combined (Multimodal / Intermodal) Transport
+
+--- PAGE 002 | method=direct | chars=2692 ---
+Shipper
+INCOPISOS IND. E COMERCIO PISOS LTDA
+ESTRADA JOSE HORACIO PASCON,
+S/N - KM 1 - 13514-002 -
+SANTA GERTRUDES - SP - BRAZIL
+Phone: 55(19)3545-8660
+CNPJ: 55.254.825/0002-05
+CONSIGNEE (not negotiable unless consigned to order)
+BILL OF LANDING FOR COMBINED TRANSPORT OR PORT TO PORT SHIPMENT
+HOME & THINGS
+17 OLD HOPE ROAD
+KINGSTON 5
+KINGSTON/JAMAICA - JAMAICA
+Phone: (876) 906.0126
+# 13008343 (gold) 011
+B/L Number
+Page 2/2
+Carrier's Reference Number
+[AM89718] SSZ1672454
+Notify
+HOME & THINGS
+17 OLD HOPE ROAD
+KINGSTON 5
+KINGSTON/JAMAICA - JAMAICA
+Phone: (876) 906.0126
+# 13008343 (gold) 011
+Also Notify
+Vessel and Voyage
+Pre-carriage by*
+For delivery of goods apply to
+ALESSIA / 1GB0GN1MA
+Roy Star Shipping Ltd. 6-12 Newport Boulevard, Newport West,
+Kingston, Jamaica TAX ID 002864789 TEL 18769975250
+roystarshippingltd@gmail.com
+Place of Receipt
+Port of Loading
+SANTOS ( BRSSZ) - Brasil
+Port of Discharge
+Place of Delivery
+KINGSTON ( JMKIN) - Jamaica
+BELOW PARTICULARS FURNISHED BY SHIPPER - CARRIER NOT RESPONSIBLE - FOR MERCHANT'S USE ONLY AND NOT PART OF THE BILL OF LADING CONTRACT
+Marks and Numbers
+Number/Kind Of Packages
+Description of packages and goods
+Weight
+Measurement
+Container NO.
+/SEAL
+/TARA
+/SIZE
+/PKG
+/G. WEIGHT
+/Meas
+BMOU1157130
+M1017120
+2100,000
+20 Dry
+971 BOX, CARTON
+26840,000
+15,510
+CMAU1457341
+M1017115
+2230,000
+20 Dry
+986 BOX, CARTON
+27030,000
+15,750
+MAGU2530220
+M1017101
+2130,000
+20 Dry
+981 BOX, CARTON
+27010,000
+15,670
+TEMU1680211
+M1024218
+2100,000
+20 Dry
+788 BOX, CARTON
+26530,000
+14,880
+TEMU2550742
+M1017111
+2200,000
+20 Dry
+936 BOX, CARTON
+26370,000
+15,170
+RECEVEID by the carrier in external apparent good order and condition unless otherwise stated the number of containers, packages or other customary freight units to be transported to such place as agreed, authorized or permitted herein and subject all the terms
+and conditions appearing on the front and reverse of this Bill of Landing either written, printed or stamped or otherwise incorporated by which the Merchant agrees to be bound in accepting this Bill of Landing. he particulars given above as stated by the Merchant and
+the weight, measure, quantity, marks, condition, content and value of the Goods considered unknown by the Carrier in witness whereof the number of original Bills of Landing stated on this side have been signed and wherever one original Bill of Landing has been
+surrendered any others shall be void
+Freight & Charges
+Prepaid
+Collect
+Freight Payable At
+Number of Originals
+AS PER AGREEMENT
+DESTINATION
+Declared Cargo Value
+Place and date of issue
+Lucas Thome de Souza
+086.266.319-95
+https://www.amtrans.com.br/
+(*) Applicable for Combined (Multimodal / Intermodal) Transport
+
+--- PAGE 003 | method=direct | chars=52698 ---
+CONDITIONS OF CARRIAGE
+(5)  When the Freight Forwarder establishes that, in the circumstances of the case, the loss or damage could be attributed to one or more of the causes or events specified above, it shall be presumed that it was
+so caused.
+8.  DESCRIPTION OF GOODS
+(1)  This Bill of Lading shall be prima facie evidence of the receipt by the Freight Forwarder in external apparent good order and condition, except as otherwise noted of the total number of packages or units or
+1.  DEFINITIONS
+containers comprising or in which the Goods have been packed or stuﬀed, such as 'shipper's wight, load and counts', 'shipper-packed container', 'said to be (STB)', 'said to contain (STC)', 'said to weight
+(STW)' or similar expression.
+(2)  No representaLon is made by the Freight Forwarder as to the weight, contents, measure, quanLty, quality, descripLon, condiLon, marks, numbers, origin or value of the Goods and the Freight Forwarder
+'Freight Forwarder' means the part and on whose behalf this Bill of Lading has been signed.
+'Carrier' means the actual Carrier, the person who accepts the obligation to transport the Goods and actually transport the Goods, either by its own vehicle or through a third party's vehicle.
+'Merchant' includes the shipper, the consignee, endorsee, the receiver of the Goods, the holder of this Bill of Lading, any person owning or enLtled to the possession of the Goods or this Bill of Lading,
+importer, exporter, any person having a present or future interest in the Goods and any person acting on behalf of any of the above mentioned person.
+'Goods' includes the whole or any part of the cargo supplied by the Merchant and includes any Container or packing or equipment not supplied by or on behalf of the Carrier.
+'Container' includes any container, trailer, transportable tank, lift van, flat, platform, pallet or any similiar article of transport used to consolidate Goods.
+'Carriage' means the whole or any part of the operations and services undertaken or performed by or on behalf of the Carrier in respect of the Goods covered by this Bill of Lading.
+'Combined Transport' arises where the Carriage called for by this Bill of Lading is not Port to Port.
+'Port to Port Shipment' arises where the Place of Receipt and the Place of Delivery are not indicated on the front of this Bill of Lading or if both the Place of Receipt and the Place of Delivery indicated are ports
+and the Bill of Lading does not in the nomination of the Place of Receipt or the Place of Delivery on the front hereof specify any place or port within the area of the port so nominated.
+'Hague Rules' mean the provisions of the International Convention for Unification of Certain Rules relating to Bills of Lading signed at Brussels on 25 August 1924.
+'Hague-Visby Rules' mean the Hague Rules as amended by the Protocol signed at Brussels on 23 February 1968.
+'COGSA' means the Carriage of Goods by Sea Act of the United States of America approved on 16 April 1936.
+'Charges' include freight, all expenses and money obligaLons incurred and payable by the Merchant and all collecLon costs for freight and other amounts due from the merchant including aNorney's fees and
+court costs.
+'Shipping Unit' includes freight unit and the term 'unit' as used in the Hague Rules and Hague-Visby Rules.
+'Person' includes an individual, a partnership, a corporate body or other entity.
+'Stuffed' includes filled, consolidated, packed, loaded or secured.
+shall not be under any responsibility whatsoever in respect of such.
+(3)  The descripLon and parLculars of the Goods set out on the face hereof are furnished by the Merchant and the Merchant warrants to the Freight Forwarder that the descripLon and parLculars provided
+by it or on its behalf including but not limited to, of weight, measure, quanLty, quality, condiLons, marks, numbers, origin and value have been checked by the Merchant and that such descripLon and
+parLculars including any other parLcular furnished by or on behalf of the Merchant are true, adequate and correct. The Merchant also warrants that the Goods are lawful goods according to the
+applicable laws including those of the country of the Place of Receipt and that of the Place of Delivery and are not, or do not contain, contraband, prohibited or illegal substances or arLcles, drugs or
+stowaways and that neither the Goods nor the Carriage thereof will cause any loss, expense or delay to the Freight Forwarder or to the Carrier or to the vessel or to any other cargo during the Carriage. The
+Merchant shall indemnity the Freight Forwarder against all loss, damage and expenses arising or resulLng from inaccuracies in or inadequacy of such parLculars. No limit of Merchant's responsibility and
+liability shall be invoked under this Bill of Lading to any person.
+9.  MERCHANT'S RESPONSIBILITY
+(1)  The Merchant shall comply with all applicable laws, regulaLons and requirements of customs port and other authoriLes and shall bear and pay (or indemnify the Freight Forwarder if the laNer shall be
+obliged to pay ﬁrst) all duLes, taxes, ﬁnes, imposts, expenses and losses incurred or suﬀered and be liable for all damages, delays and any aNorney fees in respect of the Goods by reason of any illegal,
+incorrect, untimely or insufficient declaration, marking, number or addressing of the Goods.
+(2)  The Merchan undertakes that the Goods are packed in a manner, and, if applicable, stuﬀed into a Container (in the case of not being stuﬀed by or on behalf of the Freight Forwarder), adequate to
+withstand the ordinary risks of carriage having regard to their nature and in compliance with all laws, regulations and requirements which may be applicable.
+(3)  No Goods which are or may become of a dangerous, inﬂammable or damaging nature or which are or may become liable to damage any property or person whatsoever or other goods shall be tendered to
+the Freight Forwarder or to the Carrier for Carriage, whether or not listed in any official or unofficial international or national code or convention, without previously giving written notice of their nature,
+type, name, label and classiﬁcaLon to the Freight Forwarder and obtaining the Carrier's prior express consent in wriLng. Further the Container or other covering in which the Goods themselves are to be
+transported and the Goods must be disLnctly marked on the outside so as to indicate the nature and character of any sech Goods and so as to comply with all applicable laws, regulaLons and
+requirements.
+(4)  If any such Goods are delivered to the Freight Forwarder or to the Carrier without obtaining such wriNen consent and without such marking or, if in the opinion of the Freight Forwarder or the Carrier,
+2.  FREIGHT FORWARDER'S TARIFF
+The provisions of the Freight Forwarder's applicable Tariﬀ, if any, are incorporated herein. Copies of such provisions are obtainable from the Freight Forwarder or his agents upon request or, where applicable,
+from a government body with whom the Tariff has been filed. In the case of inconsistency between this Bills of Lading and the applicable Tariff, this Bill of Lading shall prevail.
+3.  WARRANTY
+(1)  The Merchant warrants that in agreeing to the terms hereof:
+(1)  He is, or is the agent of and has the authority of, the Person owning or entitled to the possession of the Goods or any Person who has a present or future interest in the Goods and this Bill of Lading.
+(2)  The Goods placed by the Merchant in any Container are suitable for transportation in Containers.
+(3)  The Container, if not supplied by or on behalf of the Carrier, meets all applicable national or internacional safety standards and is fit in all respects for Carriage by the Carrier.
+(4)  The Freight Forwarder is only an intermediary between the Merchant and the Carrier and has the right to collect all the Charges stipulated or not in this Bill of Lading.
+4.  NEGOTIABILITY AND TITLE TO THE GOODS
+(1)  This Bill of Lading shall be negotiable unless marked 'non-negotiable' and shall constitute title to the Goods and the holder shall be entitled to receive or transfer the Goods herein described.
+(2)  The Merchant and his transferees shall surrender one of the original Bill of Lading to the Freight Forwarder to be enLtled to receive the Goods herein menLoned. The failure of the obligaLon in this clause give
+the Goods are or are liable to become of a dangerous, ellegal, inflammable or damaging nature and cannot safely or properly be carried or carried further whether taking any measures or incurring addiLonal
+expense or not, the Freight Forwarder or the Carrier at its absolute discreLon and without noLce to the Merchant (but as the Merchant's agent only) may at any Lme or place take such measures as it
+considers appropriate and/or incur reasonable addiLonal expense to conLnue the Carriage and/or arrange at the Merchant's risk and expense for such Goods to be landed, stored, ashore or aﬂoat, under
+cover or in the open, sold, destroyed, disposed of, abandoned or rendered harmless without compensaLon to the Merchant and without prejudice to the Freight Forwarder's rights to Charges. Such
+acLon shall be deemed to consLtute due delivery under this Bill of Lading and the Merchant shall pay all Charges incurred by the Freight Forwarder. In exercising its discreLon hereunder, the Freight
+Forwarder and/or the Carrier shall not be under any obligation to take any particular measure and should not be liable for any loss, damage or delay howsoever arising or any lack of action relating thereto.
+(5)  The Merchant shall be liable for the loss, damage contaminaLon, soiling, detenLon or demurrage before, during and aSer the Carriage of property (including, but not limited to, Container) of the Freight
+Forwarder or any person or vessel (other than the Merchant) referred to in clause 5 (2) above caused by the Merchant or any person acLng on his behalf or for which the Merchant is otherwise
+responsible.
+(6)  The Merchant (and each of the persons within the deﬁniLon of Merchant shall be jointly and severally liable and remain so whether or not the Bill of Lading has been transferred) shall defend, indemnify
+rise to the possessory lien over the Goods which can be exercised whether in the vehicle, terminal, port, warehouse or any other facility.
+5.  SUB-CONTRACTING
+(1)  The Freight Forwarder and the Carrier shall be entitled to sub-contract on any terms whatsoever the whole or any part of the Carriage.
+(2)  The Merchant undertakes that no claims or allegaLons whether arising in contract, tort, bailment or otherwise shall be made against any person or vessel whatsoever, other than the Carrier, including, but not
+and hold harmless the Freight Forwarder against any loss, damage, claim, liability or expense whatsoever arising from any breach of the provisions of this Bill of Lading or applicable law or from any cause in
+connection with the Goods for which the Freight Forwarder is not responsible.
+(7)  The choice of port/terminal for loading and unloading has been made by the Merchant, who is responsible for any problems arising from congesLon, overcrowding, delays, changes of dates for receiving
+limited to the Freight Forwarder, Freight Forwarder's servants or agents, Carrier's servants or agents, any independent contractor and his servants or agents, stevedores, terminal and groupage operators, road
+and rail operators and all others by whom the whole or any part of the Carriage, whether directly or indirectly, is procured, performed or undertaken which imposes or aNempts to impose upon any such
+person or vessel owned and chartered by any of them or upon which the Goods have been carried any liability whatsoever in connecLon with the Goods or the Carriage of the Goods whether arising out of
+negligence or not on the part of such person or vessel; and if any claim or allegaLon should nevertheless be made to defend, indemnify and hold harmless the Carrier against all consequences thereof. Without
+prejudice to the foregoing every such person and vessel shall have the beneﬁt of all provisions herein beneﬁLng the Carrier or Freight Forwarder as if such provisions were expressly for his beneﬁt and in
+entering into this contract the Carrier, to the extent of these provisions, does so not only on his own behalf but also as agent or trustee for such persons and vessels and such persons and vessels shall to this
+extent be or be deemed to be parties to this contract.
+(3)  The Merchant shall defend, indemnify and hold harmless the Freight Forwarder against any claim or liability (and any expense and all consequences arising therefrom) arising from the Carriage of Goods insofar as
+(gate in) or delivering (gate out) the goods. If the delivery period is not met for any reason, even if it is the fault or decision of the port/terminal, the Merchant will be responsible for changing the shipment
+and the consequent costs of increased freight, demurrage, cancellation or any other service required to receive the goods on time.
+10.  CONTAINERS
+(1)  Goods maybe stuffed by the Freight Forwarder in or on Containers and Goods maybe stuffed with other Goods.
+(2)  The terms of this Bill of Lading shall at all Lmes vovern all the responsibiliLes of the Freight Forwarder in connecLon with or arising out of the supply of a Container to the Merchant, whether supplied
+before or after the Goods are received by the Freight Forwarder or by the Carrier or delivered to the Merchant not only during the
+(i)  Carriage, but both before and after the Carriage.
+(3)  If a Container has been stuffed by or on behalf of the Merchant other than by the Freight Forwarder or the Carrier
+(A)  this Bill of Lading shall be a receipt only for such a Container and the Freight Forwarder shall not be liable for loss or damage or delay to the Goods howsoever carried including but without prejudice to
+such claim or liability is made other than in accordance with the terms of this Bill of Lading or which exceeds the Freight Forwarder's liability under this Bill of Lading.
+(4)  The defences and limits of liability provided for in this Bill of Lading shall apply in any action against the Freight Forwarder whether the action can be found in contract, in tort, in bailment or otherwise.
+6.  CARRIER'S RESPONSIBILITY
+(1)
+ CLAUSE PARAMOUNT
+(A)  Subject to Clause 15 below, this Bill fo Lading insofar as it relates to sea carriage by any vessel whether named herein or not shall have eﬀect subject to the Hague Rules or any legislaLon making such Rules or the
+the generality here of where such is:
+(i)  caused by the manner in which the Container has been stuffed
+(ii)  caused by the unsuitability of the Goods for carriage in Containers
+(iii)  caused by the unsuitability or defective condition of the Container provided that where the Container has been supplied by or on behalf of the Freight Forwarder, this sub-clause (iii) shall only apply if the
+Hague-Visby Rules including in either case any statutory modiﬁcaLon thereof compulsorily applicable to this Bill of Lading and the provisions of the Hague Rules or legislaLon making such Rules or Hague Visby
+Rules applicable shall be deemed incorporated herein. In the absence of such legislaLon or other legislaLon to similar eﬀect which is compulsorily applicable, this Bill of Lading shall have eﬀect subject to the
+Hague Rules or COGSA in the case of carriage to and from the United States of America. The Hague Rules, Hague-Visby Rules or COGSA shall apply to the carriage of Goods by inland waterways and reference to
+carriage by sea in such Rules or legislation shall be deemed to include reference to inland waterways.
+(B)  If and to the extent that the provisions of the Harter Act of the United States of America 1893 would otherwise be compulsorily applicable to regulate the Carrier's or Freight Forwarder's responsibility for the
+unsuitability or defective conditions arose (a) without any want of due diligence on the part of the Freight Forwarder or (b) would have been apparent upon reasonalbe inspecLon by the Merchant at or
+prior to the time when the Container was stuffed.
+(4)  Then Merchant shall defend, indemnify and hold harmless the Freight Forwarder against any loss, damage, claim, liability or expense whatsoever arising form one or more of the maNers converted by (A)
+above except for (A) (iii) (a) above.
+(5)  The Merchant is responsible for packing and sealing all Containers not stuﬀed by the Freight Forwarder or the Carrier and if any such Container is delivered by the Carrier with its original seal as aﬃxed by
+Goods during the period prior to loading on or aSer discharge from the vessel the Carrier's and Freight Forwarder's responsibility shall instead be determined by the provisions of Clause 6(3) below, but if
+such provisions are found to be invalid such responsibility shall be subject to COGSA.
+(C)  The Carrier and/or Freight Forwarder shall be enLtled to (and nothing to this Bill of Lading shall operate to deprive or limit such enLtlement) the full beneﬁt of, and rights to all limitaLons and exclusions of
+the Merchant intact, the Freight Forwarder shall not be liable for any shortage of goods on delivery. Where the Freight Forwarder or the Carrier is instructed to provide a Container in the absence of a
+wriNen request to the contrary, the Freight Forwarder and the Carrier are not under an obligaLon to provide a Container of any parLcular type of quality. The Merchant shall inspect the Container prior
+to stuffing and use of such Container shall be deemed to be acceptance by the Merchant of it being sound and suitable for use.
+(6)  Containers, pallets or similar articles of transport supplied by or on behalf of the Freight Forwarder shall be returned in the same order and condition as when handed over to the Merchant, fair wear and
+liability and all right conferred or authorized by any applicable law, statute or regulaLons of any country (including, but not limited to, where applicable any provisions of secLons 4281 to 4287, inclusive, of
+the Revised Statutes of the United States of America and amendments thereto and, where applicable, any provisions of the laws of the United States of America) and without prejudice to the generality of the
+foregoing also any law, statute or regulations availible to the owner of the vessel(s) on which the Goods are carried.
+(D)  This Bill of Lading shall be subject to the COGSA if Carriage takes place to, from or through a port in the United States of America which terms shall be incorporated herein and shall be paramount throughout
+tear excepted, with interiors clena and within the time prescribed in the Freight Forwarder's tariff or elsewhere.
+(7)  The Merchant shall be liable for any loss of, damage to, or delay, including demurrage or detenLon, of such arLcles, incrurred during the period between handing over to the shipper and return to the
+Freight Forwarder for carriage.
+(8)  The Shipper, the Consignee, the Endorsee and the holder of the Bill of Lading shall be jointly and severally liable for any loss of, damage to, or delay, including demurrage, of such arLcles, incurred during the
+the Carriage by sea and at the sea terminal in the United States of America prior to loading and aSer discharge from the vessel provided that the Carrier and Freight Forwarder shall not be liable for any loss,
+damage or delay to the Goods which occurs in the United States of America whilst the Goods are outside the sea terminal and not in the custody of the Carrier. In such circumstances, the Merchant agrees that
+the Carrier and/or Freight Forwarder shall act as agent only for the Merchant to arrange the Carriage by an inland Carrier in the United States of America according to the usual business terms of such Person
+performing the Carriage and shall not be liable to the Merchant for any loss, damage or delay to the Goods whilst in the custody of such Person performing the Carriage. The liability of the Carrier and Freight
+Forwarder whilst Carriage or this Bill of Lading is subject to COGSA shall not exceed the limits in Clause 6 (4) herein.
+(2)  PORT TO PORT SHIPMENT
+(A)  Where the Carriage is Port to Port Shipment, the responsibility of the Carrier and Freight Forwarder are limited to that Carriage from and during loading onto the vessel, up to and during discharge from the
+period between handing over to the Consignee and return to the Freight Forwarder.
+11.  TEMPERATURE CONTROLLED CARGO
+(1)  The Merchant undertakes not to tender for transportation any Goods which require temperature control without previously giving written notice (and filing in the box on the front of this Bill of Lading
+if this Bill of Lading has been prepared by the Merchant or a person acLng on his behalf) of the nature of the Goods and the parLcular temperature seWng to be maintained. In the case of a temperature
+controlled Container stuﬀed by or on behalf of the Merchant, the Merchant further undertakes that the Container has been properly pre-cooled, that the Goods have been properly stuﬀed in the
+Container and that its thermostaLc controls have been properly set by the Merchant before receipt of the Goods by the Carrier. If the above requirements are not complied with, the Freight Forwarder
+shall not be liable for any loss of or damage to the Goods caused by such non-compliance.
+(2)  The Freight Forwarder shall not be liable for any loss of or damage to the Goods arising from defects, derangement, breakdown, stoppage of the temperature controlling machinery, plant, insulaLon or any
+vessel or any other vessel onto which the Goods have been transhipped and the Freight Forwarder shall not be liable for any loss or damage or delay whatsoever and howsoever caused in respect of the Goods
+or for any other maNer arising even though the Goods may be in its actual or construcLve possession and Charges for the whole Carriage have been charged by the Freight Forwarder. Liability shall be
+determined in accordance with any legislaLon making the Hague Rules or Hague-Visby Rules compulsorily applicable or if none in accordance with the Hague Rules. The Merchant consLtutes the Freight
+Forwarder as agent to enter into contracts on behalf of the Merchant with others for transport, storage, handling or any other services in respect of the Goods prior to loading and subsequent to discharge
+of the Goods from the vessel without responsibility for any act or omission whatsoever on the part of the Freight Forwarder or others and the Freight Forwarder may as such agent enter into contracts with
+others on any terms whatsoever including terms less favorable than the terms in this Bill of Lading.
+(B)  Notwithstanding (A) above to the extent that any compusorily applicable legislaLon makes the Freight Forwarder responsible for any addiLonal period and in all other cases the Freight Forwarder shall have the
+apparatus of the Container, provided that the Carrier shall before or at the beginning of the Carriage exercise due diligence to maintain the refrigerated Container in an efficient state.
+12.  INSPECTION OF GOODS
+The Freight Forwarder or the Carrier or any person authorised by the Freight Forwarder or the Carrier shall be enLtled, but under no obligaLon, to open any Container or package at any Lme and to
+inspect the Goods.
+13.  MATTERS AFFECTING PERFORMANCE
+(1)  If at any Lme the Carriage, the vessel or other goods on board the vessel are or are likely to be aﬀected by any hindrance, risk, danger, delay, diﬃculty or disadvantage of whatsoever kind (including the
+beneﬁt of the Hague Rules (and COGSA where Carriage accurs in the United States of America) in respect of any loss, damage or delay arising prior to loading or subsequent to discharge from the vessel even
+though such did not occur at sea or whilst the Goods were in the custody of the Freight Forwarder.
+(C)  Where COGSA applies, then the provisions stated in the said Act shall govern before loading on the vessel or aSer discharge there from, as the case may be, during Carriage to or from a container yard or
+condition of the Goods), whensoever and howsoever arising (whether or not the Carriage has commenced) without notice to the Merchant, the Freight Forwarder or the Carrier may:
+(A)  carry the Goods to the Place of Delivery by an alternative route to that indicated in this Bill of Lading. If the Carrier does so, the Freight Forwarder shall be entitled to charge such addiLonal charges as Freight
+container freight staLon in or immediately adjacent to the sea terminal at the Port of Loading and/or Discharge. If the Freight Forwarder and/or the Carrier is requiested by the Merchant to procure Carriage by
+an inland carrier in the United States of America and the inland carrier in his discreLon agrees to do so, such carriage shall be procured by the Freight Forwarder as agent only to the Merchant and such carriage
+shall be subject to the inland carrier's contract and tariﬀ. If, for any reason, the Freight Forwarder is denied the right to act as agent at these limes, his liability for loss, damage or delay to the Goods shall be
+determined in accordance with Clause 6 (3) thereof.
+(3)  COMBINED TRANSPORT
+Forwarder or the Carrier may determine; or
+(B)  suspend the Carriage of the Goods and store them ashore or aﬂoat subject to the terms of the Bill of Lading and use reasonable endeavours to forward them the Goods, if pracLcable, to desLnaLons
+abandon the Carriage of the Goods and, where reasonably possible, place the Goods or any part of them at the Merchant's disposal at any place which the Freight Forwarder or the Carrier may deem safe
+and convenient, whereupon the responsibility of the Freight Forwarder and the Carrier in respect of such Goods shall cease; or
+(C)  without noLce to the Merchant, abandon the Carriage of the goods and where reasonably possible place the Goods or any part of them at the Merchant's disposal at any place which the Freight
+Save as otherwise provided in this Bill of Lading, if the Carriage is Combined Transport the Freight Forwarder shall ﬁnd a Carrier to perform or to procure performance of the Carriage and shall only be liable for
+loss of or damage or delay to the Goods occurring form the Place of Receipt, if applicable otherwise the Port of Loaindg, up until the Place of Delivery, if applicable, otherwise the Port of Descharge, indicated on
+the face of the Bill of Lading to the extent set out below.
+(A)  Where the stage of Carriage where the loss or damage occurred cannot be proved:
+(i)
+ The Freight Forwarder and/or the Carrier shall be enLtled to rely upon all exclusions of liability under the Hague Rules or Hague-Visby Rules or legislaLon that would have applied under 6 (1) (A) above had the
+Forwarder or the Carrier may deem safe and convenient, whereupon the responsibility of the Freight Forwarder and the Carrier in respect of such Goods shall cease.
+(D)  without prejudice to the Freight Forwarder's and the Carrier's rights subsequently to use an alternaLve route under (A) or to suspend Carriage under (B) or to abandon the Carriage under (C) above,
+continue the Carriage.
+In any event, the Freight Forwarder shall be entitled to full Charges on Goods received (or Carriage and the Merchant shall pay any additional costs resulting form the above mentioned circumstances.
+(2)  Subject to (1) above in any event, the responsibility and liability of the Freight Forwarder in respect of the Goods shall cease on the delivery or other dispositon of the Goods in accordance with the Orders
+loss or damage or delay occurred at sea or, if there was no carriage by sea, under the Hague Rules (or COGSA if the Carriage is to or from the United States of America).
+(ii)
+ Where under (i) above, the Freight Forwarder and/or the Carrier are not liable in respect of some of the factors causing the loss or damage or delay to the Goods, they shall only be liable to the extent that those
+or recommendations fiven by any government or authority or any person acting or purporting to act as or on behalf of such government or authority.
+factors for which they are liable have contributed to the loss of or damage.
+(iii)  Subject to Clause 7 (3) below, when the Hague Rules or any legislaLon applying such Rules (such as COGSA) or the Hague-Visby Rules is not compulsorily applicable, the Freight Forwarder's liability shall not
+14.  METHODS AND ROUTE OF TRANSPORTATION
+(1)  The Freight Forwarder and/or the Carrier may at any time and without notice to the Merchant use any means of transport or storage whatsoever; load, transfer or carry the Goods on any vessel other than
+exceed, in any circumstances, SDR 666.67 per package or shipping unit or SDR 2.00 per kilo of the gross weight (whichever is less) of the Goods lost, damaged or delayed or, where carriage includes Carriage to,
+from or through a port in the United States of America, US$ 500 per package or shipping unit or USD 2.00 per kilo of the gross weight of the Goods (whichever is less).
+(B)  Where the stage of Carriage where the loss or damage occurred can be proved:
+(i)
+ The liability of the Freight Forwarder and the Carrier shall be determined by the provisions contained in any international convention or national law of the country which provisions
+(a)  cannot be departed from by private contract to the detriment of the Merchant, and
+(b)  would have applied if the Merchant had made a separate and direct contract with the Freight Forwarder in respect of the particular stage of Carriage where the loss or damage or delay occurred and had received
+that named on the front hereof or by any other means of transpor whatsoever even though transhipment or forwarding may not have been contemplated or provided for; at any place unpack and
+remove Goods which have been stuﬀed in or on a Container and forward the same in a Container or in any manner whatsoever; proceed at any speed and by any route in his discreLon (whether or not
+the nearest or most direct or customary or adverLsed route) and proceed to, return to or stay at any port or place whatoever (whether or not the place is a port named on the front hereof as the
+intended Port of Loading or intended Port of Discharge) and in any order in or out of the route or in a contrary direcLon to the Port of Discharge; comply with any orders or recommendaLons given by
+any government or authority or any person or body acLng or purporLng to act as or on behalf of such government or authority or having under the terms of the insurance on any conveyance employed
+by the Freight Forwarder or the Carrier the right to give orders or direcLons, permit the vessel to proceed with or without pilots to tow or to be towed or to be dry-docked with or without Goods or
+Containers; permit the vessel to carry livestock, Goods of all kinds dangerous, or otherwise, contrabnd, explosives, munitions or warlike stores and sail armed or unarmed.
+(2)
+The liberLes set out in sub-clause (1) above may be invoked by the Freight Forwarder or the Carrier for any purposes whatsoever whether or not connected with the Carriage of the Goods including but
+not limited to loading or unloading other goods, bunkering, embarking or disembarking other person, undergoing repairs and/or dry docking, towing or being towed or assisLng other vessels. Anything
+done in accordance with (1) above or any delay arising therefrom shall be deemed to be within the contractual Carriage and shall not be a deviation of whatsoever nature or degree.
+15.  DECK CARGO (AND LIVESTOCK)
+(1)  Goods of any descripLon whether stuﬀed in containers or not may be carried on or under deck at the sole discreLon of the Carrier without noLce to the Merchant and such stowage shall not be a
+as evidence thereof any particular document which must be issued in order to make such international convention or national law applicable.
+(ii)
+ If no international convention or national law is applicable, then any liability of the Carrier shall be determined by Clause 6 (3) (A) above.
+(iii)  In the case of shipment to or from the United States of America, the liability of the Freight Forwarder and the Carrier shall be determined by the provisions of COGSA if the loss or damage or delay is known to
+have occurred during Carriage by sea to or from the United States of America or during Carriage to or from a container yard or cargo berth in or immediately adjacent to, the sea terminal at the Port of Loading
+or Port of Discharge in ports of the United States of America.
+(iv)  With respect to the transportaLon to the Port of Loading or from the Port of Discharge in the United States of America the responsibility of the Freight Forwarder shall be to procure transportaLon by
+carriers (one or more) and such transportaLon shall be subject to the inland carrier's contracts of carriage and tariﬀs in whose custody the loss or damage occurred and any law compulsorily applicable. The
+Freight Forwarder shall not be liable for any loss, damage or delay to Goods during such transportation as provided in Clause 6 (1) (d) above.
+(4)  GENERAL PROVISIONS
+(A)  Delay. Consequencital Loss.
+deviaLon of whatsoever nature or degree. If carried on deck, the Freight Forwarder shall not be obliged to note, mark or stamp on the Bill of Lading any statement that the Goods are carried on deck.
+Subject to (2) below such Goods whether carried on deck or under deck and whether or not stated as carried on deck shall parLcipate in General Average and such Goods (other than livestock) shall be
+deemed to be within the deﬁniLon of Goods for the purposes of the Hague Rules or any legislaLon making such Rules or the Hague-Visby Rules compulsorily applicable (such as COGSA) whichever is
+applicable to this Bill of Lading.
+(2)  Goods (not being Goods stuﬀed in or on Containers other than open ﬂats or pallets) which are stated on the front of this Bill of Lading to be carried on deck and which are so carried (and livestock,
+The Freight Forwarder does not undertake that the Goods or any documents relaLng thereto shall arrive or be available at any point or place during the Carriage or at the Place of Delivery at any parLcular Lme
+(whether adverLsed or not) or to meet any parLcular requirement of the Merchant or any market or use of the goods and the Merchant agrees that save as otherwise provided herein, the Fregith Forwarder
+shall under no circumstances whatsoever be liable for any direct, indirect or consequencial loss, loss of proﬁts or loss of market or loss of contract or loss of revenue or use claims, puniLve or exemplary
+damages or damage caused by delay or any other cause whatsoever and howsoever caused. Without prejudice to the foregoing, if notwithstanding the Freight Forwarder is found liable for delay, liability shall be
+limited to the freight or other charges applicable to the relevant stage of the Carriage.
+(B)  Once the Goods have been received by the Carrier for Carriage, the Merchant shall not be enLtled either to impede, delay, suspend or stop or otherwise interfere with the Carrier's intended manner of
+whether or not carried on deck) are carried without responsibility on the part of the Freight Forwarder for loss or damage of whatsoever nature or delay arising during Carriage whether caused by
+unseaworthiness or negligence or any other cause whatsoever on the part of the Carrier, its servants or agents. The Hague Rules or the Hague-Visby Rules as applicable (or COGSA, if applicable) shall not
+apply to such carriage. The Merchant shall defend, indemnify and hold harmless the Freight Forwarder against all and any extra cost incurred for any reason whatsoever in connecLon with carriage of such
+Goods or livestock.
+(3)  Where local legislation at the Port of Loading or Place of Receipt provides that for Goods carried on or above deck that the Carrier must have the agreement in writing of the Merchant to permit Carriage on
+performance of the Carriage or the exercise of the liberLes conferred by this Bill of Lading, compulsory convenLon or law or to instruct or require delivery of the Goods at a place or point other than the Port
+of Discharge or Place of Delivey named on the reverse hereof or such other port or place selected by the Carrier in the exercise of the liberLes herein, for any reason whatsoever including but not limited to the
+exercise of any right of stoppage in transit conferred by the Merchant's contract or sale or otherwise. The Merchant shall indemnify the Carrier and the Freight Forwarder against all caims, liabilities, loss, damages,
+costs, delay, aNorney fees and/or expenses caused to the Carrier or Freight Forwarder, their directors, oﬃcers, subcontractors, employees or agents or to any other cargo or to the owner of such cargo during
+the Carriage arising or resulLng from any stoppage (whether temporary or permanent) in the Carriage of the Goods whether at the request of the Merchant, or in consequence of any breach by the Merchant
+of this clause, or in consequence of any dispute whatsoever in respect of the Goods (including, but not without restriLon, disputes as to ownership, Ltle, quality, quanLty or descripLon of and/or payment
+for the Goods) involving any one or more party defined herein as the Merchant as between themselves or with any third party other than the Carrier or Freight Forwarder.
+(C)  Definition of Packaging or Shipping Unit
+or above deck, then to such extent Clause 6 (1) and 6 (2) is to be read as modified thereby.
+16.  DELIVERY OF GOODS
+(1)
+ If delivery of the Goods or any part thereof is not taken by the Merchant at the Lme and place when and where the Freight Forwarder and/or the Carrier is enLtled to call upon the Merchant to take
+delivery thereof as may be provided by the Freight Forwarder's applicable Tariﬀ, the Freight Forwarder and/or the Carrier shall be enLtled without noLce to remove from the Container the Goods or that
+part thereof if stuffed in or no a Container and to store the Goods or that part thereof ashore, afloat in the open or under cover at the sole risk and expense of the Merchnt. Such storage shall constitute
+due delivery hereunder, and thereupon all liability of the Freight Forwarder in respect of the Goods or that part thereof shall cease and the costs of the storage shall be payable upon demand by the
+Merchant to the Freigth Forwarder.
+(2)  If the Merchant fails or refuses to take delivery of the Goods within 30 days of delivery under sub-clause (1) above, or such shorter time as may be provided in any law, order, decree or regulation applicable
+Where a Container is used to consolidate Goods and such Container is stuﬀed by the Freight Forwarder or the Carrier the number of packages or shipping units stated on the face of this Bill of Lading in the
+box provided shall be deemed the number of packages or shipping units for the purpose of any limit of liability per package or shipping unit provided in any internaLonal convenLon or naLonal law relaLng to
+the carriage of Goods by sea. Except as aforesaid, the Container shall be considered the package or shipping unit. The words 'shipping unit' shall mean each physical unit or piece of cargo not shipped in a package,
+including articles and things of any descripLon whatsoever, except Goods shipped in bulk, and irrespecLve of the weight or measurement unit employed in calculaLng freight charges. As to Goods shipped in
+bulk, the limitaLon applicable thereto shall be the limitaLon provided in such convenLon or law which may be applicable, and in no event shall anything herein be construed to be a waiver of limitaLon as to
+Goods shipped in bulk.
+(D)  Rust, etc.
+at the place of discharge, or if in the sole opinion of the Freight Forwarder and/or the Carrier the Goods are likely to perish or be rendered less valuable or worthless sooner within that period, the Freight
+Forwarder and/or the Carrier shall be enLtled without further noLce to the Merchant and without prejudice to any other remedies which the Freight Forwarder and/or the Carrier may have under this
+Bill of Lading, to sell by private treaty or by public auction, dispose of or destroy the Goods and apply any proceeds of sale against sums owed by the Merchant to the Freight Forwarder.
+17.  BOTH-TO-BLAME COLLISION
+The Both-to-Blame Collision clause published and/or approved by BIMCO and obtainable from the Freight Forwarder or his agent upon request are hereby incorporated herein.
+18.  GENERAL AVERAGE
+(1)  The Freight Forwarder or the Carrier may declare General Average which shall be adjustable according to the York/Antwerp Rules of 1994 at any place at the opLon of the Freight Forwarder or the Carrier
+It is agreed that superﬁcial rust, oxidaLon or any like condiLon due to moisture, is not a condiLon of damage but it inherent to the nature of the Goods and acknowledgement of receipt of the Goods in
+apparent good order and condition is not a representation that such conditions of rust oxidation or the like did not exist on receipt.
+(E)  Notice of Loss or Damage
+The Freight Forwarder shall be deemed prima facie to have delivered the Goods as described in this Bill of Lading unless noLce of loss of, or damage or delay to the Goods, indicaLng the general nature of such
+loss, damage or delay shall have been given to the Freight Forwarder or his representaLve at the Place of Delivery before or at the Lme of removal of the Goods into the custody of the person to delivery thereof
+under this Bill of Lading or, if the loss or damage is not apparent, within three consecutive days thereafter.
+(F)  Time-bar
+and by an adjuster appointed by the Freight Forwarder or the Carrier and the Merchant shall provide such security as may be required by the Freight Forwarder or the Carrier in this connecLon. General
+Average on a vessel not operated by the Carrier shall be adjusted according to the requirements of the operator of that vessel.
+(2)  Notwithstanding (1) above, the Merchant shall defend, indemnify and hold harmless the Freight Forwarder in respect of any claim (and any expense arising therefrom) of a General Average nature which
+may be made on the Carrier and shall provide to the Freight Forwarder prior to delivery of the Goods such cash deposit or security as may be required by the Freight Forwarder or the Carrier in this
+connection to cover the estimated contribution in respect of the Goods and any salvage and special charges thereon.
+(3)  The Freight Forwarder and the Carrier shall be under no obligation to take any steps whatsoever to collect security for General Average contributions due to the Merchant.
+(4)  New Jason clause published and/or approved by BIMCO and obtainable from the Freight Forwarder or his agent upon request are hereby incorporated herein.
+19.  CHARGES
+(1)  Charges shall be deemed fully earned by the Freight Forwarder on receipt of the Goods by the Carrier whether or not such Charges or any of them are stated on the face of the Bill of Lading and shall be
+The Freight Forwarder and/or the Carrier shall be discharge of all liability whatsoever in respect of the Goods unless suit is brought in then proper forum and wriNen noLce thereof received by the Freight
+Forwarder and the Carrier within nine months aSer delivery of the Goods or if the Goods are not delivered the date when the Goods should have been delivered. Notwithstanding the above, where the Hague
+Rules or Hague-Visby Rules or COGSA apply whether by incorporation in this Bill of Lading or by compulsorily applicable law, the Freight Forwarder and the Carrier shall be discharged of all liability whatsoever in
+respect of the Goods unless such is brought in the proper forum within one year of their delivery or of the date when they should have been delivered.
+(G)  Inspection by Authorities
+If, by the order of the proper authoriLes, at any point of the Carriage, the Goods or a Container has to be opened in which the Goods are stuﬀed to be inspected, the Freight Forwarder will not be liable for
+any loss, damage or delay incured either to the Goods, the Carriage or to the carrying vessel as a result of such inspecLon including the cost of opening, unstuﬃng, inspecLon or repacking, which cost shall be
+recoverable by the Freight Forwarder from the Merchant as part of the Charges.
+7.  COMPENSATION AND LIABILITY
+(1)  Subject always to the Freight Forwarder's right to limit liability as provided for herein, if the Freight Forwarder is liable for compensaLon in respect of loss of or damage to the Goods, such compensaLon shall
+paid and non-returnable in any event Goods and/or vessel or other conveyance lost or not lost. All sums payable to the Freight Forwarder shall be paid in full without set-oﬀ, deducLon or counterclaim
+in United States Dollars or, at the Freight Forwarder's option, its equivalent in the currency of the Port of Loading or Port of Discharge.
+(2)  The Charges have been calculated on the basis of parLculars furnished by or on behalf of the Merchant and the Freight Forwarder's conﬁrmaLon of the basis of the calculaLon shall be conclusive. The
+Freight Forwarder shall be enLtled to producLon of the commercial invoice for the Goods or true copy thereof and to open the Godds or the Container to inspect, reweigh, re-measure and re-value the
+Goods. If the particulars are found by the Freight Forwarder to be incorrect, the Merchant shall pay the Freight Forwarder the correct Charges (credit being given for the Charges charged) together with the
+costs incurred by the Fregith Forwarder in establishing the correct particulars.
+(3)  All Charges shall be paid without any set-off, deduction or counter-claim before the delivery of the Goods to the Merchant.
+(4)  If the Merchant fails to pay the charges in full when due, the Merchant shall be liable in addiLon for interest due on any outstanding sum together with reasonable expenses and aNorney fees incurred in
+be calculated by reference to the invoice value of the Goods plus charges and insurance, if paid. If there is no invoice value of the Goods or if any such invoice is not bona ﬁde (and in this respect the Freight
+Forwarder shall be at liberty to seek to challenge the invoice value) such compensaLon shall be calculated by reference to the value of such Goods at the place and Lme they are delivered or should have been
+delivered to the Merchant. The value of the Goods shall be fixed according to the current market price, by reference to the normal value of goods of the same kind and/or quality.
+(2)  Where the Hauge Rules or Hague-Visby Rules or any legislaLon making either of such Rules compulsorily applicable (such as COGSA) to this Bill of Lading apply, the Merchant agrees that the Freight Forwarder has
+obtaining payment due to the Freight Forwarder.
+(5)  The Merchant shall remain responsible for all Charges, regardless of whether the Carges are stated on the face of the Bill of Lading or intended to be pre-paid or collect.
+20.  LIEN
+(1)  The Freight Forwarder shall have a lien on the Goods and any documents relaLng thereto for all sums whatsoever earned or due at any Lme to the Freght Forwarder from the Merchant under this Bill of
+no knowledge of the value of the Goods and shall not, unless a declared value has been noted in accordance with Clause 7 (3) below, be or become liable for any loss or damage to or in connecLon with the
+Goods in an amount per package or shipping unit in excess of the package or shipping unit limitaLon as laid down by such Rules or legislaLon. Where Carriage is to, from or through the United State of America,
+such limitation amount according to COGSA is US$ 500 per package or customary freight unit unless a declared value has been noted in accordance with Clause 7 (3) below or if such Rules or legislaLon are not
+compulsorily applicable, subject to any other compulsory applicable convenLon or naLonal legislaLon, the limitaLon amount shall not exceed the amount of SDR 666.67 per package or shipping unit or SDR
+2.00 per kilo of the gross weight (whichever is less) of the Goods lost, damaged or delayed or where Carriage includes Carriage to, from or through a port in the United States of America US$ 500 per package or
+shipping unit or USD 2.00 per kilo of the gross weight of the Goods, whichever is less.
+(3)  The Merchant agrees and acknowledges that the Freight Forwarder has no knowledge of the value of the Goods and the Freight Forwarder's liability may be increased to a higher value only by a declaraLon in
+Lading and/or any other contract or paid by the Fregith Forwarder, including but not limited to any liens or penalLes levied on the Freight Forwarder, for any acts or omissions for which the Merchant is
+responsible and for General Average contributions to whomsoever due and for the costs of recovering the same. The Freight Forwarder shall have the right to exercise the lien at any Lme and at any place at
+the Freight Forwarder's discreLon to recover the sums due to the Freight Forwarder and for that purpose to sell the Goods and documents by public aucLon or private treaty without noLce to the
+Merchant and at the Merchant's expense and without any liability towards the Merchant. The Freight Forwarder shall be entitled to claim the difference in the event that the slae proceds do not discharge in
+full the amount due from the Merchant. The Freight Forwarder's lien shall survive the delivery of the Goods.
+(2)  For shipments to and from the United States or Brazil, the Freight Forwarder shall become a warehouseman at the expiraLon of free Lme sLpulated in the Tariﬀ. The Freight Forwarder shall be enLtled to
+wriLng of the value of the Goods by the Merchant upon delivery to the Freight Forwarder of the Goods for shipment, such higher value being inserted with the consent of the Freight Forwarder on the front
+of this Bill of Lading in the space provided and, if required by the Freight Forwarder, extra freight paid. In such case, if the actual value of the Goods shall exceed such declared value, the value shall nevertheless be
+deemed to be the declared value and the Freight Forwarder's liability, if any, shall not exceed the declared value and any partial loss or damage shall be adjusted pro rata on the basis of such declared value.
+(4)  The Freight Forwarder shall have no liability for any loos or damage caused by: (A) an act or omission of the Merchant, or person other than the Freight Forwarder acLng on behalf of the Merchant or from
+exercise a warehouseman's lien and liquidation rights in respect of sums due from the Merchant whether before or after the expiry of free time by applying a general lien on the cargo.
+21.  VARIATION OF THE CONTRACT
+whom the Freight Forwarder took the goods in charge; (B) insuﬃciency or defecLve condiLon of the packaging or marks and/or numbers; (C) handling, loading, stowage or unloading of the goods by the
+Merchant or any person not acLng on behalf of the Freight Forwarder; (D) inherent vice of goods; (E) strike, lockout, stoppage or restraint of labour, the consequences of which the Freight Forwarder could
+not avoid by the exercise of reasonable diligence; (F) any cause or event which the Freight Forwarder could not avoid and the consequences where if he could not prevent by the exercises reasonable diligence; (G)
+a nuclear incident if the operator of a nuclear installaLon or a person acLng for him is liable for this damage under an applicable internaLonal ConvenLon or naLonal law governing liability in respect of nuclear
+energyl (H) act, neglect or default of the master, pilot or the servants of the Freight Forwarder, Carrier or the performer carrier in the navigaLon/operaLon or in the management of the vehicle; (I) ﬁre, unless
+caused by the actual personal fault of the Fregith Forwarder; (J) the causes listed in the Hague Rules article 4.2 (a) to (q).
+No employee or agent of the Freight Forwarder shall have power to waive or vary any of the terms of this Bill of Lading unless such waiver or variaLon is in wriLng and is speciﬁcally authorised or raLﬁed in
+writing by a director or officer of the Freight Forwarder who has the actual authority of the Freight Forwarder so to waive or vary.
+22.  PARTIAL INVALIDITY
+If any provision in this Bill of Lading is held to be invalid or unenforceable by any court or regulatory or self-regulatory agency or body, such invalidity or unenforceability shall attach only to such provision.
+The validity of the remaining provisions shall not be affected thereby and this Bill of Lading shall carried out as if such invalid or unenforceable provisions were not contained herein.
+23. JURISDICTION AND LAW CLAUSE
+Any claim or dispute in connecLon with the carriage of goods under the Bill of Lading may only be insLtuted in the country where the Freight Forwarder has his principal place of business and shall be
+decided according to the law of such country.
