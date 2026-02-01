@@ -6,217 +6,194 @@
   },
   "generated_at": "2026-02-01T10:22:51",
   "fields": {
-    "packing_list_number": {
+    "invoice_number": {
       "present": true,
       "required": true,
       "value": "DN-24139-P",
       "evidence": [
-        "DN-24139-P"
+        "PACKING LIST NO. DN-24139-P P. 2"
       ],
       "method": "regex"
     },
-    "shipper_name": {
-      "present": true,
-      "required": true,
-      "value": "SUZUKI OUTBOARD MOTORS",
-      "evidence": [
-        "SUZUKI OUTBOARD MOTORS"
-      ],
-      "method": "heuristic_regex"
-    },
-    "consignee_name": {
+    "importer_name": {
       "present": true,
       "required": true,
       "value": "GHANDI SECAF VEICULOS LTDA. AUG. 28,2025",
       "evidence": [
         "GHANDI SECAF VEICULOS LTDA. AUG. 28,2025"
       ],
-      "method": "heuristic_line_before_cnpj"
+      "method": "line_block"
     },
-    "consignee_cnpj": {
+    "importer_cnpj": {
       "present": true,
       "required": true,
       "value": "03562381000603",
       "evidence": [
+        "GHANDI SECAF VEICULOS LTDA. AUG. 28,2025",
         "CNPJ: 03.562.381/0006-03"
       ],
       "method": "regex"
     },
-    "total_units": {
+    "packages_total": {
       "present": true,
       "required": true,
       "value": 33,
       "evidence": [
-        "33 UNITS / 33 CARTONS"
+        "TOTAL : 33 CARTONS 7,980 9,825 53.772"
       ],
-      "method": "regex"
+      "method": "regex_total"
     },
-    "total_cartons": {
+    "net_weight_kg": {
       "present": true,
       "required": true,
-      "value": 33,
+      "value": 7980.0,
       "evidence": [
-        "33 UNITS / 33 CARTONS"
+        "TOTAL : 33 CARTONS 7,980 9,825 53.772"
       ],
-      "method": "regex"
+      "method": "regex_total"
+    },
+    "gross_weight_kg": {
+      "present": true,
+      "required": true,
+      "value": 9825.0,
+      "evidence": [
+        "TOTAL : 33 CARTONS 7,980 9,825 53.772"
+      ],
+      "method": "regex_total"
+    },
+    "measurement_total_m3": {
+      "present": true,
+      "required": true,
+      "value": 53772.0,
+      "evidence": [
+        "TOTAL : 33 CARTONS 7,980 9,825 53.772"
+      ],
+      "method": "regex_total"
     },
     "items": {
       "present": true,
-      "required": false,
+      "required": true,
       "value": [
         {
           "model": "DF140BTL",
-          "carton_range": "19-21",
-          "cartons": 3,
-          "net_weight_per_pkg_kg": 199.0,
-          "gross_weight_per_pkg_kg": 264.0,
-          "measurement_per_pkg_m3": 1.754325,
-          "measurement_total_m3": 5.263,
-          "net_weight_total_kg": 597.0,
-          "gross_weight_total_kg": 792.0,
-          "evidence_row": "19 - 21 3 CARTONS @199 @264 1.754325 5.263",
-          "evidence_totals": "597 792"
+          "no": "19 - 21",
+          "packages": 3,
+          "net_weight_kg": 597.0,
+          "gross_weight_kg": 792.0,
+          "m3_total": 5263.0,
+          "raw_line": "19 - 21 3 CARTONS @199 @264 1.754325 5.263",
+          "raw_weights_line": "597 792"
         },
         {
           "model": "DF250TX",
-          "carton_range": "3-4",
-          "cartons": 2,
-          "net_weight_per_pkg_kg": 307.0,
-          "gross_weight_per_pkg_kg": 372.0,
-          "measurement_per_pkg_m3": 1.91535,
-          "measurement_total_m3": 3.831,
-          "net_weight_total_kg": 614.0,
-          "gross_weight_total_kg": 744.0,
-          "evidence_row": "3 - 4 2 CARTONS @307 @372 1.915350 3.831",
-          "evidence_totals": "614 744"
+          "no": "3 - 4",
+          "packages": 2,
+          "net_weight_kg": 614.0,
+          "gross_weight_kg": 744.0,
+          "m3_total": 3831.0,
+          "raw_line": "3 - 4 2 CARTONS @307 @372 1.915350 3.831",
+          "raw_weights_line": "614 744"
         },
         {
           "model": "DF100BTL",
-          "carton_range": "16-21",
-          "cartons": 6,
-          "net_weight_per_pkg_kg": 167.0,
-          "gross_weight_per_pkg_kg": 202.0,
-          "measurement_per_pkg_m3": 1.0846,
-          "measurement_total_m3": 6.508,
-          "net_weight_total_kg": 1.002,
-          "gross_weight_total_kg": 1.212,
-          "evidence_row": "16 - 21 6 CARTONS @167 @202 1.084600 6.508",
-          "evidence_totals": "1,002 1,212"
+          "no": "16 - 21",
+          "packages": 6,
+          "net_weight_kg": 1002.0,
+          "gross_weight_kg": 1212.0,
+          "m3_total": 6508.0,
+          "raw_line": "16 - 21 6 CARTONS @167 @202 1.084600 6.508",
+          "raw_weights_line": "1,002 1,212"
         },
         {
           "model": "DF140BTL",
-          "carton_range": "22-25",
-          "cartons": 4,
-          "net_weight_per_pkg_kg": 199.0,
-          "gross_weight_per_pkg_kg": 264.0,
-          "measurement_per_pkg_m3": 1.754325,
-          "measurement_total_m3": 7.017,
-          "net_weight_total_kg": 796.0,
-          "gross_weight_total_kg": 1.056,
-          "evidence_row": "22 - 25 4 CARTONS @199 @264 1.754325 7.017",
-          "evidence_totals": "796 1,056"
+          "no": "22 - 25",
+          "packages": 4,
+          "net_weight_kg": 796.0,
+          "gross_weight_kg": 1056.0,
+          "m3_total": 7017.0,
+          "raw_line": "22 - 25 4 CARTONS @199 @264 1.754325 7.017",
+          "raw_weights_line": "796 1,056"
         },
         {
           "model": "DF200TX",
-          "carton_range": "29-31",
-          "cartons": 3,
-          "net_weight_per_pkg_kg": 302.0,
-          "gross_weight_per_pkg_kg": 367.0,
-          "measurement_per_pkg_m3": 1.91535,
-          "measurement_total_m3": 5.746,
-          "net_weight_total_kg": 906.0,
-          "gross_weight_total_kg": 1.101,
-          "evidence_row": "29 - 31 3 CARTONS @302 @367 1.915350 5.746",
-          "evidence_totals": "906 1,101"
+          "no": "29 - 31",
+          "packages": 3,
+          "net_weight_kg": 906.0,
+          "gross_weight_kg": 1101.0,
+          "m3_total": 5746.0,
+          "raw_line": "29 - 31 3 CARTONS @302 @367 1.915350 5.746",
+          "raw_weights_line": "906 1,101"
         },
         {
           "model": "DF200ZX",
-          "carton_range": "32-33",
-          "cartons": 2,
-          "net_weight_per_pkg_kg": 298.0,
-          "gross_weight_per_pkg_kg": 363.0,
-          "measurement_per_pkg_m3": 1.91535,
-          "measurement_total_m3": 3.831,
-          "net_weight_total_kg": 596.0,
-          "gross_weight_total_kg": 726.0,
-          "evidence_row": "32 - 33 2 CARTONS @298 @363 1.915350 3.831",
-          "evidence_totals": "596 726"
+          "no": "32 - 33",
+          "packages": 2,
+          "net_weight_kg": 596.0,
+          "gross_weight_kg": 726.0,
+          "m3_total": 3831.0,
+          "raw_line": "32 - 33 2 CARTONS @298 @363 1.915350 3.831",
+          "raw_weights_line": "596 726"
         },
         {
           "model": "DF250TX",
-          "carton_range": "7-10",
-          "cartons": 4,
-          "net_weight_per_pkg_kg": 307.0,
-          "gross_weight_per_pkg_kg": 372.0,
-          "measurement_per_pkg_m3": 1.91535,
-          "measurement_total_m3": 7.661,
-          "net_weight_total_kg": 1.228,
-          "gross_weight_total_kg": 1.488,
-          "evidence_row": "7 - 10 4 CARTONS @307 @372 1.915350 7.661",
-          "evidence_totals": "1,228 1,488"
+          "no": "7 - 10",
+          "packages": 4,
+          "net_weight_kg": 1228.0,
+          "gross_weight_kg": 1488.0,
+          "m3_total": 7661.0,
+          "raw_line": "7 - 10 4 CARTONS @307 @372 1.915350 7.661",
+          "raw_weights_line": "1,228 1,488"
         },
         {
           "model": "DF300APX",
-          "carton_range": "11-12",
-          "cartons": 2,
-          "net_weight_per_pkg_kg": 318.0,
-          "gross_weight_per_pkg_kg": 383.0,
-          "measurement_per_pkg_m3": 1.91535,
-          "measurement_total_m3": 3.831,
-          "net_weight_total_kg": 636.0,
-          "gross_weight_total_kg": 766.0,
-          "evidence_row": "11 - 12 2 CARTONS @318 @383 1.915350 3.831",
-          "evidence_totals": "636 766"
+          "no": "11 - 12",
+          "packages": 2,
+          "net_weight_kg": 636.0,
+          "gross_weight_kg": 766.0,
+          "m3_total": 3831.0,
+          "raw_line": "11 - 12 2 CARTONS @318 @383 1.915350 3.831",
+          "raw_weights_line": "636 766"
         },
         {
           "model": "DF100BTL",
-          "carton_range": "5-8",
-          "cartons": 4,
-          "net_weight_per_pkg_kg": 167.0,
-          "gross_weight_per_pkg_kg": 202.0,
-          "measurement_per_pkg_m3": 1.0846,
-          "measurement_total_m3": 4.338,
-          "net_weight_total_kg": 668.0,
-          "gross_weight_total_kg": 808.0,
-          "evidence_row": "5 - 8 4 CARTONS @167 @202 1.084600 4.338",
-          "evidence_totals": "668 808"
+          "no": "5 - 8",
+          "packages": 4,
+          "net_weight_kg": 668.0,
+          "gross_weight_kg": 808.0,
+          "m3_total": 4338.0,
+          "raw_line": "5 - 8 4 CARTONS @167 @202 1.084600 4.338",
+          "raw_weights_line": "668 808"
         },
         {
           "model": "DF250TX",
-          "carton_range": "1-2",
-          "cartons": 2,
-          "net_weight_per_pkg_kg": 307.0,
-          "gross_weight_per_pkg_kg": 372.0,
-          "measurement_per_pkg_m3": 1.91535,
-          "measurement_total_m3": 3.831,
-          "net_weight_total_kg": 614.0,
-          "gross_weight_total_kg": 744.0,
-          "evidence_row": "1 - 2 2 CARTONS @307 @372 1.915350 3.831",
-          "evidence_totals": "614 744"
+          "no": "1 - 2",
+          "packages": 2,
+          "net_weight_kg": 614.0,
+          "gross_weight_kg": 744.0,
+          "m3_total": 3831.0,
+          "raw_line": "1 - 2 2 CARTONS @307 @372 1.915350 3.831",
+          "raw_weights_line": "614 744"
+        },
+        {
+          "model": "DF300APXX",
+          "no": "5",
+          "packages": 1,
+          "net_weight_kg": 323.0,
+          "gross_weight_kg": 388.0,
+          "m3_total": 1915.0,
+          "raw_line": "5 1 CARTON @323 @388 1.915350 1.915",
+          "raw_weights_line": "323 388"
         }
       ],
       "evidence": [
         "19 - 21 3 CARTONS @199 @264 1.754325 5.263",
+        "597 792",
         "3 - 4 2 CARTONS @307 @372 1.915350 3.831",
+        "614 744",
         "16 - 21 6 CARTONS @167 @202 1.084600 6.508",
-        "22 - 25 4 CARTONS @199 @264 1.754325 7.017",
-        "29 - 31 3 CARTONS @302 @367 1.915350 5.746"
+        "1,002 1,212"
       ],
-      "method": "regex_items"
-    },
-    "net_weight_kg_total_calc": {
-      "present": true,
-      "required": false,
-      "value": 5429.23,
-      "evidence": [],
-      "method": "calculated_sum"
-    },
-    "gross_weight_kg_total_calc": {
-      "present": true,
-      "required": false,
-      "value": 4584.857,
-      "evidence": [],
-      "method": "calculated_sum"
+      "method": "table_parse"
     }
   },
   "missing_required_fields": [],

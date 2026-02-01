@@ -71,12 +71,6 @@ def digits_only(v: Any) -> str:
 
 
 def to_float(v: Any) -> Optional[float]:
-    """
-    Robust float parsing:
-    - "9,825.000" -> 9825.0
-    - "7,980.00" -> 7980.0
-    - "1,002" -> 1002.0
-    """
     if v is None:
         return None
     if isinstance(v, (int, float)):
@@ -90,36 +84,55 @@ def to_float(v: Any) -> Optional[float]:
     if not s:
         return None
 
-    last_comma = s.rfind(",")
-    last_dot = s.rfind(".")
+    # milhar com vírgula: 7,980 / 1,234,567
+    if re.fullmatch(r"-?\d{1,3}(,\d{3})+", s):
+        s = s.replace(",", "")
+        try:
+            return float(s)
+        except ValueError:
+            return None
 
-    if last_comma != -1 and last_dot != -1:
-        if last_comma > last_dot:
-            s = s.replace(".", "").replace(",", ".")
+    # milhar com vírgula + decimal com ponto: 7,980.00
+    if re.fullmatch(r"-?\d{1,3}(,\d{3})+(\.\d+)?", s):
+        s = s.replace(",", "")
+        try:
+            return float(s)
+        except ValueError:
+            return None
+
+    # milhar com ponto + decimal com vírgula: 7.980,00
+    if re.fullmatch(r"-?\d{1,3}(\.\d{3})+(,\d+)?", s):
+        s = s.replace(".", "").replace(",", ".")
+        try:
+            return float(s)
+        except ValueError:
+            return None
+
+    if "," in s and "." not in s:
+        left, right = s.split(",", 1)
+        if len(right) == 3 and len(left) <= 3:
+            s = left + right
         else:
-            s = s.replace(",", "")
+            s = left + "." + right
+
+    elif "." in s and "," not in s:
+        left, right = s.split(".", 1)
+        if len(right) == 3 and len(left) <= 3:
+            s = left + right
+
     else:
-        if "," in s and "." not in s:
-            groups = s.split(",")
-            if len(groups) >= 2 and all(g.isdigit() for g in groups):
-                if len(groups[-1]) == 3:
-                    s = "".join(groups)
-                else:
-                    s = s.replace(",", ".")
-            else:
-                s = s.replace(",", ".")
-        elif "." in s and s.count(".") > 1:
-            parts = s.split(".")
-            if len(parts[-1]) == 3:
-                s = "".join(parts)
-            else:
-                s = "".join(parts[:-1]) + "." + parts[-1]
+        # ambos: decide pelo último separador como decimal
+        last_comma = s.rfind(",")
+        last_dot = s.rfind(".")
+        if last_dot > last_comma:
+            s = s.replace(",", "")
+        else:
+            s = s.replace(".", "").replace(",", ".")
 
     try:
         return float(s)
     except ValueError:
         return None
-
 
 def num_close(a: float, b: float, abs_tol: float = 0.5, rel_tol: float = 0.01) -> bool:
     diff = abs(a - b)

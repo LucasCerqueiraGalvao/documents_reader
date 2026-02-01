@@ -1,7 +1,7 @@
 # Stage 04 Report — Importação
 - Gerado em: **2026-02-01T10:22:51**
 - Status final: **FAIL**
-- Motivos: missing_required_fields_em_algum_documento, divergencias_stage03=5
+- Motivos: divergencias_stage03=2
 
 ## Stage 01 — Qualidade da extração
 - Docs: 3 | all_direct: 2 | com OCR: 1
@@ -11,19 +11,17 @@
 
 ## Stage 02 — Campos (por documento)
 ### bl | BL.pdf
-- Severidade: **FAIL** (missing_required_fields=1)
-- Missing: shipper_name
-- Warnings: NCM/HS encontrado com 4 dígitos (8407). Pode ser HS (4/6) e não NCM completo (8).
-- Fields encontrados: 8 / 9
+- Severidade: **OK** (no_missing_no_warnings)
+- Fields encontrados: 5 / 5
 ### invoice | INVOICE.pdf
 - Severidade: **OK** (no_missing_no_warnings)
 - Fields encontrados: 14 / 16
 ### packing_list | PACKING LIST.pdf
 - Severidade: **OK** (no_missing_no_warnings)
-- Fields encontrados: 9 / 9
+- Fields encontrados: 8 / 8
 
 ## Stage 03 — Comparações
-- Total checks: 11 | matches: 6 | divergences: 5 | skipped: 0
+- Total checks: 11 | matches: 9 | divergences: 2 | skipped: 0
 
 ### Divergências
 - [pair] invoice_vs_packing | INVOICE.pdf <> PACKING LIST.pdf | ? | A=9825.0 | B=4584.857

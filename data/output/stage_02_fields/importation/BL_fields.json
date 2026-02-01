@@ -25,11 +25,11 @@
     "consignee_cnpj": {
       "present": true,
       "required": true,
-      "value": "03562381000603",
+      "value": "SUZUKI MOTOR CORPORATION",
       "evidence": [
         "fess) e\nGHANDI SECAF VEICU LOS LTDA. Received by the Carrier from the Shipper in apparent good order and condition unless otherwise indicated herein, the\nCNPJ: 03.562.381/0006-03 crncitons appearing onthe ave an wach of "
       ],
-      "method": "regex(cnpj)"
+      "method": "line_block"
     },
     "importer_name": {
       "present": true,
@@ -38,7 +38,7 @@
       "evidence": [
         "fess) e\nGHANDI SECAF VEICU LOS LTDA. Received by the Carrier from the Shipper in apparent good order and condition unless otherwise indicated herein, the\nCNPJ: 03.562.381/0006-03 c"
       ],
-      "method": "alias(consignee_name)"
+      "method": "line_block"
     },
     "importer_cnpj": {
       "present": true,
@@ -47,49 +47,27 @@
       "evidence": [
         "fess) e\nGHANDI SECAF VEICU LOS LTDA. Received by the Carrier from the Shipper in apparent good order and condition unless otherwise indicated herein, the\nCNPJ: 03.562.381/0006-03 crncitons appearing onthe ave an wach of "
       ],
-      "method": "alias(consignee_cnpj)"
+      "method": "regex"
     },
-    "freight_payment": {
+    "ncm": {
       "present": true,
       "required": true,
-      "value": "COLLECT",
+      "value": "8407",
       "evidence": [
-        "COLLECT"
+        "' NCM NO.8407"
       ],
-      "method": "regex(freight)"
+      "method": "regex"
     },
     "gross_weight_kg": {
       "present": true,
       "required": true,
       "value": 9825.0,
       "evidence": [
-        "... 9,825.000 KG ..."
+        "J MESBagsE 1 Peas ' 9,825.000 KG 53.772 M3"
       ],
-      "method": "regex(number+KG,max)"
-    },
-    "total_packages": {
-      "present": true,
-      "required": true,
-      "value": 33,
-      "evidence": [
-        "33"
-      ],
-      "method": "regex(packages)"
-    },
-    "ncm_or_hs_code": {
-      "present": true,
-      "required": true,
-      "value": "8407",
-      "evidence": [
-        "NCM/HS 8407"
-      ],
-      "method": "regex(ncm/hs)"
+      "method": "regex"
     }
   },
-  "missing_required_fields": [
-    "shipper_name"
-  ],
-  "warnings": [
-    "NCM/HS encontrado com 4 dígitos (8407). Pode ser HS (4/6) e não NCM completo (8)."
-  ]
+  "missing_required_fields": [],
+  "warnings": []
 }

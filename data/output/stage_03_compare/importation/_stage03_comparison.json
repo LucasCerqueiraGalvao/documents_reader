@@ -7,12 +7,8 @@
       "doc_kind": "bl",
       "original_file": "BL.pdf",
       "stage02_file": "BL_extracted.json",
-      "missing_required_fields": [
-        "shipper_name"
-      ],
-      "warnings": [
-        "NCM/HS encontrado com 4 dígitos (8407). Pode ser HS (4/6) e não NCM completo (8)."
-      ]
+      "missing_required_fields": [],
+      "warnings": []
     },
     {
       "doc_kind": "invoice",
@@ -32,8 +28,8 @@
   "summary": {
     "pair_checks": {
       "total": 11,
-      "matches": 6,
-      "divergences": 5,
+      "matches": 9,
+      "divergences": 2,
       "skipped": 0
     },
     "group_checks": {
@@ -53,7 +49,7 @@
       "check": "Invoice vs Packing reference number",
       "status": "match",
       "a_key_used": "invoice_number",
-      "b_key_used": "packing_list_number",
+      "b_key_used": "invoice_number",
       "a_value": "DN-24139",
       "b_value": "DN-24139-P",
       "note": "accepts trailing '-P' / 'P' on one side",
@@ -62,7 +58,7 @@
           "INVOICE NO. DN-24139"
         ],
         "b": [
-          "DN-24139-P"
+          "PACKING LIST NO. DN-24139-P P. 2"
         ]
       }
     },
@@ -71,7 +67,7 @@
       "check": "Consignee name",
       "status": "match",
       "a_key_used": "importer_name",
-      "b_key_used": "consignee_name",
+      "b_key_used": "importer_name",
       "a_value": "GHANDI SECAF VEICULOS LTDA.",
       "b_value": "GHANDI SECAF VEICULOS LTDA. AUG. 28,2025",
       "evidence": {
@@ -88,7 +84,7 @@
       "check": "Consignee CNPJ",
       "status": "match",
       "a_key_used": "importer_cnpj",
-      "b_key_used": "consignee_cnpj",
+      "b_key_used": "importer_cnpj",
       "a_value": "03562381000603",
       "b_value": "03562381000603",
       "a_digits": "03562381000603",
@@ -98,6 +94,7 @@
           "CNPJ: 03.562.381/0006-03"
         ],
         "b": [
+          "GHANDI SECAF VEICULOS LTDA. AUG. 28,2025",
           "CNPJ: 03.562.381/0006-03"
         ]
       }
@@ -105,11 +102,11 @@
     {
       "pair": "invoice_vs_packing | INVOICE.pdf <> PACKING LIST.pdf",
       "check": "Gross weight (kg)",
-      "status": "divergent",
+      "status": "match",
       "a_key_used": "gross_weight_kg",
-      "b_key_used": "gross_weight_kg_total_calc",
+      "b_key_used": "gross_weight_kg",
       "a_value": 9825.0,
-      "b_value": 4584.857,
+      "b_value": 9825.0,
       "tolerance": {
         "abs_tol": 1.0,
         "rel_tol": 0.01
@@ -118,17 +115,19 @@
         "a": [
           "GROSS WEIGHT: 9,825.00KGS"
         ],
-        "b": []
+        "b": [
+          "TOTAL : 33 CARTONS 7,980 9,825 53.772"
+        ]
       }
     },
     {
       "pair": "invoice_vs_packing | INVOICE.pdf <> PACKING LIST.pdf",
       "check": "Net weight (kg)",
-      "status": "divergent",
+      "status": "match",
       "a_key_used": "net_weight_kg",
-      "b_key_used": "net_weight_kg_total_calc",
+      "b_key_used": "net_weight_kg",
       "a_value": 7980.0,
-      "b_value": 5429.23,
+      "b_value": 7980.0,
       "tolerance": {
         "abs_tol": 1.0,
         "rel_tol": 0.01
@@ -137,7 +136,9 @@
         "a": [
           "NET WEIGHT: 7,980.00KGS"
         ],
-        "b": []
+        "b": [
+          "TOTAL : 33 CARTONS 7,980 9,825 53.772"
+        ]
       }
     },
     {
@@ -145,7 +146,7 @@
       "check": "Consignee name",
       "status": "divergent",
       "a_key_used": "importer_name",
-      "b_key_used": "consignee_name",
+      "b_key_used": "importer_name",
       "a_value": "GHANDI SECAF VEICULOS LTDA.",
       "b_value": "FESS) E",
       "evidence": {
@@ -162,7 +163,7 @@
       "check": "Consignee CNPJ",
       "status": "match",
       "a_key_used": "importer_cnpj",
-      "b_key_used": "consignee_cnpj",
+      "b_key_used": "importer_cnpj",
       "a_value": "03562381000603",
       "b_value": "03562381000603",
       "a_digits": "03562381000603",
@@ -193,7 +194,7 @@
           "GROSS WEIGHT: 9,825.00KGS"
         ],
         "b": [
-          "... 9,825.000 KG ..."
+          "J MESBagsE 1 Peas ' 9,825.000 KG 53.772 M3"
         ]
       }
     },
@@ -201,8 +202,8 @@
       "pair": "packing_vs_bl | PACKING LIST.pdf <> BL.pdf",
       "check": "Consignee name",
       "status": "divergent",
-      "a_key_used": "consignee_name",
-      "b_key_used": "consignee_name",
+      "a_key_used": "importer_name",
+      "b_key_used": "importer_name",
       "a_value": "GHANDI SECAF VEICULOS LTDA. AUG. 28,2025",
       "b_value": "FESS) E",
       "evidence": {
@@ -218,14 +219,15 @@
       "pair": "packing_vs_bl | PACKING LIST.pdf <> BL.pdf",
       "check": "Consignee CNPJ",
       "status": "match",
-      "a_key_used": "consignee_cnpj",
-      "b_key_used": "consignee_cnpj",
+      "a_key_used": "importer_cnpj",
+      "b_key_used": "importer_cnpj",
       "a_value": "03562381000603",
       "b_value": "03562381000603",
       "a_digits": "03562381000603",
       "b_digits": "03562381000603",
       "evidence": {
         "a": [
+          "GHANDI SECAF VEICULOS LTDA. AUG. 28,2025",
           "CNPJ: 03.562.381/0006-03"
         ],
         "b": [
@@ -236,19 +238,21 @@
     {
       "pair": "packing_vs_bl | PACKING LIST.pdf <> BL.pdf",
       "check": "Gross weight (kg)",
-      "status": "divergent",
-      "a_key_used": "gross_weight_kg_total_calc",
+      "status": "match",
+      "a_key_used": "gross_weight_kg",
       "b_key_used": "gross_weight_kg",
-      "a_value": 4584.857,
+      "a_value": 9825.0,
       "b_value": 9825.0,
       "tolerance": {
         "abs_tol": 1.0,
         "rel_tol": 0.01
       },
       "evidence": {
-        "a": [],
+        "a": [
+          "TOTAL : 33 CARTONS 7,980 9,825 53.772"
+        ],
         "b": [
-          "... 9,825.000 KG ..."
+          "J MESBagsE 1 Peas ' 9,825.000 KG 53.772 M3"
         ]
       }
     }
@@ -257,7 +261,7 @@
     {
       "group_check": "shipper_exporter_equal_across_invoice_packing_bl",
       "status": "missing",
-      "reason": "missing_in: BL.pdf",
+      "reason": "missing_in: PACKING LIST.pdf",
       "items": [
         {
           "doc": "INVOICE.pdf",
@@ -271,18 +275,18 @@
         {
           "doc": "PACKING LIST.pdf",
           "doc_kind": "packing_list",
-          "key_used": "shipper_name",
-          "value": "SUZUKI OUTBOARD MOTORS",
-          "evidence": [
-            "SUZUKI OUTBOARD MOTORS"
-          ]
+          "key_used": null,
+          "value": null,
+          "evidence": []
         },
         {
           "doc": "BL.pdf",
           "doc_kind": "bl",
-          "key_used": null,
-          "value": null,
-          "evidence": []
+          "key_used": "shipper_name",
+          "value": "SUZUKI MOTOR CORPORATION",
+          "evidence": [
+            "SUZUKI MOTOR CORPORATION 258255821A"
+          ]
         }
       ]
     },
@@ -304,17 +308,18 @@
         {
           "doc": "PACKING LIST.pdf",
           "doc_kind": "packing_list",
-          "key_used": "consignee_cnpj",
+          "key_used": "importer_cnpj",
           "value": "03562381000603",
           "digits": "03562381000603",
           "evidence": [
+            "GHANDI SECAF VEICULOS LTDA. AUG. 28,2025",
             "CNPJ: 03.562.381/0006-03"
           ]
         },
         {
           "doc": "BL.pdf",
           "doc_kind": "bl",
-          "key_used": "consignee_cnpj",
+          "key_used": "importer_cnpj",
           "value": "03562381000603",
           "digits": "03562381000603",
           "evidence": [

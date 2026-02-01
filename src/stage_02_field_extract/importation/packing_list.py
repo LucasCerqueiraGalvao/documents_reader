@@ -1,4 +1,19 @@
-# packing_list.py
+# -*- coding: utf-8 -*-
+"""
+Stage 02 - Importation - Packing List field extraction (stdlib only)
+
+Fixes:
+- aceita "CARTON" (singular) e "CARTONS" (plural)
+- aceita "No." como 1 número ("5") ou range ("19 - 21")
+- captura a linha final "* MODEL: DF300APXX" + "5 1 CARTON ..." + pesos "323 388"
+- soma e compara com TOTAL; só gera warning se realmente divergir
+
+Return signature:
+    fields_dict, missing_required_fields, warnings
+"""
+
+from __future__ import annotations
+
 import re
 
 try:
@@ -81,10 +96,12 @@ def extract_packing_list_fields(text: str):
     items = []
     i = 0
     while i < len(lines):
-        line = lines[i].strip()
-        m_model = RE_MODEL.match(line)
+        ln = lines[i]
+
+        # model marker
+        m_model = re.search(r"\*\s*MODEL\s*:\s*([A-Z0-9\-]+)", ln, flags=re.I)
         if m_model:
-            current_model = m_model.group(1)
+            current_model = m_model.group(1).strip()
             i += 1
             continue
 
@@ -154,4 +171,4 @@ def extract_packing_list_fields(text: str):
         has_totals, False, gross_sum if has_totals else None, [], "calculated_sum"
     )
 
-    return fields, warnings
+    return fields, missing, warnings

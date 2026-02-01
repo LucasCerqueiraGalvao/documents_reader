@@ -9,8 +9,7 @@
   "overall": {
     "status": "FAIL",
     "reasons": [
-      "missing_required_fields_em_algum_documento",
-      "divergencias_stage03=5"
+      "divergencias_stage03=2"
     ]
   },
   "stage01_quality": {
@@ -76,17 +75,13 @@
         "doc_kind": "bl",
         "original_file": "BL.pdf",
         "stage01_file": "BL_extracted.json",
-        "missing_required_fields": [
-          "shipper_name"
-        ],
-        "warnings": [
-          "NCM/HS encontrado com 4 dígitos (8407). Pode ser HS (4/6) e não NCM completo (8)."
-        ],
-        "fields_present_count": 8,
-        "fields_total_count": 9,
+        "missing_required_fields": [],
+        "warnings": [],
+        "fields_present_count": 5,
+        "fields_total_count": 5,
         "severity": {
-          "level": "FAIL",
-          "reason": "missing_required_fields=1"
+          "level": "OK",
+          "reason": "no_missing_no_warnings"
         }
       },
       {
@@ -110,8 +105,8 @@
         "stage01_file": "PACKING LIST_extracted.json",
         "missing_required_fields": [],
         "warnings": [],
-        "fields_present_count": 9,
-        "fields_total_count": 9,
+        "fields_present_count": 8,
+        "fields_total_count": 8,
         "severity": {
           "level": "OK",
           "reason": "no_missing_no_warnings"
@@ -122,68 +117,24 @@
   "stage03": {
     "summary": {
       "total": 11,
-      "matches": 6,
-      "divergences": 5,
+      "matches": 9,
+      "divergences": 2,
       "skipped": 0
     },
     "counts": {
-      "matches": 6,
-      "divergent": 5,
+      "matches": 9,
+      "divergent": 2,
       "skipped": 0
     }
   },
   "lists": {
     "divergent": [
       {
-        "pair": "invoice_vs_packing | INVOICE.pdf <> PACKING LIST.pdf",
-        "check": "Gross weight (kg)",
-        "status": "divergent",
-        "a_key_used": "gross_weight_kg",
-        "b_key_used": "gross_weight_kg_total_calc",
-        "a_value": 9825.0,
-        "b_value": 4584.857,
-        "tolerance": {
-          "abs_tol": 1.0,
-          "rel_tol": 0.01
-        },
-        "evidence": {
-          "a": [
-            "GROSS WEIGHT: 9,825.00KGS"
-          ],
-          "b": []
-        },
-        "bucket": "pair",
-        "evidence_a": "GROSS WEIGHT: 9,825.00KGS",
-        "evidence_b": ""
-      },
-      {
-        "pair": "invoice_vs_packing | INVOICE.pdf <> PACKING LIST.pdf",
-        "check": "Net weight (kg)",
-        "status": "divergent",
-        "a_key_used": "net_weight_kg",
-        "b_key_used": "net_weight_kg_total_calc",
-        "a_value": 7980.0,
-        "b_value": 5429.23,
-        "tolerance": {
-          "abs_tol": 1.0,
-          "rel_tol": 0.01
-        },
-        "evidence": {
-          "a": [
-            "NET WEIGHT: 7,980.00KGS"
-          ],
-          "b": []
-        },
-        "bucket": "pair",
-        "evidence_a": "NET WEIGHT: 7,980.00KGS",
-        "evidence_b": ""
-      },
-      {
         "pair": "invoice_vs_bl | INVOICE.pdf <> BL.pdf",
         "check": "Consignee name",
         "status": "divergent",
         "a_key_used": "importer_name",
-        "b_key_used": "consignee_name",
+        "b_key_used": "importer_name",
         "a_value": "GHANDI SECAF VEICULOS LTDA.",
         "b_value": "FESS) E",
         "evidence": {
@@ -202,8 +153,8 @@
         "pair": "packing_vs_bl | PACKING LIST.pdf <> BL.pdf",
         "check": "Consignee name",
         "status": "divergent",
-        "a_key_used": "consignee_name",
-        "b_key_used": "consignee_name",
+        "a_key_used": "importer_name",
+        "b_key_used": "importer_name",
         "a_value": "GHANDI SECAF VEICULOS LTDA. AUG. 28,2025",
         "b_value": "FESS) E",
         "evidence": {
@@ -248,7 +199,7 @@
         "check": "Invoice vs Packing reference number",
         "status": "match",
         "a_key_used": "invoice_number",
-        "b_key_used": "packing_list_number",
+        "b_key_used": "invoice_number",
         "a_value": "DN-24139",
         "b_value": "DN-24139-P",
         "note": "accepts trailing '-P' / 'P' on one side",
@@ -257,19 +208,19 @@
             "INVOICE NO. DN-24139"
           ],
           "b": [
-            "DN-24139-P"
+            "PACKING LIST NO. DN-24139-P P. 2"
           ]
         },
         "bucket": "pair",
         "evidence_a": "INVOICE NO. DN-24139",
-        "evidence_b": "DN-24139-P"
+        "evidence_b": "PACKING LIST NO. DN-24139-P P. 2"
       },
       {
         "pair": "invoice_vs_packing | INVOICE.pdf <> PACKING LIST.pdf",
         "check": "Consignee name",
         "status": "match",
         "a_key_used": "importer_name",
-        "b_key_used": "consignee_name",
+        "b_key_used": "importer_name",
         "a_value": "GHANDI SECAF VEICULOS LTDA.",
         "b_value": "GHANDI SECAF VEICULOS LTDA. AUG. 28,2025",
         "evidence": {
@@ -289,7 +240,7 @@
         "check": "Consignee CNPJ",
         "status": "match",
         "a_key_used": "importer_cnpj",
-        "b_key_used": "consignee_cnpj",
+        "b_key_used": "importer_cnpj",
         "a_value": "03562381000603",
         "b_value": "03562381000603",
         "a_digits": "03562381000603",
@@ -299,19 +250,68 @@
             "CNPJ: 03.562.381/0006-03"
           ],
           "b": [
+            "GHANDI SECAF VEICULOS LTDA. AUG. 28,2025",
             "CNPJ: 03.562.381/0006-03"
           ]
         },
         "bucket": "pair",
         "evidence_a": "CNPJ: 03.562.381/0006-03",
-        "evidence_b": "CNPJ: 03.562.381/0006-03"
+        "evidence_b": "GHANDI SECAF VEICULOS LTDA. AUG. 28,2025"
+      },
+      {
+        "pair": "invoice_vs_packing | INVOICE.pdf <> PACKING LIST.pdf",
+        "check": "Gross weight (kg)",
+        "status": "match",
+        "a_key_used": "gross_weight_kg",
+        "b_key_used": "gross_weight_kg",
+        "a_value": 9825.0,
+        "b_value": 9825.0,
+        "tolerance": {
+          "abs_tol": 1.0,
+          "rel_tol": 0.01
+        },
+        "evidence": {
+          "a": [
+            "GROSS WEIGHT: 9,825.00KGS"
+          ],
+          "b": [
+            "TOTAL : 33 CARTONS 7,980 9,825 53.772"
+          ]
+        },
+        "bucket": "pair",
+        "evidence_a": "GROSS WEIGHT: 9,825.00KGS",
+        "evidence_b": "TOTAL : 33 CARTONS 7,980 9,825 53.772"
+      },
+      {
+        "pair": "invoice_vs_packing | INVOICE.pdf <> PACKING LIST.pdf",
+        "check": "Net weight (kg)",
+        "status": "match",
+        "a_key_used": "net_weight_kg",
+        "b_key_used": "net_weight_kg",
+        "a_value": 7980.0,
+        "b_value": 7980.0,
+        "tolerance": {
+          "abs_tol": 1.0,
+          "rel_tol": 0.01
+        },
+        "evidence": {
+          "a": [
+            "NET WEIGHT: 7,980.00KGS"
+          ],
+          "b": [
+            "TOTAL : 33 CARTONS 7,980 9,825 53.772"
+          ]
+        },
+        "bucket": "pair",
+        "evidence_a": "NET WEIGHT: 7,980.00KGS",
+        "evidence_b": "TOTAL : 33 CARTONS 7,980 9,825 53.772"
       },
       {
         "pair": "invoice_vs_bl | INVOICE.pdf <> BL.pdf",
         "check": "Consignee CNPJ",
         "status": "match",
         "a_key_used": "importer_cnpj",
-        "b_key_used": "consignee_cnpj",
+        "b_key_used": "importer_cnpj",
         "a_value": "03562381000603",
         "b_value": "03562381000603",
         "a_digits": "03562381000603",
@@ -345,25 +345,26 @@
             "GROSS WEIGHT: 9,825.00KGS"
           ],
           "b": [
-            "... 9,825.000 KG ..."
+            "J MESBagsE 1 Peas ' 9,825.000 KG 53.772 M3"
           ]
         },
         "bucket": "pair",
         "evidence_a": "GROSS WEIGHT: 9,825.00KGS",
-        "evidence_b": "... 9,825.000 KG ..."
+        "evidence_b": "J MESBagsE 1 Peas ' 9,825.000 KG 53.772 M3"
       },
       {
         "pair": "packing_vs_bl | PACKING LIST.pdf <> BL.pdf",
         "check": "Consignee CNPJ",
         "status": "match",
-        "a_key_used": "consignee_cnpj",
-        "b_key_used": "consignee_cnpj",
+        "a_key_used": "importer_cnpj",
+        "b_key_used": "importer_cnpj",
         "a_value": "03562381000603",
         "b_value": "03562381000603",
         "a_digits": "03562381000603",
         "b_digits": "03562381000603",
         "evidence": {
           "a": [
+            "GHANDI SECAF VEICULOS LTDA. AUG. 28,2025",
             "CNPJ: 03.562.381/0006-03"
           ],
           "b": [

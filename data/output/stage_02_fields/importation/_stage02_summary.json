@@ -9,12 +9,8 @@
       "original_file": "BL.pdf",
       "stage01_file": "BL_extracted.json",
       "stage02_file": "BL_fields.json",
-      "missing_required_fields": [
-        "shipper_name"
-      ],
-      "warnings": [
-        "NCM/HS encontrado com 4 dígitos (8407). Pode ser HS (4/6) e não NCM completo (8)."
-      ]
+      "missing_required_fields": [],
+      "warnings": []
     },
     {
       "doc_kind": "invoice",
