@@ -1,20 +1,16 @@
 {
-  "generated_at": "2026-01-30T01:48:38",
+  "generated_at": "2026-02-01T14:14:20",
   "flow": "importation",
-  "input_folder": "C:\\Users\\lucas\\Documents\\Projects\\professional\\Documents Reader\\data\\output\\stage_01_text\\importation",
-  "output_folder": "C:\\Users\\lucas\\Documents\\Projects\\professional\\Documents Reader\\data\\output\\stage_02_fields\\importation",
+  "input_folder": "C:\\Users\\lucas\\Documents\\Projects\\professional\\documents_reader\\data\\output\\stage_01_text\\importation",
+  "output_folder": "C:\\Users\\lucas\\Documents\\Projects\\professional\\documents_reader\\data\\output\\stage_02_fields\\importation",
   "documents": [
     {
       "doc_kind": "bl",
       "original_file": "BL.pdf",
       "stage01_file": "BL_extracted.json",
       "stage02_file": "BL_fields.json",
-      "missing_required_fields": [
-        "shipper_name"
-      ],
-      "warnings": [
-        "NCM/HS encontrado com 4 dígitos (8407). Pode ser HS (4/6) e não NCM completo (8)."
-      ]
+      "missing_required_fields": [],
+      "warnings": []
     },
     {
       "doc_kind": "invoice",

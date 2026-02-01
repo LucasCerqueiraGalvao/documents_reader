@@ -4,92 +4,55 @@
     "original_file": "BL.pdf",
     "doc_kind": "bl"
   },
-  "generated_at": "2026-01-30T01:48:38",
+  "generated_at": "2026-02-01T14:14:20",
   "fields": {
     "shipper_name": {
-      "present": false,
-      "required": true,
-      "value": null,
-      "evidence": [],
-      "method": "block(shipper)"
-    },
-    "consignee_name": {
       "present": true,
       "required": true,
-      "value": "FESS) R",
+      "value": "SUZUKI MOTOR CORPORATION",
       "evidence": [
-        "fess) r\nGHANDI SECAF VEICU LOS LTDA. Received by the Carrier from the Shipper in apparent good order and condition unless otherwise indicated herein, the\nCNPJ: 03.562.381/0006-03 c"
+        "SUZUKI MOTOR CORPORATION 258255821A"
       ],
-      "method": "block(consignee)"
-    },
-    "consignee_cnpj": {
-      "present": true,
-      "required": true,
-      "value": "03562381000603",
-      "evidence": [
-        "fess) r\nGHANDI SECAF VEICU LOS LTDA. Received by the Carrier from the Shipper in apparent good order and condition unless otherwise indicated herein, the\nCNPJ: 03.562.381/0006-03 conor appearing onthe face an back of hs "
-      ],
-      "method": "regex(cnpj)"
+      "method": "line_block"
     },
     "importer_name": {
       "present": true,
       "required": true,
-      "value": "FESS) R",
+      "value": "GHANDI SECAF VEICU LOS LTDA. Received by the Carrier from the Shipper in apparent good order and condition unless otherwise indicated herein, the",
       "evidence": [
-        "fess) r\nGHANDI SECAF VEICU LOS LTDA. Received by the Carrier from the Shipper in apparent good order and condition unless otherwise indicated herein, the\nCNPJ: 03.562.381/0006-03 c"
+        "GHANDI SECAF VEICU LOS LTDA. Received by the Carrier from the Shipper in apparent good order and condition unless otherwise indicated herein, the"
       ],
-      "method": "alias(consignee_name)"
+      "method": "line_block"
     },
     "importer_cnpj": {
       "present": true,
       "required": true,
       "value": "03562381000603",
       "evidence": [
-        "fess) r\nGHANDI SECAF VEICU LOS LTDA. Received by the Carrier from the Shipper in apparent good order and condition unless otherwise indicated herein, the\nCNPJ: 03.562.381/0006-03 conor appearing onthe face an back of hs "
+        "GHANDI SECAF VEICU LOS LTDA. Received by the Carrier from the Shipper in apparent good order and condition unless otherwise indicated herein, the",
+        "CNPJ: 03.562.381/0006-03 conor appearing onthe face an back of hs Bil ef Ladng bythe vesse named herein or any substue othe Case\""
       ],
-      "method": "alias(consignee_cnpj)"
+      "method": "regex"
     },
-    "freight_payment": {
+    "ncm": {
       "present": true,
       "required": true,
-      "value": "COLLECT",
+      "value": "8407",
       "evidence": [
-        "COLLECT"
+        "' NCM NO.8407"
       ],
-      "method": "regex(freight)"
+      "method": "regex"
     },
     "gross_weight_kg": {
       "present": true,
       "required": true,
       "value": 9825.0,
       "evidence": [
-        "... 9,825.000 KG ..."
+        "J MESBagsE 1 Peas ' 9,825.000 KG 53.772 M3"
       ],
-      "method": "regex(number+KG,max)"
-    },
-    "total_packages": {
-      "present": true,
-      "required": true,
-      "value": 33,
-      "evidence": [
-        "33"
-      ],
-      "method": "regex(packages)"
-    },
-    "ncm_or_hs_code": {
-      "present": true,
-      "required": true,
-      "value": "8407",
-      "evidence": [
-        "NCM/HS 8407"
-      ],
-      "method": "regex(ncm/hs)"
+      "method": "regex"
     }
   },
-  "missing_required_fields": [
-    "shipper_name"
-  ],
-  "warnings": [
-    "NCM/HS encontrado com 4 dígitos (8407). Pode ser HS (4/6) e não NCM completo (8)."
-  ]
+  "missing_required_fields": [],
+  "warnings": []
 }
