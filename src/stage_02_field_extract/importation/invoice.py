@@ -1,9 +1,26 @@
 # invoice.py
 import re
-from common import (
-    build_field, find_first, find_all, find_cnpj, find_company_line_before_cnpj,
-    parse_mixed_number, find_incoterm
-)
+
+try:
+    from .common import (
+        build_field,
+        find_first,
+        find_all,
+        find_cnpj,
+        find_company_line_before_cnpj,
+        parse_mixed_number,
+        find_incoterm,
+    )
+except ImportError:  # pragma: no cover
+    from common import (
+        build_field,
+        find_first,
+        find_all,
+        find_cnpj,
+        find_company_line_before_cnpj,
+        parse_mixed_number,
+        find_incoterm,
+    )
 
 RE_INVOICE_NO = re.compile(r"(?is)\bINVOICE\s*NO\.?\s*[:\-]?\s*([A-Z0-9\-\/]+)\b")
 RE_ANY_DOC_NO = re.compile(r"(?is)\b([A-Z]{1,4}-\d{3,8})\b")  # fallback tipo DN-24139

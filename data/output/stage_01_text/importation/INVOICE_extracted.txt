@@ -1,5 +1,5 @@
 FILE: INVOICE.pdf
-TESSERACT: C:\Program Files\Tesseract-OCR\tesseract.exe
+TESSERACT: /opt/homebrew/bin/tesseract
 ==== EXTRACTED TEXT ====
 
 --- PAGE 001 | method=direct | chars=1184 ---

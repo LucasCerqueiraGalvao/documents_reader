@@ -1,6 +1,22 @@
 # packing_list.py
 import re
-from common import build_field, find_first, find_cnpj, find_company_line_before_cnpj, parse_mixed_number
+
+try:
+    from .common import (
+        build_field,
+        find_first,
+        find_cnpj,
+        find_company_line_before_cnpj,
+        parse_mixed_number,
+    )
+except ImportError:  # pragma: no cover
+    from common import (
+        build_field,
+        find_first,
+        find_cnpj,
+        find_company_line_before_cnpj,
+        parse_mixed_number,
+    )
 
 RE_ANY_DOC_NO = re.compile(r"(?is)\b([A-Z]{1,4}-\d{3,8}(?:-P)?)\b")  # DN-24139-P
 RE_TOTAL_UNITS_CARTONS = re.compile(r"(?is)\b(\d+)\s+UNITS?\s*/\s*(\d+)\s+CARTONS?\b")

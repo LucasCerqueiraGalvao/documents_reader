@@ -1,6 +1,6 @@
 {
   "file": "PACKING LIST.pdf",
-  "tesseract": "C:\\Program Files\\Tesseract-OCR\\tesseract.exe",
+  "tesseract": "/opt/homebrew/bin/tesseract",
   "pages": [
     {
       "page": 1,

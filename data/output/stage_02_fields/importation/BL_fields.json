@@ -4,7 +4,7 @@
     "original_file": "BL.pdf",
     "doc_kind": "bl"
   },
-  "generated_at": "2026-01-30T01:48:38",
+  "generated_at": "2026-02-01T10:22:51",
   "fields": {
     "shipper_name": {
       "present": false,
@@ -16,9 +16,9 @@
     "consignee_name": {
       "present": true,
       "required": true,
-      "value": "FESS) R",
+      "value": "FESS) E",
       "evidence": [
-        "fess) r\nGHANDI SECAF VEICU LOS LTDA. Received by the Carrier from the Shipper in apparent good order and condition unless otherwise indicated herein, the\nCNPJ: 03.562.381/0006-03 c"
+        "fess) e\nGHANDI SECAF VEICU LOS LTDA. Received by the Carrier from the Shipper in apparent good order and condition unless otherwise indicated herein, the\nCNPJ: 03.562.381/0006-03 c"
       ],
       "method": "block(consignee)"
     },
@@ -27,16 +27,16 @@
       "required": true,
       "value": "03562381000603",
       "evidence": [
-        "fess) r\nGHANDI SECAF VEICU LOS LTDA. Received by the Carrier from the Shipper in apparent good order and condition unless otherwise indicated herein, the\nCNPJ: 03.562.381/0006-03 conor appearing onthe face an back of hs "
+        "fess) e\nGHANDI SECAF VEICU LOS LTDA. Received by the Carrier from the Shipper in apparent good order and condition unless otherwise indicated herein, the\nCNPJ: 03.562.381/0006-03 crncitons appearing onthe ave an wach of "
       ],
       "method": "regex(cnpj)"
     },
     "importer_name": {
       "present": true,
       "required": true,
-      "value": "FESS) R",
+      "value": "FESS) E",
       "evidence": [
-        "fess) r\nGHANDI SECAF VEICU LOS LTDA. Received by the Carrier from the Shipper in apparent good order and condition unless otherwise indicated herein, the\nCNPJ: 03.562.381/0006-03 c"
+        "fess) e\nGHANDI SECAF VEICU LOS LTDA. Received by the Carrier from the Shipper in apparent good order and condition unless otherwise indicated herein, the\nCNPJ: 03.562.381/0006-03 c"
       ],
       "method": "alias(consignee_name)"
     },
@@ -45,7 +45,7 @@
       "required": true,
       "value": "03562381000603",
       "evidence": [
-        "fess) r\nGHANDI SECAF VEICU LOS LTDA. Received by the Carrier from the Shipper in apparent good order and condition unless otherwise indicated herein, the\nCNPJ: 03.562.381/0006-03 conor appearing onthe face an back of hs "
+        "fess) e\nGHANDI SECAF VEICU LOS LTDA. Received by the Carrier from the Shipper in apparent good order and condition unless otherwise indicated herein, the\nCNPJ: 03.562.381/0006-03 crncitons appearing onthe ave an wach of "
       ],
       "method": "alias(consignee_cnpj)"
     },

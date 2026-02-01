@@ -190,6 +190,20 @@ ipcRenderer.on('process-documents', async (event, files) => {
 - **Stage 03**: `_stage03_comparison.json`
 - **Stage 04**: `_stage04_report.json`, `_stage04_report.html`, `_stage04_report.md`
 
+## Electron App
+
+Working desktop UI is available at [examples/electron_app](examples/electron_app).
+
+Run:
+
+```bash
+cd examples/electron_app
+npm install
+npm start
+```
+
+Build (Windows/Linux/macOS): see [examples/electron_app/README.md](examples/electron_app/README.md).
+
 ## Document Types Supported
 
 - **Invoice** (Commercial Invoice)

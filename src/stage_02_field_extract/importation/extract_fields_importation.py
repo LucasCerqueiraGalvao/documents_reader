@@ -17,9 +17,16 @@ from pathlib import Path
 from typing import Any, Dict, List, Tuple
 
 # imports locais (arquivos na mesma pasta)
-from invoice import extract_invoice_fields
-from packing_list import extract_packing_list_fields
-from bl import extract_bl_fields
+# - Quando roda como script: `python extract_fields_importation.py` (imports diretos)
+# - Quando roda via pipeline (import como módulo): imports relativos
+try:
+    from .invoice import extract_invoice_fields
+    from .packing_list import extract_packing_list_fields
+    from .bl import extract_bl_fields
+except ImportError:  # pragma: no cover
+    from invoice import extract_invoice_fields
+    from packing_list import extract_packing_list_fields
+    from bl import extract_bl_fields
 
 
 def now_iso() -> str:
@@ -49,7 +56,11 @@ def join_pages(stage01_obj: dict) -> str:
 def detect_kind(original_file: str, full_text: str) -> str:
     name = (original_file or "").upper()
 
-    if "PACKING" in name or "PACKING LIST" in name or re_any(name, [" PL", " P.L", "ROMANEIO"]):
+    if (
+        "PACKING" in name
+        or "PACKING LIST" in name
+        or re_any(name, [" PL", " P.L", "ROMANEIO"])
+    ):
         return "packing_list"
     if "INVOICE" in name and "PACKING" not in name:
         return "invoice"
@@ -92,18 +103,16 @@ def unpack_extractor_result(res: Any) -> Tuple[Dict[str, Any], List[str], List[s
 
 
 def run_stage_02_extraction(
-    in_dir: Path,
-    out_dir: Path,
-    verbose: bool = True
+    in_dir: Path, out_dir: Path, verbose: bool = True
 ) -> Dict[str, Any]:
     """
     Execute Stage 02: Extract structured fields from text
-    
+
     Args:
         in_dir: Directory with Stage 01 *_extracted.json files
         out_dir: Output directory for field extraction results
         verbose: Print progress messages
-        
+
     Returns:
         Dictionary with processing results and warnings
     """
@@ -114,7 +123,7 @@ def run_stage_02_extraction(
         return {
             "processed_count": 0,
             "warnings": [f"No *_extracted.json files found in: {in_dir}"],
-            "documents": []
+            "documents": [],
         }
 
     summary_docs: List[dict] = []
@@ -154,19 +163,23 @@ def run_stage_02_extraction(
         out_path = out_dir / out_name
         write_json(out_path, out_obj)
 
-        summary_docs.append({
-            "doc_kind": doc_kind,
-            "original_file": original_file,
-            "stage01_file": p.name,
-            "stage02_file": out_name,
-            "missing_required_fields": missing_required_fields,
-            "warnings": warnings,
-        })
-        
+        summary_docs.append(
+            {
+                "doc_kind": doc_kind,
+                "original_file": original_file,
+                "stage01_file": p.name,
+                "stage02_file": out_name,
+                "missing_required_fields": missing_required_fields,
+                "warnings": warnings,
+            }
+        )
+
         all_warnings.extend(warnings)
 
         if verbose:
-            print(f"OK -> {out_name} | kind={doc_kind} | missing={len(missing_required_fields)} | warnings={len(warnings)}")
+            print(
+                f"OK -> {out_name} | kind={doc_kind} | missing={len(missing_required_fields)} | warnings={len(warnings)}"
+            )
 
     summary = {
         "generated_at": now_iso(),
@@ -176,27 +189,26 @@ def run_stage_02_extraction(
         "documents": summary_docs,
     }
     write_json(out_dir / "_stage02_summary.json", summary)
-    
+
     if verbose:
         print("Completed.")
-    
+
     return {
         "processed_count": len(summary_docs),
         "warnings": all_warnings,
-        "documents": summary_docs
+        "documents": summary_docs,
     }
 
 
 def main() -> None:
     ap = argparse.ArgumentParser()
     ap.add_argument("--in", dest="in_dir", required=True, help="Stage 01 text folder")
-    ap.add_argument("--out", dest="out_dir", required=True, help="Stage 02 fields output folder")
+    ap.add_argument(
+        "--out", dest="out_dir", required=True, help="Stage 02 fields output folder"
+    )
     args = ap.parse_args()
 
-    run_stage_02_extraction(
-        in_dir=Path(args.in_dir),
-        out_dir=Path(args.out_dir)
-    )
+    run_stage_02_extraction(in_dir=Path(args.in_dir), out_dir=Path(args.out_dir))
 
 
 if __name__ == "__main__":

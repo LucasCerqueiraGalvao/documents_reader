@@ -1,0 +1,79 @@
+{
+  "name": "documents-reader-electron",
+  "version": "0.1.0",
+  "private": true,
+  "description": "Electron UI for documents_reader pipeline",
+  "main": "src/main.js",
+  "scripts": {
+    "start": "electron .",
+    "start:dev": "ELECTRON_DISABLE_SECURITY_WARNINGS=true electron .",
+    "smoke": "node scripts/smoke.js",
+    "build:python": "node scripts/build-python-runner.js",
+    "smoke:python": "node scripts/smoke-python-runner.js",
+    "pack": "electron-builder --dir",
+    "dist:mac": "electron-builder --mac",
+    "dist:win": "electron-builder --win",
+    "dist:linux": "electron-builder --linux"
+  },
+  "devDependencies": {
+    "electron": "^30.0.0",
+    "electron-builder": "^24.13.3"
+  },
+  "build": {
+    "appId": "com.documentsreader.app",
+    "productName": "Documents Reader",
+    "directories": {
+      "output": "dist"
+    },
+    "files": [
+      "src/**",
+      "package.json",
+      "README.md"
+    ],
+    "mac": {
+      "extraResources": [
+        {
+          "from": "resources/python/mac",
+          "to": "python/mac"
+        },
+        {
+          "from": "resources/tesseract/mac",
+          "to": "tesseract/mac"
+        }
+      ],
+      "target": [
+        "dmg"
+      ]
+    },
+    "win": {
+      "extraResources": [
+        {
+          "from": "resources/python/win",
+          "to": "python/win"
+        },
+        {
+          "from": "resources/tesseract/win",
+          "to": "tesseract/win"
+        }
+      ],
+      "target": [
+        "nsis"
+      ]
+    },
+    "linux": {
+      "extraResources": [
+        {
+          "from": "resources/python/linux",
+          "to": "python/linux"
+        },
+        {
+          "from": "resources/tesseract/linux",
+          "to": "tesseract/linux"
+        }
+      ],
+      "target": [
+        "AppImage"
+      ]
+    }
+  }
+}

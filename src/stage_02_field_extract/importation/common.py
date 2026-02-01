@@ -2,6 +2,7 @@
 import json
 import re
 from pathlib import Path
+from typing import Optional, Tuple
 
 INCOTERMS = [
     "EXW","FCA","FAS","FOB","CFR","CIF","CPT","CIP","DAP","DPU","DDP","DAT"
@@ -42,7 +43,7 @@ def normalize_spaces(s: str) -> str:
 def digits_only(s: str) -> str:
     return re.sub(r"\D", "", s or "")
 
-def parse_mixed_number(s: str) -> float | None:
+def parse_mixed_number(s: str) -> Optional[float]:
     """
     Converte:
       9,825.000 -> 9825.0
@@ -81,7 +82,7 @@ def build_field(present: bool, required: bool, value, evidence: list[str], metho
         "method": method,
     }
 
-def find_first(regex: re.Pattern, text: str, group: int = 1) -> tuple[str | None, str | None]:
+def find_first(regex: re.Pattern, text: str, group: int = 1) -> Tuple[Optional[str], Optional[str]]:
     m = regex.search(text or "")
     if not m:
         return None, None
@@ -95,7 +96,7 @@ def find_all(regex: re.Pattern, text: str, group: int = 1) -> list[str]:
             out.append(g.strip())
     return out
 
-def find_company_line_before_cnpj(text: str) -> tuple[str | None, str | None]:
+def find_company_line_before_cnpj(text: str) -> Tuple[Optional[str], Optional[str]]:
     """
     Heurística simples e efetiva para seus docs:
     pega a linha imediatamente anterior ao 'CNPJ: ...'
@@ -111,14 +112,14 @@ def find_company_line_before_cnpj(text: str) -> tuple[str | None, str | None]:
                 return lines[j], lines[j]
     return None, None
 
-def find_cnpj(text: str) -> tuple[str | None, str | None]:
+def find_cnpj(text: str) -> Tuple[Optional[str], Optional[str]]:
     m = re.search(r"(?i)\bCNPJ\b\s*[:\-]?\s*([0-9\.\-\/]{11,20})", text or "")
     if not m:
         return None, None
     raw = m.group(1)
     return digits_only(raw), m.group(0)
 
-def find_incoterm(text: str) -> tuple[str | None, str | None]:
+def find_incoterm(text: str) -> Tuple[Optional[str], Optional[str]]:
     # aceita F.C.A. / F C A / FCA etc
     # primeiro tenta achar versões com pontos
     m = re.search(r"(?is)\bF\.?\s*C\.?\s*A\.?\b", text or "")

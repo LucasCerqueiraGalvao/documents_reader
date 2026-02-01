@@ -1,0 +1,5 @@
+#!/usr/bin/env bash
+set -euo pipefail
+
+# Convenience wrapper (so you can run ./scripts/run-electron)
+exec "$(dirname "$0")/run-electron.sh"

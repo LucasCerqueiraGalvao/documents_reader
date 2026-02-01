@@ -1,0 +1,56 @@
+<!doctype html>
+<html lang="pt-BR">
+  <head>
+    <meta charset="UTF-8" />
+    <meta http-equiv="Content-Security-Policy" content="default-src 'self'; style-src 'self' 'unsafe-inline'; script-src 'self'" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Documents Reader</title>
+    <link rel="stylesheet" href="styles.css" />
+  </head>
+  <body>
+    <header class="header">
+      <div>
+        <h1>Documents Reader</h1>
+        <p class="subtitle">Selecione ou arraste PDFs, escolha o tipo, e rode o pipeline.</p>
+        <p id="projectRoot" class="subtitle" style="margin-top:8px"></p>
+      </div>
+      <div class="actions">
+        <button id="btnProject" class="btn">Configurar Projeto</button>
+        <button id="btnPick" class="btn">Selecionar PDFs</button>
+        <button id="btnRun" class="btn btn-primary" disabled>Run</button>
+      </div>
+    </header>
+
+    <main class="main">
+      <section class="card">
+        <button id="dropzone" class="dropzone" type="button">
+          <div class="dropzone-title">Arraste & solte os PDFs aqui</div>
+          <div class="dropzone-hint">ou clique aqui para selecionar</div>
+        </button>
+
+        <div class="list-header">
+          <div>Arquivos</div>
+          <div class="muted">Tipo do documento (BL / INVOICE / PACKING LIST)</div>
+        </div>
+
+        <div id="fileList" class="file-list"></div>
+      </section>
+
+      <section class="card">
+        <div class="log-header">
+          <div>
+            <div class="label">Logs</div>
+            <div id="status" class="muted">Pronto.</div>
+            <div id="reportPath" class="muted report-path" style="display:none"></div>
+          </div>
+          <div>
+            <button id="btnOpenReport" class="btn" disabled>Abrir Report (Stage 4)</button>
+          </div>
+        </div>
+        <pre id="log" class="log"></pre>
+      </section>
+    </main>
+
+    <script src="renderer.js"></script>
+  </body>
+</html>

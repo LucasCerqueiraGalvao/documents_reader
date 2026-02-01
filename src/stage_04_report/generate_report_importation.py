@@ -32,6 +32,7 @@ from typing import Any, Dict, List, Optional, Tuple
 # Helpers
 # -----------------------------
 
+
 def now_iso() -> str:
     return datetime.now().strftime("%Y-%m-%dT%H:%M:%S")
 
@@ -106,24 +107,36 @@ def extract_stage01_quality(stage01_dir: Path) -> Dict[str, Any]:
         has_ocr = any(m.lower() == "ocr" for m in methods)
         all_direct = (len(methods) > 0) and all(m.lower() == "direct" for m in methods)
 
-        out["documents"].append({
-            "file": obj.get("file") or p.name.replace("_extracted.json", ".pdf"),
-            "extracted_json": p.name,
-            "pages": len(pages),
-            "methods": methods,
-            "chars_by_page": chars,
-            "has_ocr": has_ocr,
-            "all_direct": all_direct,
-        })
+        out["documents"].append(
+            {
+                "file": obj.get("file") or p.name.replace("_extracted.json", ".pdf"),
+                "extracted_json": p.name,
+                "pages": len(pages),
+                "methods": methods,
+                "chars_by_page": chars,
+                "has_ocr": has_ocr,
+                "all_direct": all_direct,
+            }
+        )
 
     out["summary"]["total_docs"] = len(out["documents"])
-    out["summary"]["docs_with_ocr_pages"] = sum(1 for d in out["documents"] if d["has_ocr"])
-    out["summary"]["docs_all_direct"] = sum(1 for d in out["documents"] if d["all_direct"])
+    out["summary"]["docs_with_ocr_pages"] = sum(
+        1 for d in out["documents"] if d["has_ocr"]
+    )
+    out["summary"]["docs_all_direct"] = sum(
+        1 for d in out["documents"] if d["all_direct"]
+    )
     return out
 
 
 def load_stage02_docs(stage02_dir: Path) -> List[dict]:
-    files = sorted([p for p in stage02_dir.glob("*_fields.json") if p.name != "_stage02_summary.json"])
+    files = sorted(
+        [
+            p
+            for p in stage02_dir.glob("*_fields.json")
+            if p.name != "_stage02_summary.json"
+        ]
+    )
     return [read_json(p) for p in files]
 
 
@@ -156,14 +169,26 @@ def normalize_stage03(stage03_obj: dict) -> Dict[str, Any]:
         # tentar achar summary já pronto
         sm = stage03_obj.get("summary") or {}
         total = int(sm.get("total_checks") or len(pairs))
-        matches = int(sm.get("matches") or sum(1 for c in pairs if c.get("status") == "match"))
-        divs = int(sm.get("divergences") or sum(1 for c in pairs if c.get("status") == "divergent"))
-        skipped = int(sm.get("skipped") or sum(1 for c in pairs if c.get("status") == "skipped"))
+        matches = int(
+            sm.get("matches") or sum(1 for c in pairs if c.get("status") == "match")
+        )
+        divs = int(
+            sm.get("divergences")
+            or sum(1 for c in pairs if c.get("status") == "divergent")
+        )
+        skipped = int(
+            sm.get("skipped") or sum(1 for c in pairs if c.get("status") == "skipped")
+        )
         return {
             "pairs": pairs,
             "groups": groups,
             "rules": rules,
-            "summary": {"total": total, "matches": matches, "divergences": divs, "skipped": skipped},
+            "summary": {
+                "total": total,
+                "matches": matches,
+                "divergences": divs,
+                "skipped": skipped,
+            },
         }
 
     # formato novo (o que você descreveu)
@@ -172,10 +197,18 @@ def normalize_stage03(stage03_obj: dict) -> Dict[str, Any]:
     rules = stage03_obj.get("rule_checks") or []
 
     # tentativa de consolidar summary
-    def count_status(items: List[dict], key: str = "status") -> Tuple[int, int, int, int]:
+    def count_status(
+        items: List[dict], key: str = "status"
+    ) -> Tuple[int, int, int, int]:
         total = len(items)
-        matches = sum(1 for x in items if (x.get(key) or "").lower() in ("match", "ok", "pass"))
-        divs = sum(1 for x in items if (x.get(key) or "").lower() in ("divergent", "fail", "error"))
+        matches = sum(
+            1 for x in items if (x.get(key) or "").lower() in ("match", "ok", "pass")
+        )
+        divs = sum(
+            1
+            for x in items
+            if (x.get(key) or "").lower() in ("divergent", "fail", "error")
+        )
         skipped = sum(1 for x in items if (x.get(key) or "").lower() == "skipped")
         return total, matches, divs, skipped
 
@@ -197,7 +230,9 @@ def normalize_stage03(stage03_obj: dict) -> Dict[str, Any]:
     }
 
 
-def decide_overall_status(stage02_docs: List[dict], stage03_norm: Dict[str, Any]) -> Dict[str, Any]:
+def decide_overall_status(
+    stage02_docs: List[dict], stage03_norm: Dict[str, Any]
+) -> Dict[str, Any]:
     """
     Regra simples:
     - FAIL se existir qualquer missing_required_fields em qualquer doc
@@ -249,28 +284,38 @@ def build_markdown(report: dict) -> str:
 
     # Stage 01
     lines.append("## Stage 01 — Qualidade da extração")
-    sm1 = (s1.get("summary") or {})
-    lines.append(f"- Docs: {sm1.get('total_docs', 0)} | all_direct: {sm1.get('docs_all_direct', 0)} | com OCR: {sm1.get('docs_with_ocr_pages', 0)}")
-    for d in (s1.get("documents") or []):
-        lines.append(f"- **{d['file']}** | pages={d['pages']} | has_ocr={d['has_ocr']} | methods={d['methods']}")
+    sm1 = s1.get("summary") or {}
+    lines.append(
+        f"- Docs: {sm1.get('total_docs', 0)} | all_direct: {sm1.get('docs_all_direct', 0)} | com OCR: {sm1.get('docs_with_ocr_pages', 0)}"
+    )
+    for d in s1.get("documents") or []:
+        lines.append(
+            f"- **{d['file']}** | pages={d['pages']} | has_ocr={d['has_ocr']} | methods={d['methods']}"
+        )
     lines.append("")
 
     # Stage 02
     lines.append("## Stage 02 — Campos (por documento)")
-    for doc in (s2.get("documents") or []):
+    for doc in s2.get("documents") or []:
         lines.append(f"### {doc['label']}")
-        lines.append(f"- Severidade: **{doc['severity']['level']}** ({doc['severity']['reason']})")
+        lines.append(
+            f"- Severidade: **{doc['severity']['level']}** ({doc['severity']['reason']})"
+        )
         if doc["missing_required_fields"]:
             lines.append(f"- Missing: {', '.join(doc['missing_required_fields'])}")
         if doc["warnings"]:
             lines.append(f"- Warnings: {', '.join(doc['warnings'])}")
-        lines.append(f"- Fields encontrados: {doc['fields_present_count']} / {doc['fields_total_count']}")
+        lines.append(
+            f"- Fields encontrados: {doc['fields_present_count']} / {doc['fields_total_count']}"
+        )
     lines.append("")
 
     # Stage 03
     lines.append("## Stage 03 — Comparações")
     sm3 = s3.get("summary") or {}
-    lines.append(f"- Total checks: {sm3.get('total', 0)} | matches: {sm3.get('matches', 0)} | divergences: {sm3.get('divergences', 0)} | skipped: {sm3.get('skipped', 0)}")
+    lines.append(
+        f"- Total checks: {sm3.get('total', 0)} | matches: {sm3.get('matches', 0)} | divergences: {sm3.get('divergences', 0)} | skipped: {sm3.get('skipped', 0)}"
+    )
     lines.append("")
     lines.append("### Divergências")
     divs = report["lists"]["divergent"]
@@ -278,7 +323,9 @@ def build_markdown(report: dict) -> str:
         lines.append("- (nenhuma)")
     else:
         for c in divs[:60]:
-            lines.append(f"- [{c.get('bucket')}] {c.get('pair','?')} | {c.get('field','?')} | A={c.get('a_value')} | B={c.get('b_value')}")
+            lines.append(
+                f"- [{c.get('bucket')}] {c.get('pair','?')} | {c.get('field','?')} | A={c.get('a_value')} | B={c.get('b_value')}"
+            )
     lines.append("")
     lines.append("### Skipped (não comparados)")
     sk = report["lists"]["skipped"]
@@ -286,7 +333,9 @@ def build_markdown(report: dict) -> str:
         lines.append("- (nenhum)")
     else:
         for c in sk[:60]:
-            lines.append(f"- [{c.get('bucket')}] {c.get('pair','?')} | {c.get('field','?')} | reason={c.get('reason','?')}")
+            lines.append(
+                f"- [{c.get('bucket')}] {c.get('pair','?')} | {c.get('field','?')} | reason={c.get('reason','?')}"
+            )
     lines.append("")
 
     return "\n".join(lines) + "\n"
@@ -329,8 +378,9 @@ def build_html(report: dict) -> str:
 
     # Stage02 docs table
     rows2 = []
-    for d in (s2.get("documents") or []):
-        rows2.append(f"""
+    for d in s2.get("documents") or []:
+        rows2.append(
+            f"""
         <tr>
           <td>{tr(d['label'])}</td>
           <td>{badge(d['severity']['level'])}<div class="small">{tr(d['severity']['reason'])}</div></td>
@@ -338,12 +388,14 @@ def build_html(report: dict) -> str:
           <td>{tr(", ".join(d["warnings"]) if d["warnings"] else "-")}</td>
           <td>{d['fields_present_count']} / {d['fields_total_count']}</td>
         </tr>
-        """)
+        """
+        )
 
     # Divergences table
     rows_div = []
     for c in divergent[:120]:
-        rows_div.append(f"""
+        rows_div.append(
+            f"""
         <tr>
           <td>{tr(c.get("bucket","pair"))}</td>
           <td>{tr(c.get("pair","?"))}</td>
@@ -353,19 +405,22 @@ def build_html(report: dict) -> str:
           <td class="small">{tr(safe(c.get("evidence_a","")))}</td>
           <td class="small">{tr(safe(c.get("evidence_b","")))}</td>
         </tr>
-        """)
+        """
+        )
 
     # Skipped table
     rows_sk = []
     for c in skipped[:120]:
-        rows_sk.append(f"""
+        rows_sk.append(
+            f"""
         <tr>
           <td>{tr(c.get("bucket","pair"))}</td>
           <td>{tr(c.get("pair","?"))}</td>
           <td><code>{tr(c.get("field","?"))}</code></td>
           <td class="small">{tr(c.get("reason","?"))}</td>
         </tr>
-        """)
+        """
+        )
 
     reasons = ", ".join(overall.get("reasons") or [])
 
@@ -441,20 +496,24 @@ def build_stage02_section(stage02_docs: List[dict]) -> Dict[str, Any]:
     for d in stage02_docs:
         src = d.get("source") or {}
         fields = d.get("fields") or {}
-        present_count = sum(1 for _, fv in fields.items() if (fv or {}).get("present") is True)
+        present_count = sum(
+            1 for _, fv in fields.items() if (fv or {}).get("present") is True
+        )
         total_count = len(fields)
         sev = classify_severity(d)
-        docs_out.append({
-            "label": doc_label(d),
-            "doc_kind": src.get("doc_kind"),
-            "original_file": src.get("original_file"),
-            "stage01_file": src.get("stage01_file"),
-            "missing_required_fields": d.get("missing_required_fields") or [],
-            "warnings": d.get("warnings") or [],
-            "fields_present_count": present_count,
-            "fields_total_count": total_count,
-            "severity": sev,
-        })
+        docs_out.append(
+            {
+                "label": doc_label(d),
+                "doc_kind": src.get("doc_kind"),
+                "original_file": src.get("original_file"),
+                "stage01_file": src.get("stage01_file"),
+                "missing_required_fields": d.get("missing_required_fields") or [],
+                "warnings": d.get("warnings") or [],
+                "fields_present_count": present_count,
+                "fields_total_count": total_count,
+                "severity": sev,
+            }
+        )
     return {"documents": docs_out}
 
 
@@ -477,18 +536,18 @@ def run_stage_04_report(
     stage02_dir: Path,
     stage03_file: Path,
     out_dir: Path,
-    verbose: bool = True
+    verbose: bool = True,
 ) -> Dict[str, Any]:
     """
     Execute Stage 04: Generate final consolidated report
-    
+
     Args:
         stage01_dir: Directory with Stage 01 extracted text
         stage02_dir: Directory with Stage 02 extracted fields
         stage03_file: Stage 03 comparison JSON file
         out_dir: Output directory for reports
         verbose: Print progress messages
-        
+
     Returns:
         Dictionary with report paths and status
     """
@@ -579,22 +638,28 @@ def run_stage_04_report(
         print(f"JSON : {out_json}")
         print(f"MD   : {out_md}")
         print(f"HTML : {out_html}")
-    
+
     return {
         "success": True,
         "output_json": str(out_json),
         "output_md": str(out_md),
         "output_html": str(out_html),
         "overall_status": overall.get("status"),
-        "divergent_count": len(divergent)
+        "divergent_count": len(divergent),
     }
 
 
 def main() -> None:
     ap = argparse.ArgumentParser()
-    ap.add_argument("--stage01", required=True, help="Stage 01 folder with *_extracted.json")
-    ap.add_argument("--stage02", required=True, help="Stage 02 folder with *_fields.json")
-    ap.add_argument("--stage03", required=True, help="Stage 03 _stage03_comparison.json file")
+    ap.add_argument(
+        "--stage01", required=True, help="Stage 01 folder with *_extracted.json"
+    )
+    ap.add_argument(
+        "--stage02", required=True, help="Stage 02 folder with *_fields.json"
+    )
+    ap.add_argument(
+        "--stage03", required=True, help="Stage 03 _stage03_comparison.json file"
+    )
     ap.add_argument("--out", required=True, help="Stage 04 output folder")
     args = ap.parse_args()
 
@@ -602,7 +667,7 @@ def main() -> None:
         stage01_dir=Path(args.stage01),
         stage02_dir=Path(args.stage02),
         stage03_file=Path(args.stage03),
-        out_dir=Path(args.out)
+        out_dir=Path(args.out),
     )
 
 

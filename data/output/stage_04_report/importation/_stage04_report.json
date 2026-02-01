@@ -1,10 +1,10 @@
 {
-  "generated_at": "2026-01-30T09:17:24",
+  "generated_at": "2026-02-01T10:22:51",
   "flow": "importation",
   "inputs": {
-    "stage01_dir": "C:\\Users\\lucas\\Documents\\Projects\\professional\\Documents Reader\\data\\output\\stage_01_text\\importation",
-    "stage02_dir": "C:\\Users\\lucas\\Documents\\Projects\\professional\\Documents Reader\\data\\output\\stage_02_fields\\importation",
-    "stage03_file": "C:\\Users\\lucas\\Documents\\Projects\\professional\\Documents Reader\\data\\output\\stage_03_compare\\importation\\_stage03_comparison.json"
+    "stage01_dir": "data/output/stage_01_text/importation",
+    "stage02_dir": "data/output/stage_02_fields/importation",
+    "stage03_file": "data/output/stage_03_compare/importation/_stage03_comparison.json"
   },
   "overall": {
     "status": "FAIL",
@@ -24,7 +24,7 @@
           "ocr"
         ],
         "chars_by_page": [
-          2834,
+          2654,
           354
         ],
         "has_ocr": true,
@@ -185,18 +185,18 @@
         "a_key_used": "importer_name",
         "b_key_used": "consignee_name",
         "a_value": "GHANDI SECAF VEICULOS LTDA.",
-        "b_value": "FESS) R",
+        "b_value": "FESS) E",
         "evidence": {
           "a": [
             "GHANDI SECAF VEICULOS LTDA."
           ],
           "b": [
-            "fess) r\nGHANDI SECAF VEICU LOS LTDA. Received by the Carrier from the Shipper in apparent good order and condition unless otherwise indicated herein, the\nCNPJ: 03.562.381/0006-03 c"
+            "fess) e\nGHANDI SECAF VEICU LOS LTDA. Received by the Carrier from the Shipper in apparent good order and condition unless otherwise indicated herein, the\nCNPJ: 03.562.381/0006-03 c"
           ]
         },
         "bucket": "pair",
         "evidence_a": "GHANDI SECAF VEICULOS LTDA.",
-        "evidence_b": "fess) r\nGHANDI SECAF VEICU LOS LTDA. Received by the Carrier from the Shipper in apparent good order and condition unless otherwise indicated herein, the\nCNPJ: 03.562.381/0006-03 c"
+        "evidence_b": "fess) e\nGHANDI SECAF VEICU LOS LTDA. Received by the Carrier from the Shipper in apparent good order and condition unless otherwise indicated herein, the\nCNPJ: 03.562.381/0006-03 c"
       },
       {
         "pair": "packing_vs_bl | PACKING LIST.pdf <> BL.pdf",
@@ -205,18 +205,18 @@
         "a_key_used": "consignee_name",
         "b_key_used": "consignee_name",
         "a_value": "GHANDI SECAF VEICULOS LTDA. AUG. 28,2025",
-        "b_value": "FESS) R",
+        "b_value": "FESS) E",
         "evidence": {
           "a": [
             "GHANDI SECAF VEICULOS LTDA. AUG. 28,2025"
           ],
           "b": [
-            "fess) r\nGHANDI SECAF VEICU LOS LTDA. Received by the Carrier from the Shipper in apparent good order and condition unless otherwise indicated herein, the\nCNPJ: 03.562.381/0006-03 c"
+            "fess) e\nGHANDI SECAF VEICU LOS LTDA. Received by the Carrier from the Shipper in apparent good order and condition unless otherwise indicated herein, the\nCNPJ: 03.562.381/0006-03 c"
           ]
         },
         "bucket": "pair",
         "evidence_a": "GHANDI SECAF VEICULOS LTDA. AUG. 28,2025",
-        "evidence_b": "fess) r\nGHANDI SECAF VEICU LOS LTDA. Received by the Carrier from the Shipper in apparent good order and condition unless otherwise indicated herein, the\nCNPJ: 03.562.381/0006-03 c"
+        "evidence_b": "fess) e\nGHANDI SECAF VEICU LOS LTDA. Received by the Carrier from the Shipper in apparent good order and condition unless otherwise indicated herein, the\nCNPJ: 03.562.381/0006-03 c"
       },
       {
         "pair": "packing_vs_bl | PACKING LIST.pdf <> BL.pdf",
@@ -321,12 +321,12 @@
             "CNPJ: 03.562.381/0006-03"
           ],
           "b": [
-            "fess) r\nGHANDI SECAF VEICU LOS LTDA. Received by the Carrier from the Shipper in apparent good order and condition unless otherwise indicated herein, the\nCNPJ: 03.562.381/0006-03 conor appearing onthe face an back of hs "
+            "fess) e\nGHANDI SECAF VEICU LOS LTDA. Received by the Carrier from the Shipper in apparent good order and condition unless otherwise indicated herein, the\nCNPJ: 03.562.381/0006-03 crncitons appearing onthe ave an wach of "
           ]
         },
         "bucket": "pair",
         "evidence_a": "CNPJ: 03.562.381/0006-03",
-        "evidence_b": "fess) r\nGHANDI SECAF VEICU LOS LTDA. Received by the Carrier from the Shipper in apparent good order and condition unless otherwise indicated herein, the\nCNPJ: 03.562.381/0006-03 conor appearing onthe face an back of hs"
+        "evidence_b": "fess) e\nGHANDI SECAF VEICU LOS LTDA. Received by the Carrier from the Shipper in apparent good order and condition unless otherwise indicated herein, the\nCNPJ: 03.562.381/0006-03 crncitons appearing onthe ave an wach of"
       },
       {
         "pair": "invoice_vs_bl | INVOICE.pdf <> BL.pdf",
@@ -367,12 +367,12 @@
             "CNPJ: 03.562.381/0006-03"
           ],
           "b": [
-            "fess) r\nGHANDI SECAF VEICU LOS LTDA. Received by the Carrier from the Shipper in apparent good order and condition unless otherwise indicated herein, the\nCNPJ: 03.562.381/0006-03 conor appearing onthe face an back of hs "
+            "fess) e\nGHANDI SECAF VEICU LOS LTDA. Received by the Carrier from the Shipper in apparent good order and condition unless otherwise indicated herein, the\nCNPJ: 03.562.381/0006-03 crncitons appearing onthe ave an wach of "
           ]
         },
         "bucket": "pair",
         "evidence_a": "CNPJ: 03.562.381/0006-03",
-        "evidence_b": "fess) r\nGHANDI SECAF VEICU LOS LTDA. Received by the Carrier from the Shipper in apparent good order and condition unless otherwise indicated herein, the\nCNPJ: 03.562.381/0006-03 conor appearing onthe face an back of hs"
+        "evidence_b": "fess) e\nGHANDI SECAF VEICU LOS LTDA. Received by the Carrier from the Shipper in apparent good order and condition unless otherwise indicated herein, the\nCNPJ: 03.562.381/0006-03 crncitons appearing onthe ave an wach of"
       }
     ]
   }
