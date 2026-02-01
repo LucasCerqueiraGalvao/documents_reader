@@ -4,7 +4,7 @@
     "original_file": "INVOICE.pdf",
     "doc_kind": "invoice"
   },
-  "generated_at": "2026-01-30T01:48:38",
+  "generated_at": "2026-02-01T14:14:20",
   "fields": {
     "invoice_number": {
       "present": true,

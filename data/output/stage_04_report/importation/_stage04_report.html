@@ -22,8 +22,8 @@
     <body>
       <h1>Stage 04 Report — Importação</h1>
       <div class="meta">
-        Gerado em <b>2026-01-30T09:17:24</b> — Status final <span class="badge fail">FAIL</span><br/>
-        <span class="small">Motivos: missing_required_fields_em_algum_documento, divergencias_stage03=5</span>
+        Gerado em <b>2026-02-01T14:14:27</b> — Status final <span class="badge fail">FAIL</span><br/>
+        <span class="small">Motivos: divergencias_stage03=2</span>
       </div>
 
       <div class="card">
@@ -45,10 +45,10 @@
             
         <tr>
           <td>bl | BL.pdf</td>
-          <td><span class="badge fail">FAIL</span><div class="small">missing_required_fields=1</div></td>
-          <td>shipper_name</td>
-          <td>NCM/HS encontrado com 4 dígitos (8407). Pode ser HS (4/6) e não NCM completo (8).</td>
-          <td>8 / 9</td>
+          <td><span class="badge ok">OK</span><div class="small">no_missing_no_warnings</div></td>
+          <td>-</td>
+          <td>-</td>
+          <td>5 / 5</td>
         </tr>
         
         <tr>
@@ -64,7 +64,7 @@
           <td><span class="badge ok">OK</span><div class="small">no_missing_no_warnings</div></td>
           <td>-</td>
           <td>-</td>
-          <td>9 / 9</td>
+          <td>8 / 8</td>
         </tr>
         
           </tbody>
@@ -73,7 +73,7 @@
 
       <div class="card">
         <h2 style="margin-top:0">Stage 03 — Comparações</h2>
-        <div class="small">Total: 11 | Matches: 6 | Divergences: 5 | Skipped: 0</div>
+        <div class="small">Total: 11 | Matches: 9 | Divergences: 2 | Skipped: 0</div>
       </div>
 
       <div class="card">
@@ -84,34 +84,12 @@
           <tbody>
         <tr>
           <td>pair</td>
-          <td>invoice_vs_packing | INVOICE.pdf &lt;&gt; PACKING LIST.pdf</td>
-          <td><code>?</code></td>
-          <td>9825.0</td>
-          <td>4584.857</td>
-          <td class="small">GROSS WEIGHT: 9,825.00KGS</td>
-          <td class="small"></td>
-        </tr>
-        
-        <tr>
-          <td>pair</td>
-          <td>invoice_vs_packing | INVOICE.pdf &lt;&gt; PACKING LIST.pdf</td>
-          <td><code>?</code></td>
-          <td>7980.0</td>
-          <td>5429.23</td>
-          <td class="small">NET WEIGHT: 7,980.00KGS</td>
-          <td class="small"></td>
-        </tr>
-        
-        <tr>
-          <td>pair</td>
           <td>invoice_vs_bl | INVOICE.pdf &lt;&gt; BL.pdf</td>
           <td><code>?</code></td>
           <td>GHANDI SECAF VEICULOS LTDA.</td>
-          <td>FESS) R</td>
+          <td>GHANDI SECAF VEICU LOS LTDA. Received by the Carrier from the Shipper in apparent good order and condition unless otherwise indicated herein, the</td>
           <td class="small">GHANDI SECAF VEICULOS LTDA.</td>
-          <td class="small">fess) r
-GHANDI SECAF VEICU LOS LTDA. Received by the Carrier from the Shipper in apparent good order and condition unless otherwise indicated herein, the
-CNPJ: 03.562.381/0006-03 c</td>
+          <td class="small">GHANDI SECAF VEICU LOS LTDA. Received by the Carrier from the Shipper in apparent good order and condition unless otherwise indicated herein, the</td>
         </tr>
         
         <tr>
@@ -119,21 +97,9 @@ CNPJ: 03.562.381/0006-03 c</td>
           <td>packing_vs_bl | PACKING LIST.pdf &lt;&gt; BL.pdf</td>
           <td><code>?</code></td>
           <td>GHANDI SECAF VEICULOS LTDA. AUG. 28,2025</td>
-          <td>FESS) R</td>
+          <td>GHANDI SECAF VEICU LOS LTDA. Received by the Carrier from the Shipper in apparent good order and condition unless otherwise indicated herein, the</td>
           <td class="small">GHANDI SECAF VEICULOS LTDA. AUG. 28,2025</td>
-          <td class="small">fess) r
-GHANDI SECAF VEICU LOS LTDA. Received by the Carrier from the Shipper in apparent good order and condition unless otherwise indicated herein, the
-CNPJ: 03.562.381/0006-03 c</td>
-        </tr>
-        
-        <tr>
-          <td>pair</td>
-          <td>packing_vs_bl | PACKING LIST.pdf &lt;&gt; BL.pdf</td>
-          <td><code>?</code></td>
-          <td>4584.857</td>
-          <td>9825.0</td>
-          <td class="small"></td>
-          <td class="small">... 9,825.000 KG ...</td>
+          <td class="small">GHANDI SECAF VEICU LOS LTDA. Received by the Carrier from the Shipper in apparent good order and condition unless otherwise indicated herein, the</td>
         </tr>
         </tbody>
         </table>
