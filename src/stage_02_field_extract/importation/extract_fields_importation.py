@@ -91,21 +91,34 @@ def unpack_extractor_result(res: Any) -> Tuple[Dict[str, Any], List[str], List[s
     raise ValueError(f"Extractor retornou {len(res)} itens (esperado 2 ou 3)")
 
 
-def main() -> None:
-    ap = argparse.ArgumentParser()
-    ap.add_argument("--in", dest="in_dir", required=True, help="Pasta stage_01_text/importation")
-    ap.add_argument("--out", dest="out_dir", required=True, help="Pasta stage_02_fields/importation")
-    args = ap.parse_args()
-
-    in_dir = Path(args.in_dir)
-    out_dir = Path(args.out_dir)
+def run_stage_02_extraction(
+    in_dir: Path,
+    out_dir: Path,
+    verbose: bool = True
+) -> Dict[str, Any]:
+    """
+    Execute Stage 02: Extract structured fields from text
+    
+    Args:
+        in_dir: Directory with Stage 01 *_extracted.json files
+        out_dir: Output directory for field extraction results
+        verbose: Print progress messages
+        
+    Returns:
+        Dictionary with processing results and warnings
+    """
     out_dir.mkdir(parents=True, exist_ok=True)
 
     files = sorted(in_dir.glob("*_extracted.json"))
     if not files:
-        raise SystemExit(f"Nenhum *_extracted.json encontrado em: {in_dir}")
+        return {
+            "processed_count": 0,
+            "warnings": [f"No *_extracted.json files found in: {in_dir}"],
+            "documents": []
+        }
 
     summary_docs: List[dict] = []
+    all_warnings: List[str] = []
 
     for p in files:
         obj = read_json(p)
@@ -114,7 +127,6 @@ def main() -> None:
 
         doc_kind = detect_kind(original_file, full_text)
 
-        # escolhe extractor
         if doc_kind == "invoice":
             res = extract_invoice_fields(full_text)
         elif doc_kind == "packing_list":
@@ -122,8 +134,7 @@ def main() -> None:
         elif doc_kind == "bl":
             res = extract_bl_fields(full_text)
         else:
-            # desconhecido: cria output vazio mas rastreável
-            res = ({}, [f"doc_kind desconhecido: {doc_kind}"], [])
+            res = ({}, [f"doc_kind unknown: {doc_kind}"], [])
 
         fields, missing_required_fields, warnings = unpack_extractor_result(res)
 
@@ -151,8 +162,11 @@ def main() -> None:
             "missing_required_fields": missing_required_fields,
             "warnings": warnings,
         })
+        
+        all_warnings.extend(warnings)
 
-        print(f"OK -> {out_name} | kind={doc_kind} | missing={len(missing_required_fields)} | warnings={len(warnings)}")
+        if verbose:
+            print(f"OK -> {out_name} | kind={doc_kind} | missing={len(missing_required_fields)} | warnings={len(warnings)}")
 
     summary = {
         "generated_at": now_iso(),
@@ -162,7 +176,27 @@ def main() -> None:
         "documents": summary_docs,
     }
     write_json(out_dir / "_stage02_summary.json", summary)
-    print("Concluído.")
+    
+    if verbose:
+        print("Completed.")
+    
+    return {
+        "processed_count": len(summary_docs),
+        "warnings": all_warnings,
+        "documents": summary_docs
+    }
+
+
+def main() -> None:
+    ap = argparse.ArgumentParser()
+    ap.add_argument("--in", dest="in_dir", required=True, help="Stage 01 text folder")
+    ap.add_argument("--out", dest="out_dir", required=True, help="Stage 02 fields output folder")
+    args = ap.parse_args()
+
+    run_stage_02_extraction(
+        in_dir=Path(args.in_dir),
+        out_dir=Path(args.out_dir)
+    )
 
 
 if __name__ == "__main__":

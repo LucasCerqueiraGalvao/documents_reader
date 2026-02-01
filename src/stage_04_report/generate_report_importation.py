@@ -472,18 +472,26 @@ def pick_evidence_from_pair(item: dict) -> Tuple[str, str]:
     return ea, eb
 
 
-def main() -> None:
-    ap = argparse.ArgumentParser()
-    ap.add_argument("--stage01", required=True, help="Pasta Stage 01 importation (com *_extracted.json)")
-    ap.add_argument("--stage02", required=True, help="Pasta Stage 02 importation (com *_fields.json)")
-    ap.add_argument("--stage03", required=True, help="Arquivo _stage03_comparison.json (Stage 03 importation)")
-    ap.add_argument("--out", required=True, help="Pasta de saída Stage 04 report (importation)")
-    args = ap.parse_args()
-
-    stage01_dir = Path(args.stage01)
-    stage02_dir = Path(args.stage02)
-    stage03_file = Path(args.stage03)
-    out_dir = Path(args.out)
+def run_stage_04_report(
+    stage01_dir: Path,
+    stage02_dir: Path,
+    stage03_file: Path,
+    out_dir: Path,
+    verbose: bool = True
+) -> Dict[str, Any]:
+    """
+    Execute Stage 04: Generate final consolidated report
+    
+    Args:
+        stage01_dir: Directory with Stage 01 extracted text
+        stage02_dir: Directory with Stage 02 extracted fields
+        stage03_file: Stage 03 comparison JSON file
+        out_dir: Output directory for reports
+        verbose: Print progress messages
+        
+    Returns:
+        Dictionary with report paths and status
+    """
     out_dir.mkdir(parents=True, exist_ok=True)
 
     # Load
@@ -553,7 +561,7 @@ def main() -> None:
         "lists": {
             "divergent": divergent,
             "skipped": skipped,
-            "matches": matches[:200],  # para não explodir o arquivo
+            "matches": matches[:200],
         },
     }
 
@@ -566,10 +574,36 @@ def main() -> None:
     write_text(out_md, build_markdown(report))
     write_text(out_html, build_html(report))
 
-    print("Concluído.")
-    print(f"JSON : {out_json}")
-    print(f"MD   : {out_md}")
-    print(f"HTML : {out_html}")
+    if verbose:
+        print("Completed.")
+        print(f"JSON : {out_json}")
+        print(f"MD   : {out_md}")
+        print(f"HTML : {out_html}")
+    
+    return {
+        "success": True,
+        "output_json": str(out_json),
+        "output_md": str(out_md),
+        "output_html": str(out_html),
+        "overall_status": overall.get("status"),
+        "divergent_count": len(divergent)
+    }
+
+
+def main() -> None:
+    ap = argparse.ArgumentParser()
+    ap.add_argument("--stage01", required=True, help="Stage 01 folder with *_extracted.json")
+    ap.add_argument("--stage02", required=True, help="Stage 02 folder with *_fields.json")
+    ap.add_argument("--stage03", required=True, help="Stage 03 _stage03_comparison.json file")
+    ap.add_argument("--out", required=True, help="Stage 04 output folder")
+    args = ap.parse_args()
+
+    run_stage_04_report(
+        stage01_dir=Path(args.stage01),
+        stage02_dir=Path(args.stage02),
+        stage03_file=Path(args.stage03),
+        out_dir=Path(args.out)
+    )
 
 
 if __name__ == "__main__":

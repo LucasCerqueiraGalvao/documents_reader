@@ -749,19 +749,32 @@ def pair_by_reference(invoices: List[dict], packings: List[dict]) -> List[Tuple[
     return pairs
 
 
-def main() -> None:
-    ap = argparse.ArgumentParser()
-    ap.add_argument("--input", required=True, help="Pasta do Stage 02 importation (com *_fields.json)")
-    ap.add_argument("--output", required=True, help="Pasta de saída do Stage 03 (comparação)")
-    args = ap.parse_args()
-
-    in_dir = Path(args.input)
-    out_dir = Path(args.output)
+def run_stage_03_comparison(
+    in_dir: Path,
+    out_dir: Path,
+    verbose: bool = True
+) -> Dict[str, Any]:
+    """
+    Execute Stage 03: Compare and validate fields across documents
+    
+    Args:
+        in_dir: Directory with Stage 02 *_fields.json files
+        out_dir: Output directory for comparison results
+        verbose: Print progress messages
+        
+    Returns:
+        Dictionary with comparison results and warnings
+    """
     out_dir.mkdir(parents=True, exist_ok=True)
 
     files = sorted([p for p in in_dir.glob("*_fields.json") if p.name != "_stage02_summary.json"])
     if not files:
-        raise SystemExit(f"Nenhum *_fields.json encontrado em: {in_dir}")
+        return {
+            "success": False,
+            "warnings": [f"No *_fields.json files found in: {in_dir}"],
+            "comparisons": [],
+            "divergences": 0
+        }
 
     docs = [read_json(p) for p in files]
     by_kind = pick_docs_by_kind(docs)
@@ -787,10 +800,7 @@ def main() -> None:
             "warnings": d.get("warnings", []),
         })
 
-    # -------------------------
     # Pair comparisons
-    # -------------------------
-
     for inv, pl in pair_by_reference(invoices, packings):
         label = f"invoice_vs_packing | {doc_label(inv)} <> {doc_label(pl)}"
         comparisons.extend(compare_pair(inv, pl, INVOICE_VS_PACKING, label))
@@ -815,9 +825,88 @@ def main() -> None:
             label = f"li_vs_base | {doc_label(li)} <> {doc_label(base)}"
             comparisons.extend(compare_pair(li, base, DI_LI_VS_BASE, label))
 
-    # -------------------------
-    # Group checks (Karina)
-    # -------------------------
+    # Group checks
+    if invoices or packings or bls:
+        group_checks.append(check_shipper_global(invoices, packings, bls))
+        group_checks.append(check_consignee_cnpj(invoices, packings, bls, dis, lis))
+
+    # Rule checks (Incoterm vs Freight)
+    for inv in invoices:
+        for bl in bls:
+            rule_checks.append(check_incoterm_vs_freight(inv, bl))
+
+    # Summary
+    total = len(comparisons)
+    matches = sum(1 for c in comparisons if c["status"] == "match")
+    divs = sum(1 for c in comparisons if c["status"] == "divergent")
+    skipped = sum(1 for c in comparisons if c["status"] == "skipped")
+
+    gc_total = len(group_checks)
+    gc_div = sum(1 for g in group_checks if g["status"] == "divergent")
+    gc_missing = sum(1 for g in group_checks if g["status"] == "missing")
+
+    rc_total = len(rule_checks)
+    rc_div = sum(1 for r in rule_checks if r.get("status") == "divergent")
+    rc_skipped = sum(1 for r in rule_checks if r.get("status") == "skipped")
+
+    out = {
+        "generated_at": now_iso(),
+        "flow": "importation",
+        "input_folder": str(in_dir),
+        "documents": meta_docs,
+        "summary": {
+            "pair_checks": {
+                "total": total,
+                "matches": matches,
+                "divergences": divs,
+                "skipped": skipped,
+            },
+            "group_checks": {
+                "total": gc_total,
+                "divergences": gc_div,
+                "missing": gc_missing,
+            },
+            "rule_checks": {
+                "total": rc_total,
+                "divergences": rc_div,
+                "skipped": rc_skipped,
+            },
+        },
+        "comparisons": comparisons,
+        "group_checks": group_checks,
+        "rule_checks": rule_checks,
+    }
+
+    out_path = out_dir / "_stage03_comparison.json"
+    write_json(out_path, out)
+
+    if verbose:
+        print("Completed.")
+        print(f"Output: {out_path}")
+    
+    return {
+        "success": True,
+        "warnings": [],
+        "output_file": str(out_path),
+        "total_comparisons": total,
+        "divergences": divs + gc_div + rc_div
+    }
+
+
+def main() -> None:
+    ap = argparse.ArgumentParser()
+    ap.add_argument("--input", required=True, help="Stage 02 folder with *_fields.json")
+    ap.add_argument("--output", required=True, help="Stage 03 output folder")
+    args = ap.parse_args()
+
+    run_stage_03_comparison(
+        in_dir=Path(args.input),
+        out_dir=Path(args.output)
+    )
+
+
+if __name__ == "__main__":
+    main()
 
     core_docs_for_shipper = []
     core_docs_for_shipper.extend(invoices[:1] if invoices else [])
