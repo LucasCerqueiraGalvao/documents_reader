@@ -34,6 +34,7 @@ from typing import Any, Dict, List, Tuple
 # Utilities
 # ------------------------
 
+
 def now_iso() -> str:
     return datetime.now().strftime("%Y-%m-%dT%H:%M:%S")
 
@@ -72,6 +73,7 @@ def norm_spaces(s: str) -> str:
 # Load Stage01 quality info
 # ------------------------
 
+
 def extract_stage01_quality(stage01_dir: Path) -> Dict[str, Any]:
     """
     Reads *_extracted.json to understand extraction method (direct vs ocr),
@@ -92,12 +94,14 @@ def extract_stage01_quality(stage01_dir: Path) -> Dict[str, Any]:
         direct = sum(1 for pg in pages if (pg.get("method") or "").lower() == "direct")
         ocr = sum(1 for pg in pages if (pg.get("method") or "").lower() == "ocr")
 
-        out["documents"].append({
-            "file": obj.get("file") or p.name,
-            "pages": len(pages),
-            "direct_pages": direct,
-            "ocr_pages": ocr,
-        })
+        out["documents"].append(
+            {
+                "file": obj.get("file") or p.name,
+                "pages": len(pages),
+                "direct_pages": direct,
+                "ocr_pages": ocr,
+            }
+        )
 
     return out
 
@@ -105,6 +109,7 @@ def extract_stage01_quality(stage01_dir: Path) -> Dict[str, Any]:
 # ------------------------
 # Load Stage02 docs
 # ------------------------
+
 
 def load_stage02_docs(stage02_dir: Path) -> List[dict]:
     docs: List[dict] = []
@@ -129,9 +134,14 @@ def build_stage02_section(stage02_docs: List[dict]) -> Dict[str, Any]:
         missing = d.get("missing_required_fields") or []
         warnings = d.get("warnings") or []
 
-        required_total = sum(1 for k, v in fields.items() if (v or {}).get("required") is True)
-        required_present = sum(1 for k, v in fields.items()
-                               if (v or {}).get("required") is True and (v or {}).get("present") is True)
+        required_total = sum(
+            1 for k, v in fields.items() if (v or {}).get("required") is True
+        )
+        required_present = sum(
+            1
+            for k, v in fields.items()
+            if (v or {}).get("required") is True and (v or {}).get("present") is True
+        )
 
         status = "OK"
         if missing:
@@ -139,21 +149,29 @@ def build_stage02_section(stage02_docs: List[dict]) -> Dict[str, Any]:
         elif warnings:
             status = "ALERT"
 
-        items.append({
-            "doc_kind": src.get("doc_kind"),
-            "original_file": src.get("original_file"),
-            "stage01_file": src.get("stage01_file"),
-            "status": status,
-            "missing_required_fields": missing,
-            "warnings": warnings,
-            "required_present": required_present,
-            "required_total": required_total,
-            "fields_count": len(fields),
-        })
+        items.append(
+            {
+                "doc_kind": src.get("doc_kind"),
+                "original_file": src.get("original_file"),
+                "stage01_file": src.get("stage01_file"),
+                "status": status,
+                "missing_required_fields": missing,
+                "warnings": warnings,
+                "required_present": required_present,
+                "required_total": required_total,
+                "fields_count": len(fields),
+            }
+        )
 
     # sort: FAIL -> ALERT -> OK
     order = {"FAIL": 0, "ALERT": 1, "OK": 2}
-    items.sort(key=lambda x: (order.get(x["status"], 9), x.get("doc_kind") or "", x.get("original_file") or ""))
+    items.sort(
+        key=lambda x: (
+            order.get(x["status"], 9),
+            x.get("doc_kind") or "",
+            x.get("original_file") or "",
+        )
+    )
 
     return {"documents": items}
 
@@ -161,6 +179,7 @@ def build_stage02_section(stage02_docs: List[dict]) -> Dict[str, Any]:
 # ------------------------
 # Normalize Stage03
 # ------------------------
+
 
 def normalize_stage03(stage03_obj: dict) -> Dict[str, Any]:
     """
@@ -225,16 +244,17 @@ def normalize_stage03(stage03_obj: dict) -> Dict[str, Any]:
     # -------------
     # Formato B (novo) - duas variações: "pairs" ou "pair_checks"
     # -------------
-    pairs  = stage03_obj.get("pairs") or stage03_obj.get("pair_checks") or []
+    pairs = stage03_obj.get("pairs") or stage03_obj.get("pair_checks") or []
     groups = stage03_obj.get("groups") or stage03_obj.get("group_checks") or []
-    rules  = stage03_obj.get("rules") or stage03_obj.get("rule_checks") or []
+    rules = stage03_obj.get("rules") or stage03_obj.get("rule_checks") or []
 
-    pairs  = [_ensure_field(dict(x)) for x in pairs]
+    pairs = [_ensure_field(dict(x)) for x in pairs]
     groups = [_ensure_group_rule_field(dict(x), "group") for x in groups]
-    rules  = [_ensure_group_rule_field(dict(x), "rule") for x in rules]
+    rules = [_ensure_group_rule_field(dict(x), "rule") for x in rules]
 
     # Alguns Stage03 novos trazem summary detalhada por categoria
     s = stage03_obj.get("summary") or {}
+
     # tenta ler contagens se existirem
     def _read_counts(block: dict) -> tuple[int, int, int, int]:
         if not isinstance(block, dict):
@@ -256,8 +276,17 @@ def normalize_stage03(stage03_obj: dict) -> Dict[str, Any]:
         matches = sum(1 for x in all_items if (x.get("status") == "match"))
         divs = sum(1 for x in all_items if (x.get("status") == "divergent"))
         skps = sum(1 for x in all_items if (x.get("status") == "skipped"))
-        return {"pairs": pairs, "groups": groups, "rules": rules,
-                "summary": {"total": total, "matches": matches, "divergences": divs, "skipped": skps}}
+        return {
+            "pairs": pairs,
+            "groups": groups,
+            "rules": rules,
+            "summary": {
+                "total": total,
+                "matches": matches,
+                "divergences": divs,
+                "skipped": skps,
+            },
+        }
 
     return {
         "pairs": pairs,
@@ -276,8 +305,13 @@ def normalize_stage03(stage03_obj: dict) -> Dict[str, Any]:
 # Decide overall status
 # ------------------------
 
-def decide_overall_status(stage02_docs: List[dict], stage03_norm: Dict[str, Any]) -> Dict[str, Any]:
-    missing_total = sum(len((d.get("missing_required_fields") or [])) for d in stage02_docs)
+
+def decide_overall_status(
+    stage02_docs: List[dict], stage03_norm: Dict[str, Any]
+) -> Dict[str, Any]:
+    missing_total = sum(
+        len((d.get("missing_required_fields") or [])) for d in stage02_docs
+    )
     warnings_total = sum(len((d.get("warnings") or [])) for d in stage02_docs)
     divs_total = int((stage03_norm.get("summary") or {}).get("divergences", 0) or 0)
 
@@ -304,14 +338,15 @@ def decide_overall_status(stage02_docs: List[dict], stage03_norm: Dict[str, Any]
 # Evidence extraction helpers
 # ------------------------
 
+
 def pick_evidence_from_pair(c: dict) -> Tuple[str, str]:
     """
     Stage03 antigo: c["evidence"] = {"a":[...], "b":[...]}
     Stage03 novo:  c tem evidence_a/evidence_b ou details
     """
     if isinstance(c.get("evidence"), dict):
-        ea = (c["evidence"].get("a") or [])
-        eb = (c["evidence"].get("b") or [])
+        ea = c["evidence"].get("a") or []
+        eb = c["evidence"].get("b") or []
         return ("\n".join(ea[:2]), "\n".join(eb[:2]))
 
     ea = c.get("evidence_a") or ""
@@ -326,6 +361,7 @@ def pick_evidence_from_pair(c: dict) -> Tuple[str, str]:
 # ------------------------
 # Markdown / HTML builders
 # ------------------------
+
 
 def build_markdown(report: dict) -> str:
     overall = report.get("overall") or {}
@@ -351,7 +387,9 @@ def build_markdown(report: dict) -> str:
         lines.append("| Documento | Páginas | Direct | OCR |")
         lines.append("|---|---:|---:|---:|")
         for d in docs:
-            lines.append(f"| {d.get('file','')} | {d.get('pages',0)} | {d.get('direct_pages',0)} | {d.get('ocr_pages',0)} |")
+            lines.append(
+                f"| {d.get('file','')} | {d.get('pages',0)} | {d.get('direct_pages',0)} | {d.get('ocr_pages',0)} |"
+            )
     lines.append("")
 
     # Stage02
@@ -365,15 +403,21 @@ def build_markdown(report: dict) -> str:
         for d in d2:
             miss = ", ".join(d.get("missing_required_fields") or []) or "-"
             warn = "; ".join(d.get("warnings") or []) or "-"
-            lines.append(f"| {d.get('original_file','')} | {d.get('doc_kind','')} | {d.get('status','')} | {miss} | {warn} | {d.get('fields_count',0)} |")
+            lines.append(
+                f"| {d.get('original_file','')} | {d.get('doc_kind','')} | {d.get('status','')} | {miss} | {warn} | {d.get('fields_count',0)} |"
+            )
     lines.append("")
 
     # Stage03
     lines.append("## Stage 03 — Comparações")
     summ = s03.get("summary") or {}
     counts = s03.get("counts") or {}
-    lines.append(f"- Total: **{summ.get('total',0)}** | Match: **{summ.get('matches',0)}** | Divergences: **{summ.get('divergences',0)}** | Skipped: **{summ.get('skipped',0)}**")
-    lines.append(f"- (render) matches={counts.get('matches',0)} divergent={counts.get('divergent',0)} skipped={counts.get('skipped',0)}")
+    lines.append(
+        f"- Total: **{summ.get('total',0)}** | Match: **{summ.get('matches',0)}** | Divergences: **{summ.get('divergences',0)}** | Skipped: **{summ.get('skipped',0)}**"
+    )
+    lines.append(
+        f"- (render) matches={counts.get('matches',0)} divergent={counts.get('divergent',0)} skipped={counts.get('skipped',0)}"
+    )
     lines.append("")
 
     # Divergences list
@@ -383,7 +427,9 @@ def build_markdown(report: dict) -> str:
         lines.append("| Bucket | Par | Campo | A | B |")
         lines.append("|---|---|---|---|---|")
         for c in divs[:50]:
-            lines.append(f"| {c.get('bucket','')} | {tr(c.get('pair',''))} | {tr(c.get('field','?'))} | {tr(c.get('a_value'))} | {tr(c.get('b_value'))} |")
+            lines.append(
+                f"| {c.get('bucket','')} | {tr(c.get('pair',''))} | {tr(c.get('field','?'))} | {tr(c.get('a_value'))} | {tr(c.get('b_value'))} |"
+            )
         lines.append("")
     else:
         lines.append("### Divergências")
@@ -398,7 +444,9 @@ def build_markdown(report: dict) -> str:
         lines.append("|---|---|---|---|")
         for c in skips[:50]:
             reason = c.get("reason") or ""
-            lines.append(f"| {c.get('bucket','')} | {tr(c.get('pair',''))} | {tr(c.get('field','?'))} | {tr(reason)} |")
+            lines.append(
+                f"| {c.get('bucket','')} | {tr(c.get('pair',''))} | {tr(c.get('field','?'))} | {tr(reason)} |"
+            )
         lines.append("")
     else:
         lines.append("### Skipped")
@@ -421,7 +469,8 @@ def build_stage02_table_html(stage02_docs: List[dict]) -> str:
         elif status == "ALERT":
             badge_class = "alert"
 
-        rows.append(f"""
+        rows.append(
+            f"""
         <tr>
           <td><b>{tr(d.get("doc_kind",""))}</b> | {tr(d.get("original_file",""))}</td>
           <td><span class="badge {badge_class}">{tr(status_badge)}</span><br><span class="muted">{tr("missing_required_fields="+str(len(d.get("missing_required_fields") or [])) if status=="FAIL" else "warnings="+str(len(d.get("warnings") or [])) if status=="ALERT" else "no_missing_no_warnings")}</span></td>
@@ -429,7 +478,8 @@ def build_stage02_table_html(stage02_docs: List[dict]) -> str:
           <td>{tr(warn)}</td>
           <td style="text-align:right">{tr(d.get("fields_count",0))} / {tr(d.get("required_total",0) or d.get("fields_count",0))}</td>
         </tr>
-        """)
+        """
+        )
 
     return f"""
     <table class="tbl">
@@ -466,15 +516,17 @@ def build_html(report: dict) -> str:
 
     # stage01 small table
     s01_rows = []
-    for d in (s01.get("documents") or []):
-        s01_rows.append(f"""
+    for d in s01.get("documents") or []:
+        s01_rows.append(
+            f"""
         <tr>
           <td>{tr(d.get("file",""))}</td>
           <td style="text-align:right">{tr(d.get("pages",0))}</td>
           <td style="text-align:right">{tr(d.get("direct_pages",0))}</td>
           <td style="text-align:right">{tr(d.get("ocr_pages",0))}</td>
         </tr>
-        """)
+        """
+        )
     stage01_tbl = ""
     if s01_rows:
         stage01_tbl = f"""
@@ -521,7 +573,8 @@ def build_html(report: dict) -> str:
     rows_div = []
     for c in divs[:100]:
         field_label = c.get("field") or c.get("check") or "?"
-        rows_div.append(f"""
+        rows_div.append(
+            f"""
         <tr>
           <td class="muted">{tr(c.get("bucket",""))}</td>
           <td><code>{tr(c.get("pair",""))}</code></td>
@@ -531,7 +584,8 @@ def build_html(report: dict) -> str:
           <td class="muted">{tr(c.get("evidence_a",""))}</td>
           <td class="muted">{tr(c.get("evidence_b",""))}</td>
         </tr>
-        """)
+        """
+        )
     div_tbl = ""
     if rows_div:
         div_tbl = f"""
@@ -560,14 +614,16 @@ def build_html(report: dict) -> str:
     rows_sk = []
     for c in skips[:100]:
         field_label = c.get("field") or c.get("check") or "?"
-        rows_sk.append(f"""
+        rows_sk.append(
+            f"""
         <tr>
           <td class="muted">{tr(c.get("bucket",""))}</td>
           <td><code>{tr(c.get("pair",""))}</code></td>
           <td><code title="{tr(field_label)}">{tr(field_label)}</code></td>
           <td class="muted">{tr(c.get("reason",""))}</td>
         </tr>
-        """)
+        """
+        )
     sk_tbl = ""
     if rows_sk:
         sk_tbl = f"""
@@ -711,12 +767,27 @@ def build_html(report: dict) -> str:
 # Main
 # ------------------------
 
+
 def main() -> None:
     ap = argparse.ArgumentParser()
-    ap.add_argument("--stage01", required=True, help="Pasta Stage 01 importation (com *_extracted.json)")
-    ap.add_argument("--stage02", required=True, help="Pasta Stage 02 importation (com *_fields.json)")
-    ap.add_argument("--stage03", required=True, help="Arquivo _stage03_comparison.json (Stage 03 importation)")
-    ap.add_argument("--out", required=True, help="Pasta de saída Stage 04 report (importation)")
+    ap.add_argument(
+        "--stage01",
+        required=True,
+        help="Pasta Stage 01 importation (com *_extracted.json)",
+    )
+    ap.add_argument(
+        "--stage02",
+        required=True,
+        help="Pasta Stage 02 importation (com *_fields.json)",
+    )
+    ap.add_argument(
+        "--stage03",
+        required=True,
+        help="Arquivo _stage03_comparison.json (Stage 03 importation)",
+    )
+    ap.add_argument(
+        "--out", required=True, help="Pasta de saída Stage 04 report (importation)"
+    )
     args = ap.parse_args()
 
     run_stage_04_report(
