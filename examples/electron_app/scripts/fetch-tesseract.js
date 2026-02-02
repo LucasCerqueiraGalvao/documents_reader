@@ -447,23 +447,66 @@ async function fetchWindows(destRoot, opts) {
   const args = ['/S', `/D=${destWin}`];
   run(tmpInstaller, args, { windowsHide: true });
 
-  // Locate tesseract.exe (some installers create a subfolder).
-  let exePath = path.join(destRoot, 'tesseract.exe');
-  if (!fs.existsSync(exePath)) {
-    const found = await findFileRecursive(destRoot, 'tesseract.exe', 5);
-    if (found) exePath = found;
+  // Locate tesseract.exe.
+  // Some installers ignore /D=... and install to Program Files, so we search a few places.
+  const candidateExePaths = [];
+  candidateExePaths.push(path.join(destRoot, 'tesseract.exe'));
+
+  const foundUnderDest = await findFileRecursive(destRoot, 'tesseract.exe', 6);
+  if (foundUnderDest) candidateExePaths.push(foundUnderDest);
+
+  // Common default install locations.
+  candidateExePaths.push('C:\\Program Files\\Tesseract-OCR\\tesseract.exe');
+  candidateExePaths.push('C:\\Program Files (x86)\\Tesseract-OCR\\tesseract.exe');
+
+  // If installer added it to PATH, use `where`.
+  try {
+    const whereRes = spawnSync('where', ['tesseract.exe'], { encoding: 'utf-8' });
+    if (!whereRes.error && whereRes.status === 0) {
+      const lines = String(whereRes.stdout || '')
+        .split(/\r?\n/)
+        .map((s) => s.trim())
+        .filter(Boolean);
+      for (const p of lines) candidateExePaths.push(p);
+    }
+  } catch {
+    // ignore
   }
 
-  if (!fs.existsSync(exePath)) {
-    throw new Error('tesseract.exe not found after install; check installer URL or permissions.');
+  const exePath = candidateExePaths.find((p) => p && fs.existsSync(p));
+  if (!exePath) {
+    throw new Error(
+      'tesseract.exe not found after install. The installer may have ignored /D=... or installed somewhere unexpected.\n' +
+        'Tip: set TESSERACT_WIN_URL to a known-good UB Mannheim installer, or rerun with a different version.'
+    );
   }
 
-  if (path.dirname(exePath) !== destRoot) {
-    await fsp.copyFile(exePath, path.join(destRoot, 'tesseract.exe'));
+  // Copy required binaries (tesseract.exe + DLLs) into destRoot.
+  // The UB Mannheim builds rely on nearby DLLs; copying only tesseract.exe is not enough.
+  const installRoot = path.dirname(exePath);
+  if (installRoot !== destRoot) {
+    const entries = await fsp.readdir(installRoot, { withFileTypes: true });
+    for (const e of entries) {
+      if (!e.isFile()) continue;
+      const name = e.name;
+      const lower = name.toLowerCase();
+      if (!(lower.endsWith('.exe') || lower.endsWith('.dll'))) continue;
+      const src = path.join(installRoot, name);
+      const dst = path.join(destRoot, name);
+      if (!fs.existsSync(dst)) {
+        await fsp.copyFile(src, dst);
+      }
+    }
+  }
+
+  // Ensure tesseract.exe is at the root.
+  const rootExe = path.join(destRoot, 'tesseract.exe');
+  if (!fs.existsSync(rootExe)) {
+    await fsp.copyFile(exePath, rootExe);
   }
 
   // Copy tessdata if present
-  const installedTessdata = path.join(path.dirname(exePath), 'tessdata');
+  const installedTessdata = path.join(installRoot, 'tessdata');
   const destTessdata = path.join(destRoot, 'tessdata');
   if (fs.existsSync(installedTessdata)) {
     await ensureDir(destTessdata);

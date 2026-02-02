@@ -28,7 +28,7 @@ function buildEnv(tesseractRoot) {
 
   const tessdataDir = path.join(tesseractRoot, 'tessdata');
   if (fs.existsSync(tessdataDir)) {
-    env.TESSDATA_PREFIX = tesseractRoot;
+    env.TESSDATA_PREFIX = tessdataDir;
   }
 
   const libDir = path.join(tesseractRoot, 'lib');
