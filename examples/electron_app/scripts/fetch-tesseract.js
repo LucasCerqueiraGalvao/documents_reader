@@ -251,7 +251,17 @@ async function fetchTraineddata(destTessdataDir) {
     console.log(`Downloading tessdata: ${file} (${repo})`);
     const tmp = path.join(os.tmpdir(), `docreader-${file}-${Date.now()}`);
     await downloadToFile(url, tmp);
-    await fsp.rename(tmp, dest);
+    try {
+      await fsp.rename(tmp, dest);
+    } catch (e) {
+      // On Windows CI the temp dir can be on a different drive than the workspace (EXDEV).
+      if (e && (e.code === 'EXDEV' || e.code === 'EPERM')) {
+        await fsp.copyFile(tmp, dest);
+        await fsp.rm(tmp, { force: true });
+      } else {
+        throw e;
+      }
+    }
   }
 }
 
