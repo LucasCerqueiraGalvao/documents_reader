@@ -12,3 +12,5 @@ examples/electron_app/resources/python/**/docreader-runner*
 
 examples/electron_app/resources/tesseract/**
 !examples/electron_app/resources/tesseract/**/.gitkeep
+backup
+data/output/**
