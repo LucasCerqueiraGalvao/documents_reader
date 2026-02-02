@@ -29,11 +29,20 @@ function getBundledTesseractEnv() {
   const exe = process.platform === 'win32' ? 'tesseract.exe' : 'tesseract';
   const exePath = path.join(process.resourcesPath, 'tesseract', folder, exe);
   const tessdataDir = path.join(process.resourcesPath, 'tesseract', folder, 'tessdata');
+  const libDir = path.join(process.resourcesPath, 'tesseract', folder, 'lib');
 
   if (!fs.existsSync(exePath)) return null;
   const env = { TESSERACT_EXE: exePath };
   if (fs.existsSync(tessdataDir)) {
     env.TESSDATA_PREFIX = tessdataDir;
+  }
+
+  if (fs.existsSync(libDir)) {
+    if (process.platform === 'darwin') {
+      env.DYLD_LIBRARY_PATH = [libDir, process.env.DYLD_LIBRARY_PATH].filter(Boolean).join(':');
+    } else if (process.platform === 'linux') {
+      env.LD_LIBRARY_PATH = [libDir, process.env.LD_LIBRARY_PATH].filter(Boolean).join(':');
+    }
   }
   return env;
 }

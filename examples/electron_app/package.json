@@ -10,9 +10,12 @@
     "smoke": "node scripts/smoke.js",
     "build:python": "node scripts/build-python-runner.js",
     "smoke:python": "node scripts/smoke-python-runner.js",
+    "fetch:tesseract": "node scripts/fetch-tesseract.js",
+    "smoke:tesseract": "node scripts/smoke-tesseract.js",
     "pack": "electron-builder --dir",
     "dist:mac": "electron-builder --mac",
     "dist:win": "electron-builder --win",
+    "dist:win:full": "node scripts/dist-win-full.js",
     "dist:linux": "electron-builder --linux"
   },
   "devDependencies": {

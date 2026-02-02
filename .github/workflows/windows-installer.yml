@@ -1,0 +1,86 @@
+name: Build Windows Installer
+
+on:
+  workflow_dispatch:
+    inputs:
+      tesseract_win_url:
+        description: "Optional override for UB Mannheim Tesseract installer URL"
+        required: false
+        default: ""
+      tess_langs:
+        description: "Tesseract languages to bundle (e.g. eng+por)"
+        required: false
+        default: "eng+por"
+      tessdata_variant:
+        description: "tessdata variant: fast or best"
+        required: false
+        default: "fast"
+  push:
+    tags:
+      - "v*"
+
+permissions:
+  contents: write
+
+concurrency:
+  group: windows-installer-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  build:
+    runs-on: windows-latest
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: "20"
+
+      - name: Setup Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.9"
+
+      - name: Create venv and install Python deps
+        shell: pwsh
+        run: |
+          python -m venv .venv
+          .\.venv\Scripts\python -m pip install --upgrade pip
+          .\.venv\Scripts\python -m pip install -r requirements.txt
+
+      - name: Install Electron app deps
+        working-directory: examples/electron_app
+        shell: pwsh
+        run: npm install
+
+      - name: Build Windows installer (full)
+        working-directory: examples/electron_app
+        shell: pwsh
+        env:
+          # Optional override; if empty, script uses its default URL.
+          TESSERACT_WIN_URL: ${{ github.event_name == 'workflow_dispatch' && github.event.inputs.tesseract_win_url || '' }}
+          TESS_LANGS: ${{ github.event_name == 'workflow_dispatch' && github.event.inputs.tess_langs || 'eng+por' }}
+          TESSDATA_VARIANT: ${{ github.event_name == 'workflow_dispatch' && github.event.inputs.tessdata_variant || 'fast' }}
+        run: npm run dist:win:full
+
+      - name: Upload installer artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: DocumentsReader-windows-installer
+          if-no-files-found: error
+          path: |
+            examples/electron_app/dist/*.exe
+            examples/electron_app/dist/*.blockmap
+            examples/electron_app/dist/*.yml
+
+      - name: Create GitHub Release (tags)
+        if: startsWith(github.ref, 'refs/tags/')
+        uses: softprops/action-gh-release@v2
+        with:
+          files: |
+            examples/electron_app/dist/*.exe
+            examples/electron_app/dist/*.blockmap
+            examples/electron_app/dist/*.yml

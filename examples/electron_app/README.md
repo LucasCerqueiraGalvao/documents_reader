@@ -75,10 +75,17 @@ Em uma máquina Windows (recomendado):
 ```powershell
 cd examples/electron_app
 npm install
-npm run dist:win
+
+# Recomendado: gera tudo (runner Python + Tesseract + smoke tests + instalador)
+npm run dist:win:full
 ```
 
 Saída em `examples/electron_app/dist/` (instalador NSIS).
+
+Notas:
+
+- Esse comando precisa rodar no Windows porque o PyInstaller não gera `.exe` a partir do macOS.
+- Se você preferir rodar passo-a-passo: `npm run build:python`, `npm run fetch:tesseract`, `npm run smoke:python`, `npm run smoke:tesseract`, `npm run dist:win`.
 
 ### Linux
 
@@ -103,8 +110,26 @@ npm run dist:mac
 ### Observações importantes
 
 - Em build empacotado, o app **não precisa** de repo/.venv e o botão **Configurar Projeto** fica desnecessário.
-- OCR: se você quiser suportar PDFs escaneados sem depender de instalação externa, coloque o Tesseract embutido em `examples/electron_app/resources/tesseract/<plataforma>/`.
-  - O app tenta usar `tesseract/<plataforma>/tesseract(.exe)` e opcionalmente `tessdata/` via `TESSDATA_PREFIX`.
+- OCR (Tesseract): para suportar PDFs escaneados sem depender de instalação externa, empacote o Tesseract em `examples/electron_app/resources/tesseract/<plataforma>/`.
+
+Automatizado (Windows-first, macOS suportado):
+
+```bash
+cd examples/electron_app
+npm install
+npm run fetch:tesseract
+
+# Opcional: valida se o Tesseract empacotado executa
+npm run smoke:tesseract
+```
+
+Variáveis úteis:
+
+- `TESS_LANGS` (default `eng+por`)
+- `TESSDATA_VARIANT` (`fast` default, ou `best`)
+- Windows: `TESSERACT_WIN_URL` para trocar o instalador (se o link padrão mudar)
+
+O app empacotado tenta usar `tesseract/<plataforma>/tesseract(.exe)` e `tessdata/` via `TESSDATA_PREFIX`.
 
 ## Como funciona
 
