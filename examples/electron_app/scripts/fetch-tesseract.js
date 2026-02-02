@@ -224,9 +224,12 @@ async function resolveWindowsInstallerUrl() {
 
   // Fallback list: these may become stale, but cover common versions.
   return [
+    // Newer versions first
+    'https://digi.bib.uni-mannheim.de/tesseract/tesseract-ocr-w64-setup-5.4.0.20240606.exe',
+    'https://digi.bib.uni-mannheim.de/tesseract/tesseract-ocr-w64-setup-5.3.4.20240503.exe',
+    // Older versions as last resort
     'https://digi.bib.uni-mannheim.de/tesseract/tesseract-ocr-w64-setup-v5.3.0.20221214.exe',
     'https://digi.bib.uni-mannheim.de/tesseract/tesseract-ocr-w64-setup-v5.2.0.20220712.exe',
-    'https://digi.bib.uni-mannheim.de/tesseract/tesseract-ocr-w64-setup-v5.2.0.20220708.exe',
   ];
 }
 

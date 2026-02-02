@@ -105,7 +105,7 @@ def extract_packing_list_fields(text: str):
             i += 1
             continue
 
-        m_row = RE_ROW.match(line)
+        m_row = RE_ROW.match(ln)
         if m_row and current_model:
             carton_range = m_row.group(1).replace(" ", "")
             cartons = int(m_row.group(2))
@@ -170,5 +170,11 @@ def extract_packing_list_fields(text: str):
     fields["gross_weight_kg_total_calc"] = build_field(
         has_totals, False, gross_sum if has_totals else None, [], "calculated_sum"
     )
+
+    missing = [
+        key
+        for key, meta in (fields or {}).items()
+        if isinstance(meta, dict) and meta.get("required") and not meta.get("present")
+    ]
 
     return fields, missing, warnings
