@@ -68,6 +68,25 @@ async function ensureDir(p) {
   await fsp.mkdir(p, { recursive: true });
 }
 
+async function copyDirRecursive(srcDir, destDir) {
+  await ensureDir(destDir);
+  const entries = await fsp.readdir(srcDir, { withFileTypes: true });
+  for (const entry of entries) {
+    const src = path.join(srcDir, entry.name);
+    const dst = path.join(destDir, entry.name);
+
+    if (entry.isDirectory()) {
+      await copyDirRecursive(src, dst);
+      continue;
+    }
+
+    // Treat files and symlinks as files.
+    if (!fs.existsSync(dst)) {
+      await fsp.copyFile(src, dst);
+    }
+  }
+}
+
 async function rmrf(p) {
   await fsp.rm(p, { recursive: true, force: true });
 }
@@ -509,15 +528,7 @@ async function fetchWindows(destRoot, opts) {
   const installedTessdata = path.join(installRoot, 'tessdata');
   const destTessdata = path.join(destRoot, 'tessdata');
   if (fs.existsSync(installedTessdata)) {
-    await ensureDir(destTessdata);
-    const entries = await fsp.readdir(installedTessdata);
-    for (const name of entries) {
-      const src = path.join(installedTessdata, name);
-      const dst = path.join(destTessdata, name);
-      if (!fs.existsSync(dst)) {
-        await fsp.copyFile(src, dst);
-      }
-    }
+    await copyDirRecursive(installedTessdata, destTessdata);
   }
 
   await fetchTraineddata(destTessdata);
