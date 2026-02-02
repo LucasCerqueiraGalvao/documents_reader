@@ -113,6 +113,104 @@ function downloadToFile(url, destPath) {
   });
 }
 
+function fetchText(url) {
+  return new Promise((resolve, reject) => {
+    const handleResponse = (res, redirectsLeft) => {
+      if (res.statusCode && res.statusCode >= 300 && res.statusCode < 400 && res.headers.location) {
+        if (redirectsLeft <= 0) {
+          reject(new Error('Too many redirects while fetching text'));
+          return;
+        }
+        doReq(res.headers.location, redirectsLeft - 1);
+        return;
+      }
+
+      if (res.statusCode !== 200) {
+        reject(new Error(`Fetch failed: ${res.statusCode} ${res.statusMessage}`));
+        return;
+      }
+
+      res.setEncoding('utf-8');
+      let data = '';
+      res.on('data', (chunk) => {
+        data += chunk;
+      });
+      res.on('end', () => {
+        resolve(data);
+      });
+      res.on('error', reject);
+    };
+
+    const doReq = (u, redirectsLeft) => {
+      const req = https.get(u, (res) => handleResponse(res, redirectsLeft));
+      req.on('error', reject);
+    };
+
+    doReq(url, 5);
+  });
+}
+
+function discoverWindowsInstallerUrlsFromHtml(html, baseUrl) {
+  const out = new Set();
+  const text = String(html || '');
+
+  // Common filenames:
+  // - tesseract-ocr-w64-setup-5.4.0.20240606.exe
+  // - tesseract-ocr-w64-setup-v5.3.4.20240501.exe
+  const re = /href\s*=\s*"([^"]*tesseract-ocr-w64-setup[^"]*\.exe)"/gi;
+  let m;
+  while ((m = re.exec(text))) {
+    const href = m[1];
+    if (!href) continue;
+    if (/\.exe\b/i.test(href)) {
+      const abs = href.startsWith('http') ? href : new URL(href, baseUrl).toString();
+      out.add(abs);
+    }
+  }
+
+  // Some directory listings don't use hrefs exactly as above, so also scan raw filenames.
+  const re2 = /(tesseract-ocr-w64-setup[^\s"']*\.exe)/gi;
+  while ((m = re2.exec(text))) {
+    const file = m[1];
+    if (!file) continue;
+    out.add(new URL(file, baseUrl).toString());
+  }
+
+  return Array.from(out);
+}
+
+async function resolveWindowsInstallerUrl() {
+  const override = (process.env.TESSERACT_WIN_URL || '').trim();
+  if (override) return override;
+
+  const base = 'https://digi.bib.uni-mannheim.de/tesseract/';
+
+  // Best effort: discover the newest installer from the directory listing.
+  try {
+    const html = await fetchText(base);
+    const urls = discoverWindowsInstallerUrlsFromHtml(html, base)
+      .filter((u) => /tesseract-ocr-w64-setup/i.test(u))
+      .filter((u) => /\.exe$/i.test(u));
+
+    // Prefer newer versions by sorting with numeric compare on the filename.
+    const sorted = urls.toSorted((a, b) =>
+      path.basename(a).localeCompare(path.basename(b), undefined, { numeric: true, sensitivity: 'base' })
+    );
+
+    const best = sorted.at(-1);
+    if (best) return best;
+  } catch {
+    // ignore; fallback below
+  }
+
+  // Fallback list: these may become stale, but cover common versions.
+  return [
+    'https://digi.bib.uni-mannheim.de/tesseract/tesseract-ocr-w64-setup-v5.3.0.20221214.exe',
+    'https://digi.bib.uni-mannheim.de/tesseract/tesseract-ocr-w64-setup-v5.2.0.20220712.exe',
+    'https://digi.bib.uni-mannheim.de/tesseract/tesseract-ocr-w64-setup-v5.2.0.20220708.exe',
+  ];
+}
+
 async function fetchTraineddata(destTessdataDir) {
   // Keep it small: only what we need by default.
   const langs = (process.env.TESS_LANGS || 'eng+por')
@@ -308,16 +406,39 @@ async function copyMacDylibTree(tesseractPath, destRoot) {
 
 async function fetchWindows(destRoot, opts) {
   // You can override the URL if the default becomes unavailable.
-  const url =
-    process.env.TESSERACT_WIN_URL ||
-    'https://digi.bib.uni-mannheim.de/tesseract/tesseract-ocr-w64-setup-v5.3.4.20240501.exe';
+  // If not provided, we try to discover the latest installer from the UB Mannheim directory listing.
+  const resolved = await resolveWindowsInstallerUrl();
+  const candidateUrls = Array.isArray(resolved) ? resolved : [resolved];
 
   if (opts.clean) await rmrf(destRoot);
   await ensureDir(destRoot);
 
   console.log('Downloading Windows Tesseract installer...');
   const tmpInstaller = path.join(os.tmpdir(), `docreader-tesseract-${Date.now()}.exe`);
-  await downloadToFile(url, tmpInstaller);
+
+  let lastErr = null;
+  for (const url of candidateUrls) {
+    try {
+      console.log('Installer URL:', url);
+      await downloadToFile(url, tmpInstaller);
+      lastErr = null;
+      break;
+    } catch (e) {
+      lastErr = e;
+      console.warn(`WARN: download failed for ${url}: ${e?.message || e}`);
+      try {
+        await fsp.rm(tmpInstaller, { force: true });
+      } catch {
+        // ignore
+      }
+    }
+  }
+
+  if (lastErr) {
+    throw new Error(
+      `Failed to download Windows Tesseract installer. You can override with TESSERACT_WIN_URL.\n${lastErr?.message || lastErr}`
+    );
+  }
 
   console.log('Running silent install into:', destRoot);
 
