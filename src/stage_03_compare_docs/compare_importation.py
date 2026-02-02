@@ -34,7 +34,6 @@ from typing import Any, Dict, List, Optional, Tuple
 # Utilities
 # ------------------------
 
-
 def now_iso() -> str:
     return datetime.now().strftime("%Y-%m-%dT%H:%M:%S")
 
@@ -223,7 +222,7 @@ def list_to_set(v: Any) -> set:
 
 def _evidence_from_locations(field_obj: dict) -> List[str]:
     ev = []
-    for loc in field_obj.get("locations") or []:
+    for loc in (field_obj.get("locations") or []):
         snip = loc.get("snippet")
         if snip:
             ev.append(str(snip))
@@ -263,7 +262,6 @@ def get_field_any(doc: dict, keys: List[str]) -> Tuple[Any, List[str], Optional[
 # Incoterm vs Freight mode
 # ------------------------
 
-
 def norm_incoterm(v: Any) -> str:
     s = norm_str(v)
     s = s.replace("INCOTERMS", "").strip()
@@ -294,11 +292,10 @@ def expected_freight_mode_from_incoterm(incoterm: str) -> Optional[str]:
 # Comparison specs
 # ------------------------
 
-
 @dataclass
 class CheckSpec:
     name: str
-    kind: str  # "number"|"string"|"set"|"code_prefix"|"cnpj"|"docref"
+    kind: str                   # "number"|"string"|"set"|"code_prefix"|"cnpj"|"docref"
     a_keys: List[str]
     b_keys: List[str]
     abs_tol: float = 0.5
@@ -329,11 +326,7 @@ INVOICE_VS_PACKING = [
         name="Gross weight (kg)",
         kind="number",
         a_keys=["gross_weight_kg"],
-        b_keys=[
-            "gross_weight_kg_total_calc",
-            "gross_weight_kg",
-            "gross_weight_total_kg",
-        ],
+        b_keys=["gross_weight_kg_total_calc", "gross_weight_kg", "gross_weight_total_kg"],
         abs_tol=1.0,
         rel_tol=0.01,
     ),
@@ -363,11 +356,7 @@ PACKING_VS_BL = [
     CheckSpec(
         name="Gross weight (kg)",
         kind="number",
-        a_keys=[
-            "gross_weight_kg_total_calc",
-            "gross_weight_kg",
-            "gross_weight_total_kg",
-        ],
+        a_keys=["gross_weight_kg_total_calc", "gross_weight_kg", "gross_weight_total_kg"],
         b_keys=["gross_weight_kg"],
         abs_tol=1.0,
         rel_tol=0.01,
@@ -431,10 +420,7 @@ DI_LI_VS_BASE = [
 # Core compare
 # ------------------------
 
-
-def compare_pair(
-    doc_a: dict, doc_b: dict, specs: List[CheckSpec], label: str
-) -> List[dict]:
+def compare_pair(doc_a: dict, doc_b: dict, specs: List[CheckSpec], label: str) -> List[dict]:
     out: List[dict] = []
 
     for spec in specs:
@@ -450,156 +436,138 @@ def compare_pair(
             missing_side = "b"
 
         if missing_side:
-            out.append(
-                {
-                    "pair": label,
-                    "check": spec.name,
-                    "status": "skipped",
-                    "reason": f"missing_on_{missing_side}",
-                    "a_key_used": a_used,
-                    "b_key_used": b_used,
-                    "a_value": None if is_blank(va) else va,
-                    "b_value": None if is_blank(vb) else vb,
-                }
-            )
+            out.append({
+                "pair": label,
+                "check": spec.name,
+                "status": "skipped",
+                "reason": f"missing_on_{missing_side}",
+                "a_key_used": a_used,
+                "b_key_used": b_used,
+                "a_value": None if is_blank(va) else va,
+                "b_value": None if is_blank(vb) else vb,
+            })
             continue
 
         if spec.kind == "number":
             fa = to_float(va)
             fb = to_float(vb)
             if fa is None or fb is None:
-                out.append(
-                    {
-                        "pair": label,
-                        "check": spec.name,
-                        "status": "skipped",
-                        "reason": "not_numeric",
-                        "a_key_used": a_used,
-                        "b_key_used": b_used,
-                        "a_value": va,
-                        "b_value": vb,
-                    }
-                )
+                out.append({
+                    "pair": label,
+                    "check": spec.name,
+                    "status": "skipped",
+                    "reason": "not_numeric",
+                    "a_key_used": a_used,
+                    "b_key_used": b_used,
+                    "a_value": va,
+                    "b_value": vb,
+                })
                 continue
 
             ok = num_close(fa, fb, abs_tol=spec.abs_tol, rel_tol=spec.rel_tol)
-            out.append(
-                {
-                    "pair": label,
-                    "check": spec.name,
-                    "status": "match" if ok else "divergent",
-                    "a_key_used": a_used,
-                    "b_key_used": b_used,
-                    "a_value": fa,
-                    "b_value": fb,
-                    "tolerance": {"abs_tol": spec.abs_tol, "rel_tol": spec.rel_tol},
-                    "evidence": {"a": eva[:2], "b": evb[:2]},
-                }
-            )
+            out.append({
+                "pair": label,
+                "check": spec.name,
+                "status": "match" if ok else "divergent",
+                "a_key_used": a_used,
+                "b_key_used": b_used,
+                "a_value": fa,
+                "b_value": fb,
+                "tolerance": {"abs_tol": spec.abs_tol, "rel_tol": spec.rel_tol},
+                "evidence": {"a": eva[:2], "b": evb[:2]},
+            })
             continue
 
         if spec.kind == "string":
             ok = token_overlap_close(va, vb)
-            out.append(
-                {
-                    "pair": label,
-                    "check": spec.name,
-                    "status": "match" if ok else "divergent",
-                    "a_key_used": a_used,
-                    "b_key_used": b_used,
-                    "a_value": va,
-                    "b_value": vb,
-                    "evidence": {"a": eva[:2], "b": evb[:2]},
-                }
-            )
+            out.append({
+                "pair": label,
+                "check": spec.name,
+                "status": "match" if ok else "divergent",
+                "a_key_used": a_used,
+                "b_key_used": b_used,
+                "a_value": va,
+                "b_value": vb,
+                "evidence": {"a": eva[:2], "b": evb[:2]},
+            })
             continue
 
         if spec.kind == "cnpj":
             ok = cnpj_close(va, vb)
-            out.append(
-                {
-                    "pair": label,
-                    "check": spec.name,
-                    "status": "match" if ok else "divergent",
-                    "a_key_used": a_used,
-                    "b_key_used": b_used,
-                    "a_value": va,
-                    "b_value": vb,
-                    "a_digits": digits_only(va),
-                    "b_digits": digits_only(vb),
-                    "evidence": {"a": eva[:2], "b": evb[:2]},
-                }
-            )
+            out.append({
+                "pair": label,
+                "check": spec.name,
+                "status": "match" if ok else "divergent",
+                "a_key_used": a_used,
+                "b_key_used": b_used,
+                "a_value": va,
+                "b_value": vb,
+                "a_digits": digits_only(va),
+                "b_digits": digits_only(vb),
+                "evidence": {"a": eva[:2], "b": evb[:2]},
+            })
             continue
 
         if spec.kind == "docref":
             ok = docref_close(va, vb)
-            out.append(
-                {
-                    "pair": label,
-                    "check": spec.name,
-                    "status": "match" if ok else "divergent",
-                    "a_key_used": a_used,
-                    "b_key_used": b_used,
-                    "a_value": va,
-                    "b_value": vb,
-                    "note": "accepts trailing '-P' / 'P' on one side",
-                    "evidence": {"a": eva[:2], "b": evb[:2]},
-                }
-            )
+            out.append({
+                "pair": label,
+                "check": spec.name,
+                "status": "match" if ok else "divergent",
+                "a_key_used": a_used,
+                "b_key_used": b_used,
+                "a_value": va,
+                "b_value": vb,
+                "note": "accepts trailing '-P' / 'P' on one side",
+                "evidence": {"a": eva[:2], "b": evb[:2]},
+            })
             continue
 
         if spec.kind == "set":
             sa = list_to_set(va)
             sb = list_to_set(vb)
             if not sa or not sb:
-                out.append(
-                    {
-                        "pair": label,
-                        "check": spec.name,
-                        "status": "skipped",
-                        "reason": "empty_set",
-                        "a_key_used": a_used,
-                        "b_key_used": b_used,
-                        "a_value": va,
-                        "b_value": vb,
-                    }
-                )
-                continue
-            ok = sa == sb
-            out.append(
-                {
+                out.append({
                     "pair": label,
                     "check": spec.name,
-                    "status": "match" if ok else "divergent",
-                    "a_key_used": a_used,
-                    "b_key_used": b_used,
-                    "a_value": sorted(list(sa))[:30],
-                    "b_value": sorted(list(sb))[:30],
-                    "diff": {
-                        "a_minus_b": sorted(list(sa - sb))[:30],
-                        "b_minus_a": sorted(list(sb - sa))[:30],
-                    },
-                    "evidence": {"a": eva[:2], "b": evb[:2]},
-                }
-            )
-            continue
-
-        if spec.kind == "code_prefix":
-            ok = code_close_prefix(va, vb)
-            out.append(
-                {
-                    "pair": label,
-                    "check": spec.name,
-                    "status": "match" if ok else "divergent",
+                    "status": "skipped",
+                    "reason": "empty_set",
                     "a_key_used": a_used,
                     "b_key_used": b_used,
                     "a_value": va,
                     "b_value": vb,
-                    "note": "prefix_match_allowed_for_4_or_6_digits",
-                    "evidence": {"a": eva[:2], "b": evb[:2]},
-                }
-            )
+                })
+                continue
+            ok = sa == sb
+            out.append({
+                "pair": label,
+                "check": spec.name,
+                "status": "match" if ok else "divergent",
+                "a_key_used": a_used,
+                "b_key_used": b_used,
+                "a_value": sorted(list(sa))[:30],
+                "b_value": sorted(list(sb))[:30],
+                "diff": {
+                    "a_minus_b": sorted(list(sa - sb))[:30],
+                    "b_minus_a": sorted(list(sb - sa))[:30],
+                },
+                "evidence": {"a": eva[:2], "b": evb[:2]},
+            })
+            continue
+
+        if spec.kind == "code_prefix":
+            ok = code_close_prefix(va, vb)
+            out.append({
+                "pair": label,
+                "check": spec.name,
+                "status": "match" if ok else "divergent",
+                "a_key_used": a_used,
+                "b_key_used": b_used,
+                "a_value": va,
+                "b_value": vb,
+                "note": "prefix_match_allowed_for_4_or_6_digits",
+                "evidence": {"a": eva[:2], "b": evb[:2]},
+            })
             continue
 
     return out
@@ -615,20 +583,14 @@ def pick_docs_by_kind(docs: List[dict]) -> Dict[str, List[dict]]:
 
 def doc_label(d: dict) -> str:
     src = d.get("source") or {}
-    return (
-        src.get("original_file")
-        or src.get("stage01_file")
-        or (src.get("doc_kind") or "doc")
-    )
+    return src.get("original_file") or src.get("stage01_file") or (src.get("doc_kind") or "doc")
 
 
 def get_doc_kind(d: dict) -> str:
     return (d.get("source") or {}).get("doc_kind") or "unknown"
 
 
-def group_check_equal_string(
-    name: str, docs: List[dict], aliases_by_kind: Dict[str, List[str]]
-) -> dict:
+def group_check_equal_string(name: str, docs: List[dict], aliases_by_kind: Dict[str, List[str]]) -> dict:
     items = []
     values_norm = []
     missing = []
@@ -639,15 +601,13 @@ def group_check_equal_string(
         lbl = doc_label(d)
         if is_blank(v):
             missing.append(lbl)
-        items.append(
-            {
-                "doc": lbl,
-                "doc_kind": k,
-                "key_used": used,
-                "value": v,
-                "evidence": (ev[:2] if ev else []),
-            }
-        )
+        items.append({
+            "doc": lbl,
+            "doc_kind": k,
+            "key_used": used,
+            "value": v,
+            "evidence": (ev[:2] if ev else []),
+        })
         values_norm.append(norm_str(v))
 
     present_values = [v for v in values_norm if v]
@@ -671,9 +631,7 @@ def group_check_equal_string(
     }
 
 
-def group_check_equal_cnpj(
-    name: str, docs: List[dict], aliases_by_kind: Dict[str, List[str]]
-) -> dict:
+def group_check_equal_cnpj(name: str, docs: List[dict], aliases_by_kind: Dict[str, List[str]]) -> dict:
     items = []
     values = []
     missing = []
@@ -685,16 +643,14 @@ def group_check_equal_cnpj(
         if is_blank(v):
             missing.append(lbl)
         dv = digits_only(v)
-        items.append(
-            {
-                "doc": lbl,
-                "doc_kind": k,
-                "key_used": used,
-                "value": v,
-                "digits": dv,
-                "evidence": (ev[:2] if ev else []),
-            }
-        )
+        items.append({
+            "doc": lbl,
+            "doc_kind": k,
+            "key_used": used,
+            "value": v,
+            "digits": dv,
+            "evidence": (ev[:2] if ev else []),
+        })
         values.append(dv)
 
     present = [x for x in values if x]
@@ -718,9 +674,7 @@ def group_check_equal_cnpj(
     }
 
 
-def rule_check_incoterm_vs_freight_mode(
-    invoice_docs: List[dict], bl_docs: List[dict]
-) -> List[dict]:
+def rule_check_incoterm_vs_freight_mode(invoice_docs: List[dict], bl_docs: List[dict]) -> List[dict]:
     out = []
     for inv in invoice_docs:
         for bl in bl_docs:
@@ -729,64 +683,54 @@ def rule_check_incoterm_vs_freight_mode(
 
             inc, inc_ev, inc_k = get_field_any(inv, ["incoterm", "incoterms"])
             # IMPORTANT: your BL has freight_terms
-            fm, fm_ev, fm_k = get_field_any(
-                bl, ["freight_terms", "freight_mode", "freight", "freight_term"]
-            )
+            fm, fm_ev, fm_k = get_field_any(bl, ["freight_terms", "freight_mode", "freight", "freight_term"])
 
             if is_blank(inc) or is_blank(fm):
-                out.append(
-                    {
-                        "rule_check": "incoterm_vs_freight_mode",
-                        "pair": f"{inv_lbl} <> {bl_lbl}",
-                        "status": "skipped",
-                        "reason": "missing_incoterm_or_freight_mode",
-                        "invoice_incoterm": inc,
-                        "bl_freight_mode": fm,
-                        "keys_used": {"invoice": inc_k, "bl": fm_k},
-                        "evidence": {"invoice": inc_ev[:2], "bl": fm_ev[:2]},
-                    }
-                )
+                out.append({
+                    "rule_check": "incoterm_vs_freight_mode",
+                    "pair": f"{inv_lbl} <> {bl_lbl}",
+                    "status": "skipped",
+                    "reason": "missing_incoterm_or_freight_mode",
+                    "invoice_incoterm": inc,
+                    "bl_freight_mode": fm,
+                    "keys_used": {"invoice": inc_k, "bl": fm_k},
+                    "evidence": {"invoice": inc_ev[:2], "bl": fm_ev[:2]},
+                })
                 continue
 
             expected = expected_freight_mode_from_incoterm(str(inc))
             actual = norm_freight_mode(fm)
 
             if expected is None:
-                out.append(
-                    {
-                        "rule_check": "incoterm_vs_freight_mode",
-                        "pair": f"{inv_lbl} <> {bl_lbl}",
-                        "status": "skipped",
-                        "reason": "incoterm_not_in_mapping",
-                        "invoice_incoterm": inc,
-                        "expected_mode": None,
-                        "bl_freight_mode": fm,
-                        "keys_used": {"invoice": inc_k, "bl": fm_k},
-                        "evidence": {"invoice": inc_ev[:2], "bl": fm_ev[:2]},
-                    }
-                )
-                continue
-
-            ok = actual == expected
-            out.append(
-                {
+                out.append({
                     "rule_check": "incoterm_vs_freight_mode",
                     "pair": f"{inv_lbl} <> {bl_lbl}",
-                    "status": "match" if ok else "divergent",
+                    "status": "skipped",
+                    "reason": "incoterm_not_in_mapping",
                     "invoice_incoterm": inc,
-                    "expected_mode": expected,
-                    "bl_freight_mode": actual,
+                    "expected_mode": None,
+                    "bl_freight_mode": fm,
                     "keys_used": {"invoice": inc_k, "bl": fm_k},
                     "evidence": {"invoice": inc_ev[:2], "bl": fm_ev[:2]},
-                }
-            )
+                })
+                continue
+
+            ok = (actual == expected)
+            out.append({
+                "rule_check": "incoterm_vs_freight_mode",
+                "pair": f"{inv_lbl} <> {bl_lbl}",
+                "status": "match" if ok else "divergent",
+                "invoice_incoterm": inc,
+                "expected_mode": expected,
+                "bl_freight_mode": actual,
+                "keys_used": {"invoice": inc_k, "bl": fm_k},
+                "evidence": {"invoice": inc_ev[:2], "bl": fm_ev[:2]},
+            })
 
     return out
 
 
-def pair_by_reference(
-    invoices: List[dict], packings: List[dict]
-) -> List[Tuple[dict, dict]]:
+def pair_by_reference(invoices: List[dict], packings: List[dict]) -> List[Tuple[dict, dict]]:
     """
     Pair invoice with packing using:
       invoice.invoice_number  <-> packing.packing_list_number (docref_close)
@@ -818,20 +762,16 @@ def pair_by_reference(
     return pairs
 
 
-def run_stage_03_comparison(
-    in_dir: Path, out_dir: Path, verbose: bool = True
-) -> Dict[str, Any]:
-    """
-    Execute Stage 03: Compare and validate fields across documents
+def main() -> None:
+    ap = argparse.ArgumentParser()
+    ap.add_argument("--input", required=True, help="Pasta do Stage 02 importation (com *_fields.json)")
+    ap.add_argument("--output", required=True, help="Pasta de saída do Stage 03 (comparação)")
+    args = ap.parse_args()
 
-    Args:
-        in_dir: Directory with Stage 02 *_fields.json files
-        out_dir: Output directory for comparison results
-        verbose: Print progress messages
+    run_stage_03_comparison(in_dir=Path(args.input), out_dir=Path(args.output), verbose=True)
 
-    Returns:
-        Dictionary with comparison results and warnings
-    """
+
+def run_stage_03_comparison(in_dir: Path, out_dir: Path, verbose: bool = True) -> Dict[str, Any]:
     out_dir.mkdir(parents=True, exist_ok=True)
 
     files = sorted(
@@ -839,10 +779,9 @@ def run_stage_03_comparison(
     )
     if not files:
         return {
-            "success": False,
+            "processed_count": 0,
             "warnings": [f"No *_fields.json files found in: {in_dir}"],
-            "comparisons": [],
-            "divergences": 0,
+            "output_file": "",
         }
 
     docs = [read_json(p) for p in files]
@@ -850,11 +789,7 @@ def run_stage_03_comparison(
 
     invoices = by_kind.get("invoice", []) + by_kind.get("commercial_invoice", [])
     packings = by_kind.get("packing_list", []) + by_kind.get("pl", [])
-    bls = (
-        by_kind.get("bl", [])
-        + by_kind.get("hbl", [])
-        + by_kind.get("bill_of_lading", [])
-    )
+    bls = by_kind.get("bl", []) + by_kind.get("hbl", []) + by_kind.get("bill_of_lading", [])
     dis = by_kind.get("di", []) + by_kind.get("conferencia_di", [])
     lis = by_kind.get("li", []) + by_kind.get("conferencia_li", [])
 
@@ -875,7 +810,6 @@ def run_stage_03_comparison(
             }
         )
 
-    # Pair comparisons
     for inv, pl in pair_by_reference(invoices, packings):
         label = f"invoice_vs_packing | {doc_label(inv)} <> {doc_label(pl)}"
         comparisons.extend(compare_pair(inv, pl, INVOICE_VS_PACKING, label))
@@ -900,10 +834,7 @@ def run_stage_03_comparison(
             label = f"li_vs_base | {doc_label(li)} <> {doc_label(base)}"
             comparisons.extend(compare_pair(li, base, DI_LI_VS_BASE, label))
 
-    # -------------------------
-    # Group checks
-    # -------------------------
-    core_docs_for_shipper: List[dict] = []
+    core_docs_for_shipper = []
     core_docs_for_shipper.extend(invoices[:1] if invoices else [])
     core_docs_for_shipper.extend(packings[:1] if packings else [])
     core_docs_for_shipper.extend(bls[:1] if bls else [])
@@ -915,32 +846,17 @@ def run_stage_03_comparison(
                 docs=core_docs_for_shipper,
                 aliases_by_kind={
                     "invoice": ["shipper_name", "exporter_name", "shipper", "exporter"],
-                    "commercial_invoice": [
-                        "shipper_name",
-                        "exporter_name",
-                        "shipper",
-                        "exporter",
-                    ],
-                    "packing_list": [
-                        "shipper_name",
-                        "exporter_name",
-                        "shipper",
-                        "exporter",
-                    ],
+                    "commercial_invoice": ["shipper_name", "exporter_name", "shipper", "exporter"],
+                    "packing_list": ["shipper_name", "exporter_name", "shipper", "exporter"],
                     "pl": ["shipper_name", "exporter_name", "shipper", "exporter"],
                     "bl": ["shipper_name", "exporter_name", "shipper", "exporter"],
                     "hbl": ["shipper_name", "exporter_name", "shipper", "exporter"],
-                    "bill_of_lading": [
-                        "shipper_name",
-                        "exporter_name",
-                        "shipper",
-                        "exporter",
-                    ],
+                    "bill_of_lading": ["shipper_name", "exporter_name", "shipper", "exporter"],
                 },
             )
         )
 
-    core_docs_for_cnpj: List[dict] = []
+    core_docs_for_cnpj = []
     core_docs_for_cnpj.extend(invoices[:1] if invoices else [])
     core_docs_for_cnpj.extend(packings[:1] if packings else [])
     core_docs_for_cnpj.extend(bls[:1] if bls else [])
@@ -962,12 +878,8 @@ def run_stage_03_comparison(
             )
         )
 
-    # -------------------------
-    # Rule checks
-    # -------------------------
     rule_checks.extend(rule_check_incoterm_vs_freight_mode(invoices, bls))
 
-    # Summary
     total = len(comparisons)
     matches = sum(1 for c in comparisons if c["status"] == "match")
     divs = sum(1 for c in comparisons if c["status"] == "divergent")
@@ -1013,25 +925,14 @@ def run_stage_03_comparison(
     write_json(out_path, out)
 
     if verbose:
-        print("Completed.")
-        print(f"Output: {out_path}")
+        print("Concluído.")
+        print(f"Saída: {out_path}")
 
     return {
-        "success": True,
+        "processed_count": len(files),
         "warnings": [],
         "output_file": str(out_path),
-        "total_comparisons": total,
-        "divergences": divs + gc_div + rc_div,
     }
-
-
-def main() -> None:
-    ap = argparse.ArgumentParser()
-    ap.add_argument("--input", required=True, help="Stage 02 folder with *_fields.json")
-    ap.add_argument("--output", required=True, help="Stage 03 output folder")
-    args = ap.parse_args()
-
-    run_stage_03_comparison(in_dir=Path(args.input), out_dir=Path(args.output))
 
 
 if __name__ == "__main__":

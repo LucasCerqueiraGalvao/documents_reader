@@ -15,402 +15,377 @@ Return signature:
 from __future__ import annotations
 
 import re
+from typing import Any, Dict, List, Optional, Tuple
 
-try:
-    from .common import (
-        build_field,
-        find_first,
-        find_cnpj,
-        find_company_line_before_cnpj,
-        parse_mixed_number,
-    )
-except ImportError:  # pragma: no cover
-    from common import (
-        build_field,
-        find_first,
-        find_cnpj,
-        find_company_line_before_cnpj,
-        parse_mixed_number,
-    )
 
-RE_ANY_DOC_NO = re.compile(r"(?is)\b([A-Z]{1,4}-\d{3,8}(?:-P)?)\b")  # DN-24139-P
-RE_TOTAL_UNITS_CARTONS = re.compile(r"(?is)\b(\d+)\s+UNITS?\s*/\s*(\d+)\s+CARTONS?\b")
-RE_MODEL = re.compile(r"(?im)^\s*\*\s*MODEL:\s*([A-Z0-9]+)\b")
+# -----------------------------
+# Helpers
+# -----------------------------
+def _clean_spaces(s: str) -> str:
+    return re.sub(r"\s+", " ", (s or "")).strip()
 
-# linha de pesos logo abaixo (normalmente: "597 792")
-RE_WEIGHTS_LINE = re.compile(r"(?im)^\s*([0-9\.,]+)\s+([0-9\.,]+)\s*$")
-
-# linha TOTAL do documento (ex.: "TOTAL : 33 CARTONS 7,980 9,825 53.772")
-RE_TOTAL_SUMMARY = re.compile(
-    r"(?is)\bTOTAL\b\s*:?\s*(\d+)\s*CARTONS?\s+([0-9\.,]+)\s+([0-9\.,]+)\s+([0-9\.,]+)"
-)
-
-RE_SHIPPER_HINT = re.compile(r"(?is)\b(SUZUKI[^\n]{0,80})\b")
-
+def _digits(s: str) -> str:
+    """Mantém só dígitos (útil p/ CNPJ)."""
+    return re.sub(r"\D+", "", str(s or ""))
 
 def _clean_company_name(raw: str) -> str:
-    s = (raw or "").strip()
+    """Normaliza nome de empresa extraído com ruído.
+
+    - Remove data do final (ex: "AUG. 28,2025")
+    - Se achar sufixo societário (LTDA/LTD/SA/etc.), corta até ele
+    - Remove trechos comuns de BL (RECEIVED BY..., TEL..., etc.)
+    """
+    s = _clean_spaces(raw)
+
+    # corrigir OCR quebrando palavra
     s = re.sub(r"\bVEICU\s+LOS\b", "VEICULOS", s, flags=re.I)
-    # remover datas comuns no final (ex: AUG. 28,2025)
+
+    # cortar em keywords que às vezes grudam no nome
+    upper = s.upper()
+    for kw in [" RECEIVED BY", " RECEIVED", " PARTY TO CONTACT", " TEL", " PHONE", " PH:"]:
+        idx = upper.find(kw)
+        if idx > 0:
+            s = s[:idx].strip()
+            upper = s.upper()
+
+    # remover data do final (ex: AUG. 28,2025)
     s = re.sub(
         r"\b(JAN|FEB|MAR|APR|MAY|JUN|JUL|AUG|SEP|OCT|NOV|DEC)\.?\s+\d{1,2},\s*\d{4}\b",
         "",
         s,
         flags=re.I,
     ).strip()
-    # cortar em ruídos que às vezes grudam no bloco do nome
-    upper = s.upper()
-    for kw in [
-        " RECEIVED BY",
-        " RECEIVED",
-        " PARTY TO CONTACT",
-        " TEL",
-        " PHONE",
-        " PH:",
-    ]:
-        idx = upper.find(kw)
-        if idx > 0:
-            s = s[:idx].strip()
-            upper = s.upper()
-    s = re.sub(r"\s+", " ", s).strip(" ,;-\t")
+
+    # cortar no sufixo societário (se existir)
+    m = re.search(r"\b(LTDA\.?|LTD\.?|S\.?A\.?|S/A|SA|INC\.?|LLC|CORPORATION|CORP\.?)\b", s, flags=re.I)
+    if m:
+        s = s[: m.end()].strip()
+
+    # limpeza final
+    s = re.sub(r"[\s,;\-]+$", "", s).strip()
     return s
 
-
-def _find_total_summary(
-    text: str,
-) -> tuple[int | None, float | None, float | None, float | None, str | None]:
-    m = RE_TOTAL_SUMMARY.search(text or "")
-    if not m:
-        return None, None, None, None, None
-    cartons = int(m.group(1))
-    net = parse_mixed_number(m.group(2))
-    gross = parse_mixed_number(m.group(3))
-    m3 = parse_mixed_number(m.group(4))
-    return cartons, net, gross, m3, m.group(0)
+def _present(v: Any) -> bool:
+    if v is None:
+        return False
+    if isinstance(v, str) and not v.strip():
+        return False
+    if isinstance(v, list) and len(v) == 0:
+        return False
+    return True
 
 
-def _model_from_line(line: str) -> str | None:
-    m_model = re.search(r"\*\s*MODEL\s*:\s*([A-Z0-9\-]+)", line or "", flags=re.I)
-    if not m_model:
-        return None
-    return m_model.group(1).strip() or None
-
-
-def _next_nonempty_line(lines: list[str], start_idx: int) -> int | None:
-    j = start_idx
-    while j < len(lines) and not (lines[j] or "").strip():
-        j += 1
-    return j if j < len(lines) else None
-
-
-def _try_parse_item_with_weights(
-    lines: list[str],
-    idx: int,
-    current_model: str,
-) -> tuple[dict | None, int]:
-    parsed = _try_parse_item_row(lines[idx])
-    if parsed is None:
-        return None, idx + 1
-
-    weights_idx = _next_nonempty_line(lines, idx + 1)
-    net_total = None
-    gross_total = None
-    ev_total = None
-
-    next_idx = idx + 1
-    if weights_idx is not None:
-        m_tot = RE_WEIGHTS_LINE.match((lines[weights_idx] or "").strip())
-        if m_tot:
-            net_total = parse_mixed_number(m_tot.group(1))
-            gross_total = parse_mixed_number(m_tot.group(2))
-            ev_total = m_tot.group(0)
-            next_idx = weights_idx + 1
-
-    item = {
-        "model": current_model,
-        "carton_range": parsed["carton_range"],
-        "cartons": parsed["cartons"],
-        "net_weight_per_pkg_kg": parsed["net_weight_per_pkg_kg"],
-        "gross_weight_per_pkg_kg": parsed["gross_weight_per_pkg_kg"],
-        "measurement_per_pkg_m3": parsed["measurement_per_pkg_m3"],
-        "measurement_total_m3": parsed["measurement_total_m3"],
-        "net_weight_total_kg": net_total,
-        "gross_weight_total_kg": gross_total,
-        "evidence_row": (lines[idx] or "").strip(),
-        "evidence_totals": ev_total,
+def _mk_field(value: Any, required: bool, evidence: List[str], method: str) -> Dict[str, Any]:
+    return {
+        "present": bool(_present(value)),
+        "required": bool(required),
+        "value": value if _present(value) else None,
+        "evidence": evidence or [],
+        "method": method,
     }
-    return item, next_idx
 
 
-def _extract_items(text: str) -> list[dict]:
-    lines = (text or "").splitlines()
+def _parse_number(v: str) -> Optional[float]:
+    if v is None:
+        return None
+    s = str(v).strip()
+    if not s:
+        return None
 
-    current_model: str | None = None
-    items: list[dict] = []
+    s = re.sub(r"[^\d,.\-]", "", s)
+    if not s:
+        return None
+
+    # 7,980 (milhar com vírgula)
+    if re.fullmatch(r"-?\d{1,3}(,\d{3})+", s):
+        s = s.replace(",", "")
+        try:
+            return float(s)
+        except ValueError:
+            return None
+
+    # 7,980.000
+    if re.fullmatch(r"-?\d{1,3}(,\d{3})+(\.\d+)?", s):
+        s = s.replace(",", "")
+        try:
+            return float(s)
+        except ValueError:
+            return None
+
+    # 7.980,00
+    if re.fullmatch(r"-?\d{1,3}(\.\d{3})+(,\d+)?", s):
+        s = s.replace(".", "").replace(",", ".")
+        try:
+            return float(s)
+        except ValueError:
+            return None
+
+    # só vírgula
+    if "," in s and "." not in s:
+        left, right = s.split(",", 1)
+        if len(right) == 3 and len(left) <= 3:
+            s = left + right
+        else:
+            s = left + "." + right
+        try:
+            return float(s)
+        except ValueError:
+            return None
+
+    # só ponto
+    if "." in s and "," not in s:
+        left, right = s.split(".", 1)
+        if len(right) == 3 and len(left) <= 3:
+            s = left + right
+        try:
+            return float(s)
+        except ValueError:
+            return None
+
+    # ambos
+    last_comma = s.rfind(",")
+    last_dot = s.rfind(".")
+    if last_dot > last_comma:
+        s = s.replace(",", "")
+    else:
+        s = s.replace(".", "").replace(",", ".")
+
+    try:
+        return float(s)
+    except ValueError:
+        return None
+
+
+def _lines(text: str) -> List[str]:
+    return [ln.strip() for ln in (text or "").splitlines() if ln.strip()]
+
+
+def _find_invoice_number(lines: List[str]) -> Tuple[Optional[str], List[str]]:
+    # Ex: "DN-24139-P" ou "DN-24139"
+    for ln in lines:
+        m = re.search(r"\b([A-Z]{1,4}-\d{3,10}(?:-[A-Z])?)\b", ln)
+        if m and "PACKING" in ln.upper():
+            return m.group(1), [ln]
+    # fallback: pega primeiro DN-xxxxx
+    for ln in lines:
+        m = re.search(r"\b([A-Z]{1,4}-\d{3,10}(?:-[A-Z])?)\b", ln)
+        if m:
+            return m.group(1), [ln]
+    return None, []
+
+def _find_importer_name_cnpj(lines: List[str]) -> Tuple[Optional[str], Optional[str], List[str]]:
+    """Extrai Importer (Consignee) e CNPJ no Packing List.
+
+    Heurística preferida (mais consistente):
+      - localizar a linha do CNPJ
+      - pegar a linha imediatamente ANTERIOR como nome
+    Depois aplica limpeza para remover data/ruído.
+
+    Fallback:
+      - procurar 'ACCOUNT OF' e usar a próxima linha como nome
+    """
+    evidence: List[str] = []
+
+    # 1) localizar CNPJ e pegar linha anterior como nome
+    cnpj_idx = None
+    cnpj_raw_line = None
+    cnpj = None
+
+    for i, ln in enumerate(lines):
+        m = re.search(r"\bCNPJ\s*[:#]?\s*([0-9][0-9\.\-/]{11,})\b", ln, flags=re.I)
+        if m:
+            cnpj_idx = i
+            cnpj_raw_line = ln.strip()
+            cnpj = _digits(m.group(1))
+            break
+
+    name = None
+    if cnpj_idx is not None:
+        # volta até achar uma linha boa (não vazia / não label)
+        for j in range(cnpj_idx - 1, max(-1, cnpj_idx - 6), -1):
+            cand = (lines[j] or "").strip()
+            if not cand:
+                continue
+            if re.search(r"\b(ACCOUNT OF|CNPJ|INVOICE|PACKING|P\.)\b", cand, flags=re.I):
+                continue
+            name = _clean_company_name(cand)
+            evidence.append(cand)
+            break
+
+        if cnpj_raw_line:
+            evidence.append(cnpj_raw_line)
+
+    # 2) fallback: ACCOUNT OF + próxima linha
+    if not name:
+        for i, ln in enumerate(lines):
+            if re.search(r"\bACCOUNT OF\b", ln, flags=re.I):
+                for j in range(i + 1, min(i + 6, len(lines))):
+                    cand = (lines[j] or "").strip()
+                    if not cand:
+                        continue
+                    if re.search(r"\b(CNPJ|INVOICE|PACKING)\b", cand, flags=re.I):
+                        continue
+                    name = _clean_company_name(cand)
+                    evidence.append(cand)
+                    break
+                break
+
+    return (name or None), (cnpj or None), evidence
+
+# -----------------------------
+# Table parsing (critical fix)
+# -----------------------------
+ROW_RE = re.compile(
+    r"""^
+    (?P<no>\d+(?:\s*-\s*\d+)?)          # "19 - 21" ou "5"
+    \s+
+    (?P<packs>\d+)\s+
+    CARTON(?:S)?                        # CARTON ou CARTONS
+    \s+
+    @(?P<nw>[0-9\.,]+)\s+@(?P<gw>[0-9\.,]+)  # @199 @264 (não é o peso final, mas ajuda a reconhecer a linha)
+    \s+
+    (?P<m3_each>[0-9\.,]+)\s+
+    (?P<m3_total>[0-9\.,]+)
+    \s*$
+    """,
+    re.IGNORECASE | re.VERBOSE,
+)
+
+WEIGHTS_LINE_RE = re.compile(r"([0-9][0-9\.,]*)")
+
+
+def _extract_items(lines: List[str]) -> Tuple[List[dict], List[str]]:
+    items: List[dict] = []
+    evidence: List[str] = []
+    current_model: Optional[str] = None
 
     i = 0
     while i < len(lines):
         ln = lines[i]
 
-        model = _model_from_line(ln)
-        if model:
-            current_model = model
+        # model marker
+        m_model = re.search(r"\*\s*MODEL\s*:\s*([A-Z0-9\-]+)", ln, flags=re.I)
+        if m_model:
+            current_model = m_model.group(1).strip()
             i += 1
             continue
 
-        if not current_model:
-            i += 1
-            continue
+        m = ROW_RE.match(ln)
+        if m:
+            # weights are on the next non-empty line (ex: "323 388")
+            j = i + 1
+            while j < len(lines) and not lines[j].strip():
+                j += 1
 
-        item, next_i = _try_parse_item_with_weights(lines, i, current_model)
-        if item is not None:
+            net_val = None
+            gross_val = None
+            if j < len(lines):
+                nums = WEIGHTS_LINE_RE.findall(lines[j])
+                if len(nums) >= 2:
+                    net_val = _parse_number(nums[0])
+                    gross_val = _parse_number(nums[1])
+
+            item = {
+                "model": current_model,
+                "no": _clean_spaces(m.group("no")),
+                "packages": int(m.group("packs")),
+                "net_weight_kg": net_val,
+                "gross_weight_kg": gross_val,
+                "m3_total": _parse_number(m.group("m3_total")),
+                "raw_line": ln,
+                "raw_weights_line": lines[j] if j < len(lines) else None,
+            }
             items.append(item)
-            i = next_i
+            evidence.append(ln)
+            if j < len(lines):
+                evidence.append(lines[j])
+
+            # avança: consumiu row + weights line
+            i = j + 1
             continue
 
         i += 1
 
-    return items
+    return items, evidence
 
 
-def _try_parse_item_row(line: str) -> dict | None:
-    """Parse uma linha de item do PL sem regex pesada.
-
-    Formatos típicos:
-      - "19 - 21 3 CARTONS @199 @264 1.754325 5.263"
-      - "5 1 CARTON @199 @264 1.754325 5.263"
-
-    Retorna dict normalizado ou None.
+def _find_total_line(lines: List[str]) -> Tuple[Optional[int], Optional[float], Optional[float], Optional[float], List[str]]:
     """
-    s = re.sub(r"\s+", " ", (line or "").strip())
-    if not s:
-        return None
+    TOTAL : 33 CARTONS 7,980 9,825 53.772
+             ^packs     ^net   ^gross  ^m3
+    """
+    for ln in lines:
+        m = re.search(
+            r"\bTOTAL\b\s*:?\s*(\d+)\s*CARTON(?:S)?\s+([0-9\.,]+)\s+([0-9\.,]+)\s+([0-9\.,]+)",
+            ln,
+            flags=re.I,
+        )
+        if m:
+            packs = int(m.group(1))
+            net = _parse_number(m.group(2))
+            gross = _parse_number(m.group(3))
+            m3 = _parse_number(m.group(4))
+            return packs, net, gross, m3, [ln]
+    return None, None, None, None, []
 
-    toks = s.split(" ")
-    if len(toks) < 7:
-        return None
 
-    carton_idx = None
-    for i, t in enumerate(toks):
-        tu = t.upper()
-        if tu == "CARTON" or tu == "CARTONS":
-            carton_idx = i
-            break
-    if carton_idx is None or carton_idx < 2:
-        return None
+def extract_packing_list_fields(text: str) -> Tuple[Dict[str, Any], List[str], List[str]]:
+    ln = _lines(text)
 
-    # packs é o token imediatamente antes de CARTON(S)
-    try:
-        cartons = int(toks[carton_idx - 1])
-    except ValueError:
-        return None
+    warnings: List[str] = []
+    missing: List[str] = []
 
-    # o restante antes de packs é o "No." (pode ser range)
-    carton_range = " ".join(toks[: carton_idx - 1]).strip()
-    if not carton_range:
-        return None
-    carton_range = re.sub(r"\s+", "", carton_range)
+    invoice_no, inv_ev = _find_invoice_number(ln)
+    importer_name, importer_cnpj, imp_ev = _find_importer_name_cnpj(ln)
 
-    # após CARTON(S): @nw @gw m3_each m3_total
-    tail = toks[carton_idx + 1 :]
-    if len(tail) < 4:
-        return None
+    items, items_ev = _extract_items(ln)
+    total_packs, total_net, total_gross, total_m3, total_ev = _find_total_line(ln)
 
-    def strip_at(x: str) -> str:
-        return x[1:] if x.startswith("@") else x
+    # soma da tabela (se conseguiu captar os itens)
+    sum_net = sum((it["net_weight_kg"] or 0.0) for it in items if it.get("net_weight_kg") is not None)
+    sum_gross = sum((it["gross_weight_kg"] or 0.0) for it in items if it.get("gross_weight_kg") is not None)
 
-    net_pkg = parse_mixed_number(strip_at(tail[0]))
-    gross_pkg = parse_mixed_number(strip_at(tail[1]))
-    m3_each = parse_mixed_number(tail[2])
-    m3_total = parse_mixed_number(tail[3])
+    # decide o que usar como valor final:
+    # TOTAL é a fonte mais confiável; mas a soma deve bater (se parser pegou tudo)
+    net_final = total_net
+    gross_final = total_gross
 
-    return {
-        "carton_range": carton_range,
-        "cartons": cartons,
-        "net_weight_per_pkg_kg": net_pkg,
-        "gross_weight_per_pkg_kg": gross_pkg,
-        "measurement_per_pkg_m3": m3_each,
-        "measurement_total_m3": m3_total,
+    # warning só se tiver TOTAL e tiver itens e realmente divergir acima de tolerância
+    tol = 0.5
+    if total_net is not None and items:
+        if abs(sum_net - total_net) > tol:
+            warnings.append(
+                f"Soma Net Weight da tabela ({sum_net:.2f}) difere do TOTAL ({total_net:.2f}). Usando TOTAL."
+            )
+    if total_gross is not None and items:
+        if abs(sum_gross - total_gross) > tol:
+            warnings.append(
+                f"Soma Gross Weight da tabela ({sum_gross:.2f}) difere do TOTAL ({total_gross:.2f}). Usando TOTAL."
+            )
+
+    required = {
+        "invoice_number": True,
+        "importer_name": True,
+        "importer_cnpj": True,   # regra Karina
+        "packages_total": True,
+        "net_weight_kg": True,
+        "gross_weight_kg": True,
+        "measurement_total_m3": True,
+        "items": True,
     }
 
+    fields: Dict[str, Any] = {}
+    fields["invoice_number"] = _mk_field(invoice_no, required["invoice_number"], inv_ev, "regex")
+    fields["importer_name"] = _mk_field(importer_name, required["importer_name"], imp_ev[:1], "line_block")
+    fields["importer_cnpj"] = _mk_field(importer_cnpj, required["importer_cnpj"], imp_ev, "regex")
+    fields["packages_total"] = _mk_field(total_packs, required["packages_total"], total_ev, "regex_total")
+    fields["net_weight_kg"] = _mk_field(net_final, required["net_weight_kg"], total_ev or items_ev[:2], "regex_total")
+    fields["gross_weight_kg"] = _mk_field(gross_final, required["gross_weight_kg"], total_ev or items_ev[:2], "regex_total")
+    fields["measurement_total_m3"] = _mk_field(total_m3, required["measurement_total_m3"], total_ev, "regex_total")
+    fields["items"] = _mk_field(items, required["items"], items_ev[:6], "table_parse")
 
-def _finalize_weight_totals(
-    *,
-    items: list[dict],
-    total_net: float | None,
-    total_gross: float | None,
-) -> tuple[float | None, float | None, list[str]]:
-    warnings: list[str] = []
-
-    net_sum = 0.0
-    gross_sum = 0.0
-    has_item_totals = False
-    for it in items:
-        net_it = it.get("net_weight_total_kg")
-        gross_it = it.get("gross_weight_total_kg")
-        if net_it is not None and gross_it is not None:
-            net_sum += float(net_it)
-            gross_sum += float(gross_it)
-            has_item_totals = True
-
-    net_final: float | None = None
-    if total_net is not None:
-        net_final = float(total_net)
-    elif has_item_totals:
-        net_final = float(net_sum)
-
-    gross_final: float | None = None
-    if total_gross is not None:
-        gross_final = float(total_gross)
-    elif has_item_totals:
-        gross_final = float(gross_sum)
-
-    tol = 0.5
-    if (
-        total_net is not None
-        and has_item_totals
-        and abs(net_sum - float(total_net)) > tol
-    ):
-        warnings.append(
-            f"Soma Net Weight da tabela ({net_sum:.2f}) difere do TOTAL ({float(total_net):.2f}). Usando TOTAL."
-        )
-    if (
-        total_gross is not None
-        and has_item_totals
-        and abs(gross_sum - float(total_gross)) > tol
-    ):
-        warnings.append(
-            f"Soma Gross Weight da tabela ({gross_sum:.2f}) difere do TOTAL ({float(total_gross):.2f}). Usando TOTAL."
-        )
-
-    return net_final, gross_final, warnings
-
-
-def _build_party_fields(text: str) -> dict:
-    fields: dict = {}
-
-    docno, ev = find_first(RE_ANY_DOC_NO, text)
-    fields["packing_list_number"] = build_field(
-        bool(docno), True, docno, [ev] if ev else [], "regex"
-    )
-
-    m = RE_SHIPPER_HINT.search(text or "")
-    shipper = m.group(1).strip() if m else None
-    fields["shipper_name"] = build_field(
-        bool(shipper), True, shipper, [m.group(0)] if m else [], "heuristic_regex"
-    )
-
-    consignee_name, ev_name = find_company_line_before_cnpj(text)
-    if consignee_name:
-        consignee_name = _clean_company_name(consignee_name)
-    fields["consignee_name"] = build_field(
-        bool(consignee_name),
-        True,
-        consignee_name,
-        [ev_name] if ev_name else [],
-        "heuristic_line_before_cnpj",
-    )
-
-    cnpj, ev = find_cnpj(text)
-    fields["consignee_cnpj"] = build_field(
-        bool(cnpj), True, cnpj, [ev] if ev else [], "regex"
-    )
-
-    return fields
-
-
-def _extract_counts_and_totals(
-    text: str,
-) -> tuple[
-    int | None,
-    str | None,
-    int | None,
-    str | None,
-    float | None,
-    float | None,
-    float | None,
-    str | None,
-]:
-    tu: int | None = None
-    tc: int | None = None
-    tu_ev: str | None = None
-    tc_ev: str | None = None
-
-    m2 = RE_TOTAL_UNITS_CARTONS.search(text or "")
-    if m2:
-        tu = int(m2.group(1))
-        tc = int(m2.group(2))
-        tu_ev = m2.group(0)
-        tc_ev = m2.group(0)
-
-    sum_cartons, sum_net, sum_gross, sum_m3, sum_ev = _find_total_summary(text)
-    if tc is None and sum_cartons is not None:
-        tc = sum_cartons
-        tc_ev = sum_ev
-
-    return tu, tu_ev, tc, tc_ev, sum_net, sum_gross, sum_m3, sum_ev
-
-
-def extract_packing_list_fields(text: str):
-    warnings: list[str] = []
-
-    fields: dict = _build_party_fields(text)
-
-    tu, tu_ev, tc, tc_ev, sum_net, sum_gross, sum_m3, sum_ev = (
-        _extract_counts_and_totals(text)
-    )
-
-    fields["total_units"] = build_field(
-        tu is not None, True, tu, [tu_ev] if tu_ev else [], "regex"
-    )
-    fields["total_cartons"] = build_field(
-        tc is not None, True, tc, [tc_ev] if tc_ev else [], "regex"
-    )
-
-    items = _extract_items(text)
-
-    fields["items"] = build_field(
-        bool(items),
-        False,
-        items if items else None,
-        [it["evidence_row"] for it in items[:5]],
-        "regex_items",
-    )
-
-    fields["measurement_total_m3"] = build_field(
-        sum_m3 is not None,
-        False,
-        float(sum_m3) if sum_m3 is not None else None,
-        [sum_ev] if sum_ev else [],
-        "regex_total",
-    )
-
-    net_final, gross_final, total_warnings = _finalize_weight_totals(
-        items=items,
-        total_net=sum_net,
-        total_gross=sum_gross,
-    )
-    warnings.extend(total_warnings)
-
-    fields["net_weight_kg_total_calc"] = build_field(
-        net_final is not None,
-        False,
-        net_final,
-        [sum_ev] if sum_ev else [],
-        "total_line_or_sum",
-    )
-    fields["gross_weight_kg_total_calc"] = build_field(
-        gross_final is not None,
-        False,
-        gross_final,
-        [sum_ev] if sum_ev else [],
-        "total_line_or_sum",
-    )
-
-    missing = [
-        key
-        for key, meta in (fields or {}).items()
-        if isinstance(meta, dict) and meta.get("required") and not meta.get("present")
-    ]
+    for k, meta in fields.items():
+        if meta["required"] and not meta["present"]:
+            missing.append(k)
 
     return fields, missing, warnings

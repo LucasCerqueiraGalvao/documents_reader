@@ -1,221 +1,263 @@
 # -*- coding: utf-8 -*-
 """
-Stage 04 - IMPORTATION - Final Report (Stages 01-03)
+Stage 04 - IMPORTATION - Generate final report (HTML/MD/JSON)
 
 Inputs:
-- Stage 01 folder: data/output/stage_01_text/importation
-  (contains *_extracted.json and optional _stage01_summary.json)
-- Stage 02 folder: data/output/stage_02_fields/importation
-  (contains *_fields.json and _stage02_summary.json)
-- Stage 03 file  : data/output/stage_03_compare/importation/_stage03_comparison.json
+- Stage 01 (text extract): data/output/stage_01_text/importation/*_extracted.json
+- Stage 02 (fields extract): data/output/stage_02_fields/importation/*_fields.json
+- Stage 03 (compare): data/output/stage_03_compare/importation/_stage03_comparison.json
 
 Outputs:
 - data/output/stage_04_report/importation/_stage04_report.json
 - data/output/stage_04_report/importation/_stage04_report.md
 - data/output/stage_04_report/importation/_stage04_report.html
 
-No external dependencies (stdlib only).
+Goal:
+- Consolidate per-document field checks (Stage02)
+- Consolidate cross-document comparisons (Stage03)
+- Produce a clean “final” report for users
 """
 
 from __future__ import annotations
 
 import argparse
-import json
 import html
+import json
+import os
 import re
 from datetime import datetime
 from pathlib import Path
-from typing import Any, Dict, List, Optional, Tuple
+from typing import Any, Dict, List, Tuple
 
 
-# -----------------------------
-# Helpers
-# -----------------------------
-
+# ------------------------
+# Utilities
+# ------------------------
 
 def now_iso() -> str:
     return datetime.now().strftime("%Y-%m-%dT%H:%M:%S")
 
 
-def read_json(p: Path) -> dict:
-    with p.open("r", encoding="utf-8") as f:
+def read_json(path: Path) -> dict:
+    with path.open("r", encoding="utf-8") as f:
         return json.load(f)
 
 
-def write_json(p: Path, obj: dict) -> None:
-    p.parent.mkdir(parents=True, exist_ok=True)
-    with p.open("w", encoding="utf-8") as f:
+def write_json(path: Path, obj: dict) -> None:
+    with path.open("w", encoding="utf-8") as f:
         json.dump(obj, f, ensure_ascii=False, indent=2)
 
 
-def write_text(p: Path, text: str) -> None:
-    p.parent.mkdir(parents=True, exist_ok=True)
-    with p.open("w", encoding="utf-8") as f:
-        f.write(text)
+def write_text(path: Path, content: str) -> None:
+    with path.open("w", encoding="utf-8") as f:
+        f.write(content)
 
 
-def safe(v: Any) -> str:
-    if v is None:
+def tr(x: Any) -> str:
+    """safe html text"""
+    if x is None:
         return ""
-    return str(v)
+    return html.escape(str(x))
 
 
-def short(s: str, n: int = 240) -> str:
-    s = s.strip()
-    if len(s) <= n:
-        return s
-    return s[: n - 3].rstrip() + "..."
+def norm_spaces(s: str) -> str:
+    s = s or ""
+    s = s.replace("\r\n", "\n").replace("\r", "\n")
+    s = re.sub(r"[ \t]+", " ", s)
+    s = re.sub(r"\n{3,}", "\n\n", s)
+    return s.strip()
 
 
-def classify_severity(stage02_doc: dict) -> Dict[str, Any]:
-    """
-    Decide severidade de um doc com base em missing_required_fields e warnings.
-    """
-    missing = stage02_doc.get("missing_required_fields") or []
-    warnings = stage02_doc.get("warnings") or []
-    if missing:
-        return {"level": "FAIL", "reason": f"missing_required_fields={len(missing)}"}
-    if warnings:
-        return {"level": "ALERT", "reason": f"warnings={len(warnings)}"}
-    return {"level": "OK", "reason": "no_missing_no_warnings"}
-
+# ------------------------
+# Load Stage01 quality info
+# ------------------------
 
 def extract_stage01_quality(stage01_dir: Path) -> Dict[str, Any]:
     """
-    Lê *_extracted.json para inferir se foi direct ou OCR, chars por página, etc.
+    Reads *_extracted.json to understand extraction method (direct vs ocr),
+    per page. Used only for quality summary in report.
     """
-    out: Dict[str, Any] = {
-        "documents": [],
-        "summary": {
-            "total_docs": 0,
-            "docs_with_ocr_pages": 0,
-            "docs_all_direct": 0,
-        },
-    }
+    out: Dict[str, Any] = {"documents": []}
 
-    extracted = sorted(stage01_dir.glob("*_extracted.json"))
-    for p in extracted:
+    if not stage01_dir.exists():
+        return out
+
+    for p in sorted(stage01_dir.glob("*_extracted.json")):
         try:
             obj = read_json(p)
         except Exception:
             continue
 
         pages = obj.get("pages") or []
-        methods = [safe(pg.get("method")) for pg in pages]
-        chars = [int(pg.get("text_chars") or 0) for pg in pages]
+        direct = sum(1 for pg in pages if (pg.get("method") or "").lower() == "direct")
+        ocr = sum(1 for pg in pages if (pg.get("method") or "").lower() == "ocr")
 
-        has_ocr = any(m.lower() == "ocr" for m in methods)
-        all_direct = (len(methods) > 0) and all(m.lower() == "direct" for m in methods)
+        out["documents"].append({
+            "file": obj.get("file") or p.name,
+            "pages": len(pages),
+            "direct_pages": direct,
+            "ocr_pages": ocr,
+        })
 
-        out["documents"].append(
-            {
-                "file": obj.get("file") or p.name.replace("_extracted.json", ".pdf"),
-                "extracted_json": p.name,
-                "pages": len(pages),
-                "methods": methods,
-                "chars_by_page": chars,
-                "has_ocr": has_ocr,
-                "all_direct": all_direct,
-            }
-        )
-
-    out["summary"]["total_docs"] = len(out["documents"])
-    out["summary"]["docs_with_ocr_pages"] = sum(
-        1 for d in out["documents"] if d["has_ocr"]
-    )
-    out["summary"]["docs_all_direct"] = sum(
-        1 for d in out["documents"] if d["all_direct"]
-    )
     return out
 
 
+# ------------------------
+# Load Stage02 docs
+# ------------------------
+
 def load_stage02_docs(stage02_dir: Path) -> List[dict]:
-    files = sorted(
-        [
-            p
-            for p in stage02_dir.glob("*_fields.json")
-            if p.name != "_stage02_summary.json"
-        ]
-    )
-    return [read_json(p) for p in files]
+    docs: List[dict] = []
+    if not stage02_dir.exists():
+        return docs
+
+    for p in sorted(stage02_dir.glob("*_fields.json")):
+        if p.name == "_stage02_summary.json":
+            continue
+        try:
+            docs.append(read_json(p))
+        except Exception:
+            continue
+    return docs
 
 
-def doc_label(d: dict) -> str:
-    src = d.get("source") or {}
-    kind = src.get("doc_kind") or "unknown"
-    original = src.get("original_file") or "?"
-    return f"{kind} | {original}"
+def build_stage02_section(stage02_docs: List[dict]) -> Dict[str, Any]:
+    items: List[dict] = []
+    for d in stage02_docs:
+        src = d.get("source") or {}
+        fields = d.get("fields") or {}
+        missing = d.get("missing_required_fields") or []
+        warnings = d.get("warnings") or []
 
+        required_total = sum(1 for k, v in fields.items() if (v or {}).get("required") is True)
+        required_present = sum(1 for k, v in fields.items()
+                               if (v or {}).get("required") is True and (v or {}).get("present") is True)
+
+        status = "OK"
+        if missing:
+            status = "FAIL"
+        elif warnings:
+            status = "ALERT"
+
+        items.append({
+            "doc_kind": src.get("doc_kind"),
+            "original_file": src.get("original_file"),
+            "stage01_file": src.get("stage01_file"),
+            "status": status,
+            "missing_required_fields": missing,
+            "warnings": warnings,
+            "required_present": required_present,
+            "required_total": required_total,
+            "fields_count": len(fields),
+        })
+
+    # sort: FAIL -> ALERT -> OK
+    order = {"FAIL": 0, "ALERT": 1, "OK": 2}
+    items.sort(key=lambda x: (order.get(x["status"], 9), x.get("doc_kind") or "", x.get("original_file") or ""))
+
+    return {"documents": items}
+
+
+# ------------------------
+# Normalize Stage03
+# ------------------------
 
 def normalize_stage03(stage03_obj: dict) -> Dict[str, Any]:
     """
-    Suporta dois formatos:
-    A) formato antigo: { summary, comparisons: [...] }
-    B) formato novo: { pair_checks: [...], group_checks: [...], rule_checks: [...] }
-    Retorna um formato único:
-    {
-      "pairs": [ {pair, field, status, ...} ],
-      "groups": [ ... ],
-      "rules":  [ ... ],
-      "summary": { matches, divergences, skipped, total }
-    }
-    """
-    pairs: List[dict] = []
-    groups: List[dict] = []
-    rules: List[dict] = []
+    Normaliza Stage 03 para um formato único, porque ao longo do projeto existiram
+    2 formatos de saída:
 
+    (A) Antigo:
+      {
+        "comparisons": [ { "pair": "...", "field": "...", "status": "...", ... }, ... ],
+        "summary": { "total_checks": ..., "matches": ..., "divergences": ..., "skipped": ... }
+      }
+
+    (B) Novo:
+      {
+        "pairs":  [ { "pair": "...", "check": "...", "status": "...", ... }, ... ],
+        "groups": [ ... ],
+        "rules":  [ ... ],
+        "summary": { "pairs": {...}, "groups": {...}, "rules": {...} }
+      }
+
+    Esse normalizador:
+    - Garante as chaves: pairs, groups, rules, summary
+    - Para itens de "pairs", garante a chave "field" (alias de "check").
+    """
+
+    def _ensure_field(item: dict) -> dict:
+        # Stage03 antigo usa "field"; novo usa "check"
+        if "field" not in item or not item.get("field"):
+            if item.get("check"):
+                item["field"] = item["check"]
+            elif item.get("key"):
+                item["field"] = item["key"]
+            elif item.get("campo"):
+                item["field"] = item["campo"]
+        return item
+
+    def _ensure_group_rule_field(item: dict, fallback_key: str) -> dict:
+        # Para tabelas de grupos/regras, precisamos de um "field" para renderizar
+        if "field" not in item or not item.get("field"):
+            if item.get(fallback_key):
+                item["field"] = item[fallback_key]
+        return item
+
+    # ---------
+    # Formato A
+    # ---------
     if "comparisons" in stage03_obj:
-        pairs = stage03_obj.get("comparisons") or []
-        # tentar achar summary já pronto
-        sm = stage03_obj.get("summary") or {}
-        total = int(sm.get("total_checks") or len(pairs))
-        matches = int(
-            sm.get("matches") or sum(1 for c in pairs if c.get("status") == "match")
-        )
-        divs = int(
-            sm.get("divergences")
-            or sum(1 for c in pairs if c.get("status") == "divergent")
-        )
-        skipped = int(
-            sm.get("skipped") or sum(1 for c in pairs if c.get("status") == "skipped")
-        )
+        pairs = [_ensure_field(x) for x in (stage03_obj.get("comparisons") or [])]
+        summary = stage03_obj.get("summary") or {}
         return {
             "pairs": pairs,
-            "groups": groups,
-            "rules": rules,
+            "groups": [],
+            "rules": [],
             "summary": {
-                "total": total,
-                "matches": matches,
-                "divergences": divs,
-                "skipped": skipped,
+                "total": int(summary.get("total_checks", 0) or 0),
+                "matches": int(summary.get("matches", 0) or 0),
+                "divergences": int(summary.get("divergences", 0) or 0),
+                "skipped": int(summary.get("skipped", 0) or 0),
             },
         }
 
-    # formato novo (o que você descreveu)
-    pairs = stage03_obj.get("pair_checks") or []
-    groups = stage03_obj.get("group_checks") or []
-    rules = stage03_obj.get("rule_checks") or []
+    # -------------
+    # Formato B (novo) - duas variações: "pairs" ou "pair_checks"
+    # -------------
+    pairs  = stage03_obj.get("pairs") or stage03_obj.get("pair_checks") or []
+    groups = stage03_obj.get("groups") or stage03_obj.get("group_checks") or []
+    rules  = stage03_obj.get("rules") or stage03_obj.get("rule_checks") or []
 
-    # tentativa de consolidar summary
-    def count_status(
-        items: List[dict], key: str = "status"
-    ) -> Tuple[int, int, int, int]:
-        total = len(items)
-        matches = sum(
-            1 for x in items if (x.get(key) or "").lower() in ("match", "ok", "pass")
-        )
-        divs = sum(
-            1
-            for x in items
-            if (x.get(key) or "").lower() in ("divergent", "fail", "error")
-        )
-        skipped = sum(1 for x in items if (x.get(key) or "").lower() == "skipped")
-        return total, matches, divs, skipped
+    pairs  = [_ensure_field(dict(x)) for x in pairs]
+    groups = [_ensure_group_rule_field(dict(x), "group") for x in groups]
+    rules  = [_ensure_group_rule_field(dict(x), "rule") for x in rules]
 
-    t1, m1, d1, s1 = count_status(pairs, "status")
-    # groups/rules podem ter "status" diferente, mas ainda somamos no total geral
-    t2, m2, d2, s2 = count_status(groups, "status")
-    t3, m3, d3, s3 = count_status(rules, "status")
+    # Alguns Stage03 novos trazem summary detalhada por categoria
+    s = stage03_obj.get("summary") or {}
+    # tenta ler contagens se existirem
+    def _read_counts(block: dict) -> tuple[int, int, int, int]:
+        if not isinstance(block, dict):
+            return (0, 0, 0, 0)
+        total = int(block.get("total", 0) or 0)
+        matches = int(block.get("matches", 0) or 0)
+        divergences = int(block.get("divergences", 0) or 0)
+        skipped = int(block.get("skipped", 0) or 0)
+        return (total, matches, divergences, skipped)
+
+    t1, m1, d1, s1 = _read_counts(s.get("pairs"))
+    t2, m2, d2, s2 = _read_counts(s.get("groups"))
+    t3, m3, d3, s3 = _read_counts(s.get("rules"))
+
+    # Se o summary não veio preenchido, calcula em cima das listas
+    if (t1 + t2 + t3) == 0:
+        all_items = pairs + groups + rules
+        total = len(all_items)
+        matches = sum(1 for x in all_items if (x.get("status") == "match"))
+        divs = sum(1 for x in all_items if (x.get("status") == "divergent"))
+        skps = sum(1 for x in all_items if (x.get("status") == "skipped"))
+        return {"pairs": pairs, "groups": groups, "rules": rules,
+                "summary": {"total": total, "matches": matches, "divergences": divs, "skipped": skps}}
 
     return {
         "pairs": pairs,
@@ -230,305 +272,460 @@ def normalize_stage03(stage03_obj: dict) -> Dict[str, Any]:
     }
 
 
-def decide_overall_status(
-    stage02_docs: List[dict], stage03_norm: Dict[str, Any]
-) -> Dict[str, Any]:
+# ------------------------
+# Decide overall status
+# ------------------------
+
+def decide_overall_status(stage02_docs: List[dict], stage03_norm: Dict[str, Any]) -> Dict[str, Any]:
+    missing_total = sum(len((d.get("missing_required_fields") or [])) for d in stage02_docs)
+    warnings_total = sum(len((d.get("warnings") or [])) for d in stage02_docs)
+    divs_total = int((stage03_norm.get("summary") or {}).get("divergences", 0) or 0)
+
+    status = "OK"
+    reasons: List[str] = []
+
+    if missing_total > 0:
+        status = "FAIL"
+        reasons.append(f"missing_required_fields={missing_total}")
+    if divs_total > 0:
+        # divergência é importante, mas em geral é ALERT (a menos que você queira FAIL)
+        if status != "FAIL":
+            status = "ALERT"
+        reasons.append(f"divergences={divs_total}")
+    if warnings_total > 0:
+        if status == "OK":
+            status = "ALERT"
+        reasons.append(f"warnings={warnings_total}")
+
+    return {"status": status, "reasons": reasons}
+
+
+# ------------------------
+# Evidence extraction helpers
+# ------------------------
+
+def pick_evidence_from_pair(c: dict) -> Tuple[str, str]:
     """
-    Regra simples:
-    - FAIL se existir qualquer missing_required_fields em qualquer doc
-    - FAIL se existir qualquer divergences no Stage 3
-    - ALERT se não for FAIL, mas houver warnings (stage2) ou skipped alto
-    - OK se tudo limpo
+    Stage03 antigo: c["evidence"] = {"a":[...], "b":[...]}
+    Stage03 novo:  c tem evidence_a/evidence_b ou details
     """
-    any_missing = any((d.get("missing_required_fields") or []) for d in stage02_docs)
-    any_warnings = any((d.get("warnings") or []) for d in stage02_docs)
+    if isinstance(c.get("evidence"), dict):
+        ea = (c["evidence"].get("a") or [])
+        eb = (c["evidence"].get("b") or [])
+        return ("\n".join(ea[:2]), "\n".join(eb[:2]))
 
-    divs = int(stage03_norm["summary"]["divergences"])
-    skipped = int(stage03_norm["summary"]["skipped"])
-    total = int(stage03_norm["summary"]["total"]) or 1
-    skipped_ratio = skipped / max(total, 1)
+    ea = c.get("evidence_a") or ""
+    eb = c.get("evidence_b") or ""
+    if ea or eb:
+        return (str(ea), str(eb))
 
-    if any_missing or divs > 0:
-        reasons = []
-        if any_missing:
-            reasons.append("missing_required_fields_em_algum_documento")
-        if divs > 0:
-            reasons.append(f"divergencias_stage03={divs}")
-        return {"status": "FAIL", "reasons": reasons}
+    # fallback
+    return ("", "")
 
-    # sem fail
-    if any_warnings or skipped_ratio >= 0.35:
-        reasons = []
-        if any_warnings:
-            reasons.append("warnings_em_algum_documento")
-        if skipped_ratio >= 0.35:
-            reasons.append(f"muitos_skipped={skipped}/{total}")
-        return {"status": "ALERT", "reasons": reasons}
 
-    return {"status": "OK", "reasons": ["sem_missing_sem_divergencias"]}
-
+# ------------------------
+# Markdown / HTML builders
+# ------------------------
 
 def build_markdown(report: dict) -> str:
-    overall = report["overall"]
-    s1 = report.get("stage01_quality") or {}
-    s2 = report.get("stage02") or {}
-    s3 = report.get("stage03") or {}
+    overall = report.get("overall") or {}
+    s01 = report.get("stage01_quality") or {}
+    s02 = report.get("stage02") or {}
+    s03 = report.get("stage03") or {}
 
     lines: List[str] = []
-    lines.append(f"# Stage 04 Report — Importação")
-    lines.append(f"- Gerado em: **{report['generated_at']}**")
-    lines.append(f"- Status final: **{overall['status']}**")
+    lines.append(f"# Report — Importation")
+    lines.append("")
+    lines.append(f"- Generated at: **{report.get('generated_at','')}**")
+    lines.append(f"- Overall: **{overall.get('status','')}**")
     if overall.get("reasons"):
-        lines.append(f"- Motivos: {', '.join(overall['reasons'])}")
+        lines.append(f"- Reasons: {', '.join(overall['reasons'])}")
     lines.append("")
 
-    # Stage 01
-    lines.append("## Stage 01 — Qualidade da extração")
-    sm1 = s1.get("summary") or {}
-    lines.append(
-        f"- Docs: {sm1.get('total_docs', 0)} | all_direct: {sm1.get('docs_all_direct', 0)} | com OCR: {sm1.get('docs_with_ocr_pages', 0)}"
-    )
-    for d in s1.get("documents") or []:
-        lines.append(
-            f"- **{d['file']}** | pages={d['pages']} | has_ocr={d['has_ocr']} | methods={d['methods']}"
-        )
+    # Stage01
+    lines.append("## Stage 01 — Extração de texto (qualidade)")
+    docs = s01.get("documents") or []
+    if not docs:
+        lines.append("_Sem dados do Stage 01._")
+    else:
+        lines.append("| Documento | Páginas | Direct | OCR |")
+        lines.append("|---|---:|---:|---:|")
+        for d in docs:
+            lines.append(f"| {d.get('file','')} | {d.get('pages',0)} | {d.get('direct_pages',0)} | {d.get('ocr_pages',0)} |")
     lines.append("")
 
-    # Stage 02
-    lines.append("## Stage 02 — Campos (por documento)")
-    for doc in s2.get("documents") or []:
-        lines.append(f"### {doc['label']}")
-        lines.append(
-            f"- Severidade: **{doc['severity']['level']}** ({doc['severity']['reason']})"
-        )
-        if doc["missing_required_fields"]:
-            lines.append(f"- Missing: {', '.join(doc['missing_required_fields'])}")
-        if doc["warnings"]:
-            lines.append(f"- Warnings: {', '.join(doc['warnings'])}")
-        lines.append(
-            f"- Fields encontrados: {doc['fields_present_count']} / {doc['fields_total_count']}"
-        )
+    # Stage02
+    lines.append("## Stage 02 — Campos por documento")
+    d2 = s02.get("documents") or []
+    if not d2:
+        lines.append("_Sem dados do Stage 02._")
+    else:
+        lines.append("| Doc | Kind | Status | Missing | Warnings | Fields |")
+        lines.append("|---|---|---|---|---|---:|")
+        for d in d2:
+            miss = ", ".join(d.get("missing_required_fields") or []) or "-"
+            warn = "; ".join(d.get("warnings") or []) or "-"
+            lines.append(f"| {d.get('original_file','')} | {d.get('doc_kind','')} | {d.get('status','')} | {miss} | {warn} | {d.get('fields_count',0)} |")
     lines.append("")
 
-    # Stage 03
+    # Stage03
     lines.append("## Stage 03 — Comparações")
-    sm3 = s3.get("summary") or {}
-    lines.append(
-        f"- Total checks: {sm3.get('total', 0)} | matches: {sm3.get('matches', 0)} | divergences: {sm3.get('divergences', 0)} | skipped: {sm3.get('skipped', 0)}"
-    )
-    lines.append("")
-    lines.append("### Divergências")
-    divs = report["lists"]["divergent"]
-    if not divs:
-        lines.append("- (nenhuma)")
-    else:
-        for c in divs[:60]:
-            lines.append(
-                f"- [{c.get('bucket')}] {c.get('pair','?')} | {c.get('field','?')} | A={c.get('a_value')} | B={c.get('b_value')}"
-            )
-    lines.append("")
-    lines.append("### Skipped (não comparados)")
-    sk = report["lists"]["skipped"]
-    if not sk:
-        lines.append("- (nenhum)")
-    else:
-        for c in sk[:60]:
-            lines.append(
-                f"- [{c.get('bucket')}] {c.get('pair','?')} | {c.get('field','?')} | reason={c.get('reason','?')}"
-            )
+    summ = s03.get("summary") or {}
+    counts = s03.get("counts") or {}
+    lines.append(f"- Total: **{summ.get('total',0)}** | Match: **{summ.get('matches',0)}** | Divergences: **{summ.get('divergences',0)}** | Skipped: **{summ.get('skipped',0)}**")
+    lines.append(f"- (render) matches={counts.get('matches',0)} divergent={counts.get('divergent',0)} skipped={counts.get('skipped',0)}")
     lines.append("")
 
-    return "\n".join(lines) + "\n"
+    # Divergences list
+    divs = (report.get("lists") or {}).get("divergent") or []
+    if divs:
+        lines.append("### Divergências (top 50)")
+        lines.append("| Bucket | Par | Campo | A | B |")
+        lines.append("|---|---|---|---|---|")
+        for c in divs[:50]:
+            lines.append(f"| {c.get('bucket','')} | {tr(c.get('pair',''))} | {tr(c.get('field','?'))} | {tr(c.get('a_value'))} | {tr(c.get('b_value'))} |")
+        lines.append("")
+    else:
+        lines.append("### Divergências")
+        lines.append("_Nenhuma divergência._")
+        lines.append("")
+
+    # Skipped list
+    skips = (report.get("lists") or {}).get("skipped") or []
+    if skips:
+        lines.append("### Skipped (top 50)")
+        lines.append("| Bucket | Par | Campo | Motivo |")
+        lines.append("|---|---|---|---|")
+        for c in skips[:50]:
+            reason = c.get("reason") or ""
+            lines.append(f"| {c.get('bucket','')} | {tr(c.get('pair',''))} | {tr(c.get('field','?'))} | {tr(reason)} |")
+        lines.append("")
+    else:
+        lines.append("### Skipped")
+        lines.append("_Nenhum skipped._")
+        lines.append("")
+
+    return "\n".join(lines)
+
+
+def build_stage02_table_html(stage02_docs: List[dict]) -> str:
+    rows = []
+    for d in stage02_docs:
+        miss = ", ".join(d.get("missing_required_fields") or []) or "-"
+        warn = "; ".join(d.get("warnings") or []) or "-"
+        status = d.get("status") or ""
+        status_badge = status
+        badge_class = "ok"
+        if status == "FAIL":
+            badge_class = "fail"
+        elif status == "ALERT":
+            badge_class = "alert"
+
+        rows.append(f"""
+        <tr>
+          <td><b>{tr(d.get("doc_kind",""))}</b> | {tr(d.get("original_file",""))}</td>
+          <td><span class="badge {badge_class}">{tr(status_badge)}</span><br><span class="muted">{tr("missing_required_fields="+str(len(d.get("missing_required_fields") or [])) if status=="FAIL" else "warnings="+str(len(d.get("warnings") or [])) if status=="ALERT" else "no_missing_no_warnings")}</span></td>
+          <td>{tr(miss)}</td>
+          <td>{tr(warn)}</td>
+          <td style="text-align:right">{tr(d.get("fields_count",0))} / {tr(d.get("required_total",0) or d.get("fields_count",0))}</td>
+        </tr>
+        """)
+
+    return f"""
+    <table class="tbl">
+      <thead>
+        <tr>
+          <th>Documento</th>
+          <th>Status</th>
+          <th>Missing</th>
+          <th>Warnings</th>
+          <th style="text-align:right">Fields</th>
+        </tr>
+      </thead>
+      <tbody>
+        {''.join(rows)}
+      </tbody>
+    </table>
+    """
 
 
 def build_html(report: dict) -> str:
-    overall = report["overall"]
-    s1 = report.get("stage01_quality") or {}
-    s2 = report.get("stage02") or {}
-    s3 = report.get("stage03") or {}
-    sm1 = s1.get("summary") or {}
-    sm3 = s3.get("summary") or {}
+    overall = report.get("overall") or {}
+    s01 = report.get("stage01_quality") or {}
+    s02 = report.get("stage02") or {}
+    s03 = report.get("stage03") or {}
 
-    def badge(status: str) -> str:
-        status_u = status.upper()
-        cls = "ok" if status_u == "OK" else ("fail" if status_u == "FAIL" else "alert")
-        return f'<span class="badge {cls}">{html.escape(status_u)}</span>'
-
-    divergent = report["lists"]["divergent"]
-    skipped = report["lists"]["skipped"]
-
-    css = """
-    body{font-family:Arial,Helvetica,sans-serif;margin:24px;color:#111}
-    h1{margin:0 0 6px 0}
-    .meta{color:#444;margin-bottom:18px}
-    .badge{display:inline-block;padding:4px 10px;border-radius:999px;font-weight:700;font-size:12px}
-    .ok{background:#e7f7ed;color:#0b6b2b;border:1px solid #bfe7cd}
-    .alert{background:#fff6e5;color:#8a5a00;border:1px solid #ffe0a6}
-    .fail{background:#ffe8e8;color:#8a0000;border:1px solid #ffb8b8}
-    .card{border:1px solid #ddd;border-radius:10px;padding:14px 16px;margin:12px 0}
-    table{border-collapse:collapse;width:100%}
-    th,td{border-bottom:1px solid #eee;padding:8px 8px;text-align:left;font-size:13px;vertical-align:top}
-    th{background:#fafafa}
-    .small{color:#555;font-size:12px}
-    code{background:#f5f5f5;padding:1px 4px;border-radius:4px}
-    """
-
-    def tr(text: str) -> str:
-        return html.escape(text)
-
-    # Stage02 docs table
-    rows2 = []
-    for d in s2.get("documents") or []:
-        rows2.append(
-            f"""
-        <tr>
-          <td>{tr(d['label'])}</td>
-          <td>{badge(d['severity']['level'])}<div class="small">{tr(d['severity']['reason'])}</div></td>
-          <td>{tr(", ".join(d["missing_required_fields"]) if d["missing_required_fields"] else "-")}</td>
-          <td>{tr(", ".join(d["warnings"]) if d["warnings"] else "-")}</td>
-          <td>{d['fields_present_count']} / {d['fields_total_count']}</td>
-        </tr>
-        """
-        )
-
-    # Divergences table
-    rows_div = []
-    for c in divergent[:120]:
-        rows_div.append(
-            f"""
-        <tr>
-          <td>{tr(c.get("bucket","pair"))}</td>
-          <td>{tr(c.get("pair","?"))}</td>
-          <td><code>{tr(c.get("field","?"))}</code></td>
-          <td>{tr(safe(c.get("a_value")))}</td>
-          <td>{tr(safe(c.get("b_value")))}</td>
-          <td class="small">{tr(safe(c.get("evidence_a","")))}</td>
-          <td class="small">{tr(safe(c.get("evidence_b","")))}</td>
-        </tr>
-        """
-        )
-
-    # Skipped table
-    rows_sk = []
-    for c in skipped[:120]:
-        rows_sk.append(
-            f"""
-        <tr>
-          <td>{tr(c.get("bucket","pair"))}</td>
-          <td>{tr(c.get("pair","?"))}</td>
-          <td><code>{tr(c.get("field","?"))}</code></td>
-          <td class="small">{tr(c.get("reason","?"))}</td>
-        </tr>
-        """
-        )
+    status = (overall.get("status") or "OK").upper()
+    badge_class = "ok"
+    if status == "FAIL":
+        badge_class = "fail"
+    elif status == "ALERT":
+        badge_class = "alert"
 
     reasons = ", ".join(overall.get("reasons") or [])
 
-    html_out = f"""<!doctype html>
-    <html lang="pt-br">
-    <head>
-      <meta charset="utf-8"/>
-      <title>Stage 04 Report — Importação</title>
-      <style>{css}</style>
-    </head>
-    <body>
-      <h1>Stage 04 Report — Importação</h1>
-      <div class="meta">
-        Gerado em <b>{html.escape(report["generated_at"])}</b> — Status final {badge(overall["status"])}<br/>
-        <span class="small">Motivos: {html.escape(reasons)}</span>
-      </div>
-
-      <div class="card">
-        <h2 style="margin-top:0">Stage 01 — Qualidade da extração</h2>
-        <div class="small">Docs: {sm1.get("total_docs",0)} | all_direct: {sm1.get("docs_all_direct",0)} | com OCR: {sm1.get("docs_with_ocr_pages",0)}</div>
-        <table>
-          <thead><tr><th>Arquivo</th><th>Páginas</th><th>OCR?</th><th>Métodos</th><th>Chars/página</th></tr></thead>
-          <tbody>
-          {''.join([
-              f"<tr><td>{tr(d['file'])}</td><td>{d['pages']}</td><td>{'SIM' if d['has_ocr'] else 'NÃO'}</td><td>{tr(str(d['methods']))}</td><td>{tr(str(d['chars_by_page']))}</td></tr>"
-              for d in (s1.get("documents") or [])
-          ])}
-          </tbody>
+    # stage01 small table
+    s01_rows = []
+    for d in (s01.get("documents") or []):
+        s01_rows.append(f"""
+        <tr>
+          <td>{tr(d.get("file",""))}</td>
+          <td style="text-align:right">{tr(d.get("pages",0))}</td>
+          <td style="text-align:right">{tr(d.get("direct_pages",0))}</td>
+          <td style="text-align:right">{tr(d.get("ocr_pages",0))}</td>
+        </tr>
+        """)
+    stage01_tbl = ""
+    if s01_rows:
+        stage01_tbl = f"""
+        <table class="tbl">
+          <thead><tr><th>Documento</th><th style="text-align:right">Páginas</th><th style="text-align:right">Direct</th><th style="text-align:right">OCR</th></tr></thead>
+          <tbody>{''.join(s01_rows)}</tbody>
         </table>
-      </div>
+        """
+    else:
+        stage01_tbl = "<div class='muted'>Sem dados do Stage 01.</div>"
 
-      <div class="card">
-        <h2 style="margin-top:0">Stage 02 — Campos por documento</h2>
-        <table>
-          <thead><tr><th>Documento</th><th>Status</th><th>Missing</th><th>Warnings</th><th>Fields</th></tr></thead>
-          <tbody>
-            {''.join(rows2)}
-          </tbody>
-        </table>
-      </div>
+    # Stage02 table
+    stage02_tbl = build_stage02_table_html(s02.get("documents") or [])
 
-      <div class="card">
-        <h2 style="margin-top:0">Stage 03 — Comparações</h2>
-        <div class="small">Total: {sm3.get("total",0)} | Matches: {sm3.get("matches",0)} | Divergences: {sm3.get("divergences",0)} | Skipped: {sm3.get("skipped",0)}</div>
+    # Stage03 summary
+    summ = s03.get("summary") or {}
+    counts = s03.get("counts") or {}
+    stage03_box = f"""
+      <div class="grid">
+        <div class="card">
+          <div class="k">Total checks</div>
+          <div class="v">{tr(summ.get("total",0))}</div>
+        </div>
+        <div class="card">
+          <div class="k">Matches</div>
+          <div class="v">{tr(summ.get("matches",0))}</div>
+        </div>
+        <div class="card">
+          <div class="k">Divergences</div>
+          <div class="v">{tr(summ.get("divergences",0))}</div>
+        </div>
+        <div class="card">
+          <div class="k">Skipped</div>
+          <div class="v">{tr(summ.get("skipped",0))}</div>
+        </div>
       </div>
-
-      <div class="card">
-        <h2 style="margin-top:0">Divergências</h2>
-        {'<div class="small">(nenhuma)</div>' if not rows_div else ''}
-        <table>
-          <thead><tr><th>Tipo</th><th>Par</th><th>Campo</th><th>A</th><th>B</th><th>Evidência A</th><th>Evidência B</th></tr></thead>
-          <tbody>{''.join(rows_div)}</tbody>
-        </table>
+      <div class="muted" style="margin-top:8px">
+        (render) matches={tr(counts.get("matches",0))} divergent={tr(counts.get("divergent",0))} skipped={tr(counts.get("skipped",0))}
       </div>
-
-      <div class="card">
-        <h2 style="margin-top:0">Skipped (não comparados)</h2>
-        {'<div class="small">(nenhum)</div>' if not rows_sk else ''}
-        <table>
-          <thead><tr><th>Tipo</th><th>Par</th><th>Campo</th><th>Motivo</th></tr></thead>
-          <tbody>{''.join(rows_sk)}</tbody>
-        </table>
-      </div>
-
-    </body>
-    </html>
     """
+
+    # Divergences table
+    divs = (report.get("lists") or {}).get("divergent") or []
+    rows_div = []
+    for c in divs[:100]:
+        field_label = c.get("field") or c.get("check") or "?"
+        rows_div.append(f"""
+        <tr>
+          <td class="muted">{tr(c.get("bucket",""))}</td>
+          <td><code>{tr(c.get("pair",""))}</code></td>
+          <td><code title="{tr(field_label)}">{tr(field_label)}</code></td>
+          <td>{tr(c.get("a_value"))}</td>
+          <td>{tr(c.get("b_value"))}</td>
+          <td class="muted">{tr(c.get("evidence_a",""))}</td>
+          <td class="muted">{tr(c.get("evidence_b",""))}</td>
+        </tr>
+        """)
+    div_tbl = ""
+    if rows_div:
+        div_tbl = f"""
+        <table class="tbl">
+          <thead>
+            <tr>
+              <th>Tipo</th>
+              <th>Par</th>
+              <th>Campo</th>
+              <th>A</th>
+              <th>B</th>
+              <th>Evidência A</th>
+              <th>Evidência B</th>
+            </tr>
+          </thead>
+          <tbody>
+            {''.join(rows_div)}
+          </tbody>
+        </table>
+        """
+    else:
+        div_tbl = "<div class='muted'>Nenhuma divergência.</div>"
+
+    # Skipped table
+    skips = (report.get("lists") or {}).get("skipped") or []
+    rows_sk = []
+    for c in skips[:100]:
+        field_label = c.get("field") or c.get("check") or "?"
+        rows_sk.append(f"""
+        <tr>
+          <td class="muted">{tr(c.get("bucket",""))}</td>
+          <td><code>{tr(c.get("pair",""))}</code></td>
+          <td><code title="{tr(field_label)}">{tr(field_label)}</code></td>
+          <td class="muted">{tr(c.get("reason",""))}</td>
+        </tr>
+        """)
+    sk_tbl = ""
+    if rows_sk:
+        sk_tbl = f"""
+        <table class="tbl">
+          <thead>
+            <tr>
+              <th>Tipo</th>
+              <th>Par</th>
+              <th>Campo</th>
+              <th>Motivo</th>
+            </tr>
+          </thead>
+          <tbody>
+            {''.join(rows_sk)}
+          </tbody>
+        </table>
+        """
+    else:
+        sk_tbl = "<div class='muted'>Nenhum skipped.</div>"
+
+    html_out = f"""
+<!doctype html>
+<html lang="pt-br">
+<head>
+  <meta charset="utf-8"/>
+  <meta name="viewport" content="width=device-width,initial-scale=1"/>
+  <title>Report — Importation</title>
+  <style>
+    body {{
+      font-family: ui-sans-serif, system-ui, -apple-system, Segoe UI, Roboto, Helvetica, Arial;
+      background: #fff;
+      color: #111;
+      margin: 20px;
+    }}
+    .container {{
+      max-width: 1200px;
+      margin: 0 auto;
+    }}
+    h1 {{ margin: 0 0 6px 0; }}
+    h2 {{ margin-top: 28px; }}
+    .muted {{ color: #666; font-size: 12px; white-space: pre-wrap; }}
+    .badge {{
+      display: inline-block; padding: 3px 10px; border-radius: 999px;
+      font-size: 12px; font-weight: 600;
+      border: 1px solid #ddd;
+    }}
+    .badge.ok {{ background: #e7f6ea; border-color: #bfe7c7; color: #1b5e20; }}
+    .badge.alert {{ background: #fff7e0; border-color: #ffe3a3; color: #7a4a00; }}
+    .badge.fail {{ background: #fdecea; border-color: #f5c2be; color: #7f1d1d; }}
+    .tbl {{
+      width: 100%;
+      border-collapse: collapse;
+      margin-top: 10px;
+      table-layout: fixed;
+    }}
+    .tbl th, .tbl td {{
+      border-bottom: 1px solid #eee;
+      padding: 10px 8px;
+      vertical-align: top;
+      font-size: 13px;
+      word-break: break-word;
+    }}
+    .tbl th {{ text-align: left; background: #fafafa; }}
+    code {{
+      background: #f6f6f6;
+      padding: 2px 6px;
+      border-radius: 6px;
+      font-size: 12px;
+      display: inline-block;
+      max-width: 100%;
+      overflow: hidden;
+      text-overflow: ellipsis;
+      vertical-align: bottom;
+    }}
+    .grid {{
+      display: grid;
+      grid-template-columns: repeat(4, minmax(0, 1fr));
+      gap: 10px;
+      margin-top: 10px;
+    }}
+    .card {{
+      border: 1px solid #eee;
+      border-radius: 12px;
+      padding: 12px;
+      background: #fff;
+    }}
+    .card .k {{ color: #666; font-size: 12px; }}
+    .card .v {{ font-size: 20px; font-weight: 700; margin-top: 4px; }}
+    .section {{
+      border: 1px solid #eee;
+      border-radius: 14px;
+      padding: 14px;
+      margin-top: 14px;
+      background: #fff;
+    }}
+  </style>
+</head>
+<body>
+<div class="container">
+
+  <h1>Report — Importation</h1>
+  <div class="muted">Generated at {tr(report.get("generated_at",""))}</div>
+  <div style="margin-top:10px">
+    <span class="badge {badge_class}">{tr(status)}</span>
+    <span class="muted" style="margin-left:10px">{tr(reasons)}</span>
+  </div>
+
+  <h2>Stage 01 — Qualidade da extração</h2>
+  <div class="section">
+    {stage01_tbl}
+  </div>
+
+  <h2>Stage 02 — Campos por documento</h2>
+  <div class="section">
+    {stage02_tbl}
+  </div>
+
+  <h2>Stage 03 — Comparações</h2>
+  <div class="section">
+    {stage03_box}
+  </div>
+
+  <h2>Divergências</h2>
+  <div class="section">
+    {div_tbl}
+  </div>
+
+  <h2>Skipped</h2>
+  <div class="section">
+    {sk_tbl}
+  </div>
+
+</div>
+</body>
+</html>
+"""
     return html_out
 
 
-def build_stage02_section(stage02_docs: List[dict]) -> Dict[str, Any]:
-    docs_out = []
-    for d in stage02_docs:
-        src = d.get("source") or {}
-        fields = d.get("fields") or {}
-        present_count = sum(
-            1 for _, fv in fields.items() if (fv or {}).get("present") is True
-        )
-        total_count = len(fields)
-        sev = classify_severity(d)
-        docs_out.append(
-            {
-                "label": doc_label(d),
-                "doc_kind": src.get("doc_kind"),
-                "original_file": src.get("original_file"),
-                "stage01_file": src.get("stage01_file"),
-                "missing_required_fields": d.get("missing_required_fields") or [],
-                "warnings": d.get("warnings") or [],
-                "fields_present_count": present_count,
-                "fields_total_count": total_count,
-                "severity": sev,
-            }
-        )
-    return {"documents": docs_out}
+# ------------------------
+# Main
+# ------------------------
 
+def main() -> None:
+    ap = argparse.ArgumentParser()
+    ap.add_argument("--stage01", required=True, help="Pasta Stage 01 importation (com *_extracted.json)")
+    ap.add_argument("--stage02", required=True, help="Pasta Stage 02 importation (com *_fields.json)")
+    ap.add_argument("--stage03", required=True, help="Arquivo _stage03_comparison.json (Stage 03 importation)")
+    ap.add_argument("--out", required=True, help="Pasta de saída Stage 04 report (importation)")
+    args = ap.parse_args()
 
-def pick_evidence_from_pair(item: dict) -> Tuple[str, str]:
-    ev = item.get("evidence") or {}
-    a = ev.get("a") if isinstance(ev, dict) else None
-    b = ev.get("b") if isinstance(ev, dict) else None
-    # suportar formato novo (evidence_a/evidence_b)
-    if not a and item.get("evidence_a"):
-        a = [item.get("evidence_a")]
-    if not b and item.get("evidence_b"):
-        b = [item.get("evidence_b")]
-    ea = short(a[0]) if isinstance(a, list) and a else ""
-    eb = short(b[0]) if isinstance(b, list) and b else ""
-    return ea, eb
+    run_stage_04_report(
+        stage01_dir=Path(args.stage01),
+        stage02_dir=Path(args.stage02),
+        stage03_file=Path(args.stage03),
+        out_dir=Path(args.out),
+        verbose=True,
+    )
 
 
 def run_stage_04_report(
@@ -538,36 +735,19 @@ def run_stage_04_report(
     out_dir: Path,
     verbose: bool = True,
 ) -> Dict[str, Any]:
-    """
-    Execute Stage 04: Generate final consolidated report
-
-    Args:
-        stage01_dir: Directory with Stage 01 extracted text
-        stage02_dir: Directory with Stage 02 extracted fields
-        stage03_file: Stage 03 comparison JSON file
-        out_dir: Output directory for reports
-        verbose: Print progress messages
-
-    Returns:
-        Dictionary with report paths and status
-    """
     out_dir.mkdir(parents=True, exist_ok=True)
 
-    # Load
     stage01_quality = extract_stage01_quality(stage01_dir)
     stage02_docs = load_stage02_docs(stage02_dir)
     stage03_obj = read_json(stage03_file)
     stage03_norm = normalize_stage03(stage03_obj)
 
-    # Overall
     overall = decide_overall_status(stage02_docs, stage03_norm)
 
-    # Lists from Stage03 (pairs/groups/rules)
     divergent: List[dict] = []
     skipped: List[dict] = []
     matches: List[dict] = []
 
-    # pairs
     for c in stage03_norm.get("pairs") or []:
         st = (c.get("status") or "").lower()
         ea, eb = pick_evidence_from_pair(c)
@@ -582,12 +762,11 @@ def run_stage_04_report(
         elif st == "match":
             matches.append(item)
 
-    # groups/rules (podem ter status = ok/fail/pass)
     for bucket_name in ("groups", "rules"):
         for c in stage03_norm.get(bucket_name) or []:
             st = (c.get("status") or "").lower()
             item = dict(c)
-            item["bucket"] = bucket_name[:-1]  # group / rule
+            item["bucket"] = bucket_name[:-1]
             if st in ("divergent", "fail", "error"):
                 divergent.append(item)
             elif st == "skipped":
@@ -595,7 +774,6 @@ def run_stage_04_report(
             elif st in ("match", "ok", "pass"):
                 matches.append(item)
 
-    # Stage02 section
     stage02_section = build_stage02_section(stage02_docs)
 
     report = {
@@ -624,7 +802,6 @@ def run_stage_04_report(
         },
     }
 
-    # Write outputs
     out_json = out_dir / "_stage04_report.json"
     out_md = out_dir / "_stage04_report.md"
     out_html = out_dir / "_stage04_report.html"
@@ -634,41 +811,18 @@ def run_stage_04_report(
     write_text(out_html, build_html(report))
 
     if verbose:
-        print("Completed.")
+        print("Concluído.")
         print(f"JSON : {out_json}")
         print(f"MD   : {out_md}")
         print(f"HTML : {out_html}")
 
     return {
-        "success": True,
+        "processed": True,
+        "warnings": [],
         "output_json": str(out_json),
         "output_md": str(out_md),
         "output_html": str(out_html),
-        "overall_status": overall.get("status"),
-        "divergent_count": len(divergent),
     }
-
-
-def main() -> None:
-    ap = argparse.ArgumentParser()
-    ap.add_argument(
-        "--stage01", required=True, help="Stage 01 folder with *_extracted.json"
-    )
-    ap.add_argument(
-        "--stage02", required=True, help="Stage 02 folder with *_fields.json"
-    )
-    ap.add_argument(
-        "--stage03", required=True, help="Stage 03 _stage03_comparison.json file"
-    )
-    ap.add_argument("--out", required=True, help="Stage 04 output folder")
-    args = ap.parse_args()
-
-    run_stage_04_report(
-        stage01_dir=Path(args.stage01),
-        stage02_dir=Path(args.stage02),
-        stage03_file=Path(args.stage03),
-        out_dir=Path(args.out),
-    )
 
 
 if __name__ == "__main__":

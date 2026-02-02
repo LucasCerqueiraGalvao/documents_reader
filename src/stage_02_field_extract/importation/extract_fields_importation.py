@@ -56,11 +56,7 @@ def join_pages(stage01_obj: dict) -> str:
 def detect_kind(original_file: str, full_text: str) -> str:
     name = (original_file or "").upper()
 
-    if (
-        "PACKING" in name
-        or "PACKING LIST" in name
-        or re_any(name, [" PL", " P.L", "ROMANEIO"])
-    ):
+    if "PACKING" in name or "PACKING LIST" in name or re_any(name, [" PL", " P.L", "ROMANEIO"]):
         return "packing_list"
     if "INVOICE" in name and "PACKING" not in name:
         return "invoice"
@@ -102,20 +98,7 @@ def unpack_extractor_result(res: Any) -> Tuple[Dict[str, Any], List[str], List[s
     raise ValueError(f"Extractor retornou {len(res)} itens (esperado 2 ou 3)")
 
 
-def run_stage_02_extraction(
-    in_dir: Path, out_dir: Path, verbose: bool = True
-) -> Dict[str, Any]:
-    """
-    Execute Stage 02: Extract structured fields from text
-
-    Args:
-        in_dir: Directory with Stage 01 *_extracted.json files
-        out_dir: Output directory for field extraction results
-        verbose: Print progress messages
-
-    Returns:
-        Dictionary with processing results and warnings
-    """
+def run_stage_02_extraction(in_dir: Path, out_dir: Path, verbose: bool = True) -> Dict[str, Any]:
     out_dir.mkdir(parents=True, exist_ok=True)
 
     files = sorted(in_dir.glob("*_extracted.json"))
@@ -202,13 +185,11 @@ def run_stage_02_extraction(
 
 def main() -> None:
     ap = argparse.ArgumentParser()
-    ap.add_argument("--in", dest="in_dir", required=True, help="Stage 01 text folder")
-    ap.add_argument(
-        "--out", dest="out_dir", required=True, help="Stage 02 fields output folder"
-    )
+    ap.add_argument("--in", dest="in_dir", required=True, help="Pasta stage_01_text/importation")
+    ap.add_argument("--out", dest="out_dir", required=True, help="Pasta stage_02_fields/importation")
     args = ap.parse_args()
 
-    run_stage_02_extraction(in_dir=Path(args.in_dir), out_dir=Path(args.out_dir))
+    run_stage_02_extraction(in_dir=Path(args.in_dir), out_dir=Path(args.out_dir), verbose=True)
 
 
 if __name__ == "__main__":

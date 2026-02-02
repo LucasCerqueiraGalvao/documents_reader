@@ -21,7 +21,7 @@ except Exception:
 @dataclass
 class PageExtraction:
     page: int
-    method: str  # direct | ocr | ocr_unavailable | ocr_error
+    method: str          # direct | ocr | ocr_unavailable | ocr_error
     text_chars: int
     text: str
     note: str = ""
@@ -88,9 +88,7 @@ def ocr_image(img: Image.Image, lang: str) -> str:
     return pytesseract.image_to_string(img, lang=lang, config=config)
 
 
-def extract_pdf_text(
-    pdf_path: Path, ocr_lang: str, ocr_dpi: int, min_chars: int
-) -> Dict[str, Any]:
+def extract_pdf_text(pdf_path: Path, ocr_lang: str, ocr_dpi: int, min_chars: int) -> Dict[str, Any]:
     doc = fitz.open(pdf_path)
     pages: List[PageExtraction] = []
     warnings: List[str] = []
@@ -103,46 +101,24 @@ def extract_pdf_text(
         # 1) extraÃ§Ã£o direta
         direct = clean_text(page.get_text("text"))
         if len(direct) >= min_chars:
-            pages.append(
-                PageExtraction(
-                    page=i + 1, method="direct", text_chars=len(direct), text=direct
-                )
-            )
+            pages.append(PageExtraction(page=i + 1, method="direct", text_chars=len(direct), text=direct))
             continue
 
         # 2) OCR (PDF escaneado)
         if tesseract_path is None:
             note = "Tesseract nÃ£o encontrado (instale e/ou coloque no PATH, ou defina TESSERACT_EXE)."
-            warnings.append(
-                f"{pdf_path.name}: pÃ¡gina {i+1} precisa OCR, mas tesseract nÃ£o estÃ¡ disponÃ­vel."
-            )
-            pages.append(
-                PageExtraction(
-                    page=i + 1,
-                    method="ocr_unavailable",
-                    text_chars=0,
-                    text="",
-                    note=note,
-                )
-            )
+            warnings.append(f"{pdf_path.name}: pÃ¡gina {i+1} precisa OCR, mas tesseract nÃ£o estÃ¡ disponÃ­vel.")
+            pages.append(PageExtraction(page=i + 1, method="ocr_unavailable", text_chars=0, text="", note=note))
             continue
 
         try:
             img = render_page_to_pil(page, dpi=ocr_dpi)
             img = preprocess_for_ocr(img)
             ocr_txt = clean_text(ocr_image(img, lang=ocr_lang))
-            pages.append(
-                PageExtraction(
-                    page=i + 1, method="ocr", text_chars=len(ocr_txt), text=ocr_txt
-                )
-            )
+            pages.append(PageExtraction(page=i + 1, method="ocr", text_chars=len(ocr_txt), text=ocr_txt))
         except Exception as e:
             warnings.append(f"{pdf_path.name}: OCR falhou na pÃ¡gina {i+1} -> {e}")
-            pages.append(
-                PageExtraction(
-                    page=i + 1, method="ocr_error", text_chars=0, text="", note=str(e)
-                )
-            )
+            pages.append(PageExtraction(page=i + 1, method="ocr_error", text_chars=0, text="", note=str(e)))
 
     doc.close()
 
@@ -169,9 +145,7 @@ def save_outputs(out_dir: Path, pdf_path: Path, payload: Dict[str, Any]) -> None
     parts.append("==== EXTRACTED TEXT ====\n")
 
     for p in payload["pages"]:
-        parts.append(
-            f"\n--- PAGE {p['page']:03d} | method={p['method']} | chars={p['text_chars']} ---\n"
-        )
+        parts.append(f"\n--- PAGE {p['page']:03d} | method={p['method']} | chars={p['text_chars']} ---\n")
         if p.get("note"):
             parts.append(f"NOTE: {p['note']}\n")
         parts.append(p.get("text", ""))
@@ -183,9 +157,7 @@ def save_outputs(out_dir: Path, pdf_path: Path, payload: Dict[str, Any]) -> None
             parts.append(f"- {w}\n")
 
     out_txt.write_text("".join(parts), encoding="utf-8")
-    out_json.write_text(
-        json.dumps(payload, ensure_ascii=False, indent=2), encoding="utf-8"
-    )
+    out_json.write_text(json.dumps(payload, ensure_ascii=False, indent=2), encoding="utf-8")
 
 
 def run_stage_01_extraction(
@@ -196,22 +168,8 @@ def run_stage_01_extraction(
     min_chars: int = 80,
     verbose: bool = True,
 ) -> Dict[str, Any]:
-    """
-    Execute Stage 01: PDF text extraction with OCR fallback
-
-    Args:
-        in_dir: Directory containing PDF files
-        out_dir: Output directory for extracted text
-        ocr_lang: OCR language codes (e.g. "eng+por")
-        ocr_dpi: DPI for OCR rendering
-        min_chars: Minimum characters for direct text extraction
-        verbose: Print progress messages
-
-    Returns:
-        Dictionary with processing results and statistics
-    """
     if not in_dir.exists():
-        raise FileNotFoundError(f"Input directory does not exist: {in_dir}")
+        raise FileNotFoundError(f"Pasta de entrada não existe: {in_dir}")
 
     pdfs = sorted(in_dir.glob("*.pdf"))
     if not pdfs:
@@ -226,12 +184,12 @@ def run_stage_01_extraction(
         print(f"IN : {in_dir}")
         print(f"OUT: {out_dir}")
 
-    results = []
-    all_warnings = []
+    results: List[dict] = []
+    all_warnings: List[str] = []
 
     for pdf in pdfs:
         if verbose:
-            print(f"\nProcessing: {pdf.name}")
+            print(f"\nProcessando: {pdf.name}")
 
         payload = extract_pdf_text(
             pdf, ocr_lang=ocr_lang, ocr_dpi=ocr_dpi, min_chars=min_chars
@@ -263,43 +221,32 @@ def run_stage_01_extraction(
             )
 
     if verbose:
-        print("\nCompleted.")
+        print("\nConcluído.")
 
-    return {"processed_count": len(results), "warnings": all_warnings, "files": results}
+    return {
+        "processed_count": len(results),
+        "warnings": all_warnings,
+        "files": results,
+    }
 
 
 def main() -> None:
-    parser = argparse.ArgumentParser(
-        description="Stage 01 - Extract text from PDFs (direct + OCR fallback)."
-    )
-    parser.add_argument(
-        "--in", dest="in_dir", required=True, help="Input directory with PDFs"
-    )
-    parser.add_argument(
-        "--out", dest="out_dir", required=True, help="Output directory (txt/json)"
-    )
-    parser.add_argument(
-        "--lang", default="eng+por", help="OCR languages (e.g. eng, por, eng+por)"
-    )
-    parser.add_argument("--dpi", type=int, default=300, help="DPI for OCR rendering")
-    parser.add_argument(
-        "--min-chars",
-        type=int,
-        default=80,
-        help="Minimum chars for direct text extraction",
-    )
+    parser = argparse.ArgumentParser(description="Stage 01 - Extract text from PDFs (direct + OCR fallback).")
+    parser.add_argument("--in", dest="in_dir", required=True, help="Pasta com PDFs de entrada")
+    parser.add_argument("--out", dest="out_dir", required=True, help="Pasta de saÃ­da (txt/json)")
+    parser.add_argument("--lang", default="eng+por", help="Idiomas do OCR (ex: eng, por, eng+por)")
+    parser.add_argument("--dpi", type=int, default=300, help="DPI para render no OCR (ex: 300)")
+    parser.add_argument("--min-chars", type=int, default=80, help="MÃ­nimo de chars para considerar texto 'direto'")
     args = parser.parse_args()
 
-    result = run_stage_01_extraction(
+    run_stage_01_extraction(
         in_dir=Path(args.in_dir),
         out_dir=Path(args.out_dir),
         ocr_lang=args.lang,
         ocr_dpi=args.dpi,
         min_chars=args.min_chars,
+        verbose=True,
     )
-
-    if result["warnings"]:
-        print(f"\n⚠ {len(result['warnings'])} warnings")
 
 
 if __name__ == "__main__":
