@@ -273,27 +273,37 @@ def _find_gross_weight(lines: List[str]) -> Tuple[Optional[float], List[str]]:
     """
     Ex: "Gross Weight 'in kilo's" e logo depois "9,825.000 KG"
     """
+    kg_re = re.compile(r"([0-9][0-9\.,]+)\s*K\s*G(?:S|M)?\b", flags=re.I)
+    m3_re = re.compile(r"([0-9][0-9\.,]+)\s+[0-9][0-9\.,]*\s*(?:M3|CBM)\b", flags=re.I)
+
     for i, ln in enumerate(lines):
         if re.search(r"\bGROSS\s+WEIGHT\b", ln, flags=re.I):
-            # procura nas próximas linhas um número + KG
+            # procura nas pr?ximas linhas um n?mero + KG
             for j in range(i, min(i + 8, len(lines))):
                 cand = lines[j]
-                m = re.search(r"([0-9][0-9\.,]+)\s*KG", cand, flags=re.I)
+                m = kg_re.search(cand)
                 if m:
                     num = _parse_number(m.group(1))
+                    if num is not None:
+                        return num, [cand]
+                # fallback: linha de tabela com M3/CBM (KG pode ter sumido no OCR)
+                m2 = m3_re.search(cand)
+                if m2:
+                    num = _parse_number(m2.group(1))
                     if num is not None:
                         return num, [cand]
             break
 
     # fallback: qualquer linha com "KG" e formato do BL
     for ln in lines:
-        m = re.search(r"([0-9][0-9\.,]+)\s*KG", ln, flags=re.I)
+        m = kg_re.search(ln)
         if m and re.search(r"\bWEIGHT\b", ln, flags=re.I):
             num = _parse_number(m.group(1))
             if num is not None:
                 return num, [ln]
 
     return None, []
+
 
 
 def extract_bl_fields(text: str) -> Tuple[Dict[str, Any], List[str], List[str]]:
