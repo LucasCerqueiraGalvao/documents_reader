@@ -176,13 +176,13 @@ def _find_invoice_number(lines: List[str]) -> Tuple[Optional[str], List[str]]:
 def _find_importer_name_cnpj(lines: List[str]) -> Tuple[Optional[str], Optional[str], List[str]]:
     """Extrai Importer (Consignee) e CNPJ no Packing List.
 
-    Heurística preferida (mais consistente):
+    Heuristica preferida (mais consistente):
       - localizar a linha do CNPJ
       - pegar a linha imediatamente ANTERIOR como nome
-    Depois aplica limpeza para remover data/ruído.
+    Depois aplica limpeza para remover data/ruido.
 
     Fallback:
-      - procurar 'ACCOUNT OF' e usar a próxima linha como nome
+      - procurar 'ACCOUNT OF' e usar a proxima linha como nome
     """
     evidence: List[str] = []
 
@@ -201,7 +201,7 @@ def _find_importer_name_cnpj(lines: List[str]) -> Tuple[Optional[str], Optional[
 
     name = None
     if cnpj_idx is not None:
-        # volta até achar uma linha boa (não vazia / não label)
+        # volta ate achar uma linha boa (nao vazia / nao label)
         for j in range(cnpj_idx - 1, max(-1, cnpj_idx - 6), -1):
             cand = (lines[j] or "").strip()
             if not cand:
@@ -215,7 +215,7 @@ def _find_importer_name_cnpj(lines: List[str]) -> Tuple[Optional[str], Optional[
         if cnpj_raw_line:
             evidence.append(cnpj_raw_line)
 
-    # 2) fallback: ACCOUNT OF + próxima linha
+    # 2) fallback: ACCOUNT OF + proxima linha
     if not name:
         for i, ln in enumerate(lines):
             if re.search(r"\bACCOUNT OF\b", ln, flags=re.I):
@@ -231,6 +231,66 @@ def _find_importer_name_cnpj(lines: List[str]) -> Tuple[Optional[str], Optional[
                 break
 
     return (name or None), (cnpj or None), evidence
+
+
+def _find_shipper_name(lines: List[str]) -> Tuple[Optional[str], List[str]]:
+    """Heuristica para achar shipper/exporter em Packing List.
+
+    Busca por blocos 'SHIPPER/EXPORTER' e, se nao houver,
+    tenta recuperar um nome de empresa imediatamente antes de 'ACCOUNT OF'.
+    """
+    evidence: List[str] = []
+
+    # 1) Se houver SHIPPER/EXPORTER explicito
+    for i, ln in enumerate(lines):
+        if re.search(r"\b(SHIPPER|EXPORTER)\b", ln, flags=re.I):
+            for j in range(i + 1, min(i + 6, len(lines))):
+                cand = (lines[j] or "").strip()
+                if not cand:
+                    continue
+                if re.search(r"\b(ACCOUNT OF|CNPJ|INVOICE|PACKING|P\.|ORDER|SALES|MODEL)\b", cand, flags=re.I):
+                    continue
+                name = _clean_company_name(cand)
+                if name:
+                    evidence.append(cand)
+                    return name, evidence
+
+    # 2) Fallback: procurar linha antes de 'ACCOUNT OF'
+    for i, ln in enumerate(lines):
+        if re.search(r"\bACCOUNT OF\b", ln, flags=re.I):
+            # primeiro tenta achar um candidato com palavras-chave empresariais
+            for j in range(i - 1, max(-1, i - 8), -1):
+                cand = (lines[j] or "").strip()
+                if not cand:
+                    continue
+                up = cand.upper()
+                if re.search(r"\b(CNPJ|INVOICE|PACKING|ORDER|SALES|MODEL|CARTON|UNITS?|PAGE|P\.)\b", up):
+                    continue
+                if sum(ch.isalpha() for ch in cand) < 3:
+                    continue
+                if re.search(r"\b(LTDA|LTD|S\.A\.|S/A|SA|INC|LLC|CORP|CO\.|COMPANY|INDUSTR|COMERC|MOTOR|MOTORS|LOGIX|LOGISTICS)\b", up):
+                    name = _clean_company_name(cand)
+                    if name:
+                        evidence.append(cand)
+                        return name, evidence
+
+            # se nao achou com keyword, pega o primeiro plausivel
+            for j in range(i - 1, max(-1, i - 8), -1):
+                cand = (lines[j] or "").strip()
+                if not cand:
+                    continue
+                up = cand.upper()
+                if re.search(r"\b(CNPJ|INVOICE|PACKING|ORDER|SALES|MODEL|CARTON|UNITS?|PAGE|P\.)\b", up):
+                    continue
+                if sum(ch.isalpha() for ch in cand) < 3:
+                    continue
+                name = _clean_company_name(cand)
+                if name:
+                    evidence.append(cand)
+                    return name, evidence
+            break
+
+    return None, []
 
 # -----------------------------
 # Table parsing (critical fix)
@@ -337,6 +397,7 @@ def extract_packing_list_fields(text: str) -> Tuple[Dict[str, Any], List[str], L
 
     invoice_no, inv_ev = _find_invoice_number(ln)
     importer_name, importer_cnpj, imp_ev = _find_importer_name_cnpj(ln)
+    shipper_name, shipper_ev = _find_shipper_name(ln)
 
     items, items_ev = _extract_items(ln)
     total_packs, total_net, total_gross, total_m3, total_ev = _find_total_line(ln)
@@ -377,6 +438,7 @@ def extract_packing_list_fields(text: str) -> Tuple[Dict[str, Any], List[str], L
     fields: Dict[str, Any] = {}
     fields["invoice_number"] = _mk_field(invoice_no, required["invoice_number"], inv_ev, "regex")
     fields["importer_name"] = _mk_field(importer_name, required["importer_name"], imp_ev[:1], "line_block")
+    fields["shipper_name"] = _mk_field(shipper_name, False, shipper_ev, "heuristic")
     fields["importer_cnpj"] = _mk_field(importer_cnpj, required["importer_cnpj"], imp_ev, "regex")
     fields["packages_total"] = _mk_field(total_packs, required["packages_total"], total_ev, "regex_total")
     fields["net_weight_kg"] = _mk_field(net_final, required["net_weight_kg"], total_ev or items_ev[:2], "regex_total")

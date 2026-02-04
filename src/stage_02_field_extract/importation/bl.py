@@ -306,6 +306,34 @@ def _find_gross_weight(lines: List[str]) -> Tuple[Optional[float], List[str]]:
 
 
 
+
+
+def _find_freight_terms(lines: List[str]) -> Tuple[Optional[str], List[str]]:
+    """Extrai FREIGHT TERMS (COLLECT/PREPAID) do BL."""
+    for i, ln in enumerate(lines):
+        if re.search(r"\bFREIGHT\b", ln, flags=re.I):
+            if re.search(r"\bCOLLECT\b", ln, flags=re.I):
+                return "COLLECT", [ln]
+            if re.search(r"\bPREPAID\b", ln, flags=re.I):
+                return "PREPAID", [ln]
+            # tenta pr??xima linha
+            if i + 1 < len(lines):
+                nxt = lines[i + 1]
+                if re.search(r"\bCOLLECT\b", nxt, flags=re.I):
+                    return "COLLECT", [ln, nxt]
+                if re.search(r"\bPREPAID\b", nxt, flags=re.I):
+                    return "PREPAID", [ln, nxt]
+
+    # fallback: procura COLLECT/PREPAID com FREIGHT na linha anterior
+    for i, ln in enumerate(lines):
+        if re.search(r"\b(COLLECT|PREPAID)\b", ln, flags=re.I):
+            if re.search(r"\bFREIGHT\b", ln, flags=re.I):
+                return ("COLLECT" if "COLLECT" in ln.upper() else "PREPAID"), [ln]
+            if i > 0 and re.search(r"\bFREIGHT\b", lines[i - 1], flags=re.I):
+                val = "COLLECT" if "COLLECT" in ln.upper() else "PREPAID"
+                return val, [lines[i - 1], ln]
+
+    return None, []
 def extract_bl_fields(text: str) -> Tuple[Dict[str, Any], List[str], List[str]]:
     ln = _lines(text)
 
@@ -316,6 +344,7 @@ def extract_bl_fields(text: str) -> Tuple[Dict[str, Any], List[str], List[str]]:
     consignee_name, consignee_cnpj, consignee_ev = _find_consignee_name_cnpj(ln)
     ncm, ncm_ev, ncm_warn = _find_ncm(ln)
     gross_weight, gross_ev = _find_gross_weight(ln)
+    freight_terms, freight_ev = _find_freight_terms(ln)
 
     warnings.extend(ncm_warn)
 
@@ -337,6 +366,7 @@ def extract_bl_fields(text: str) -> Tuple[Dict[str, Any], List[str], List[str]]:
     fields["importer_cnpj"] = _mk_field(consignee_cnpj, required["importer_cnpj"], consignee_ev, "regex")
     fields["ncm"] = _mk_field(ncm, required["ncm"], ncm_ev, "regex")
     fields["gross_weight_kg"] = _mk_field(gross_weight, required["gross_weight_kg"], gross_ev, "regex")
+    fields["freight_terms"] = _mk_field(freight_terms, False, freight_ev, "regex")
 
     for k, meta in fields.items():
         if meta["required"] and not meta["present"]:
