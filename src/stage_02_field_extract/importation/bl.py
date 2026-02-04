@@ -273,8 +273,8 @@ def _find_gross_weight(lines: List[str]) -> Tuple[Optional[float], List[str]]:
     """
     Ex: "Gross Weight 'in kilo's" e logo depois "9,825.000 KG"
     """
-    kg_re = re.compile(r"([0-9][0-9\.,]+)\s*K\s*G(?:S|M)?\b", flags=re.I)
-    m3_re = re.compile(r"([0-9][0-9\.,]+)\s+[0-9][0-9\.,]*\s*(?:M3|CBM)\b", flags=re.I)
+    kg_re = re.compile(r"([0-9][0-9\.,]+)\s*K\s*[G6S](?:S|M)?\b", flags=re.I)
+    m3_re = re.compile(r"([0-9][0-9\.,]+)\s*[A-Z0-9]{0,3}\s*[0-9][0-9\.,]*\s*(?:M3|CBM)\b", flags=re.I)
 
     for i, ln in enumerate(lines):
         if re.search(r"\bGROSS\s+WEIGHT\b", ln, flags=re.I):
