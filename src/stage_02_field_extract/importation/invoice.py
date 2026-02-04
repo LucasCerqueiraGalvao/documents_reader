@@ -138,7 +138,7 @@ def extract_invoice_fields(text: str):
     # “freight and other expenses” (pode estar ausente mesmo — vira “missing real”)
     freight_present = bool(RE_FREIGHT_WORDS.search(text or ""))
     fields["freight_and_expenses"] = build_field(
-        freight_present, True, freight_present, [], "keyword_scan"
+        freight_present, False, freight_present, [], "keyword_scan"
     )
 
     # Itens (ajuda para comparação futura)
