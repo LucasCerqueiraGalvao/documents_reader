@@ -17,6 +17,11 @@ from __future__ import annotations
 import re
 from typing import Any, Dict, List, Optional, Tuple
 
+try:
+    from .common import parse_number_locale, truncate_evidence
+except ImportError:  # pragma: no cover
+    from common import parse_number_locale, truncate_evidence
+
 
 # -----------------------------
 # Helpers
@@ -80,80 +85,13 @@ def _mk_field(value: Any, required: bool, evidence: List[str], method: str) -> D
         "present": bool(_present(value)),
         "required": bool(required),
         "value": value if _present(value) else None,
-        "evidence": evidence or [],
+        "evidence": truncate_evidence(evidence or []),
         "method": method,
     }
 
 
 def _parse_number(v: str) -> Optional[float]:
-    if v is None:
-        return None
-    s = str(v).strip()
-    if not s:
-        return None
-
-    s = re.sub(r"[^\d,.\-]", "", s)
-    if not s:
-        return None
-
-    # 7,980 (milhar com vírgula)
-    if re.fullmatch(r"-?\d{1,3}(,\d{3})+", s):
-        s = s.replace(",", "")
-        try:
-            return float(s)
-        except ValueError:
-            return None
-
-    # 7,980.000
-    if re.fullmatch(r"-?\d{1,3}(,\d{3})+(\.\d+)?", s):
-        s = s.replace(",", "")
-        try:
-            return float(s)
-        except ValueError:
-            return None
-
-    # 7.980,00
-    if re.fullmatch(r"-?\d{1,3}(\.\d{3})+(,\d+)?", s):
-        s = s.replace(".", "").replace(",", ".")
-        try:
-            return float(s)
-        except ValueError:
-            return None
-
-    # só vírgula
-    if "," in s and "." not in s:
-        left, right = s.split(",", 1)
-        if len(right) == 3 and len(left) <= 3:
-            s = left + right
-        else:
-            s = left + "." + right
-        try:
-            return float(s)
-        except ValueError:
-            return None
-
-    # só ponto
-    if "." in s and "," not in s:
-        left, right = s.split(".", 1)
-        if len(right) == 3 and len(left) <= 3:
-            s = left + right
-        try:
-            return float(s)
-        except ValueError:
-            return None
-
-    # ambos
-    last_comma = s.rfind(",")
-    last_dot = s.rfind(".")
-    if last_dot > last_comma:
-        s = s.replace(",", "")
-    else:
-        s = s.replace(".", "").replace(",", ".")
-
-    try:
-        return float(s)
-    except ValueError:
-        return None
+    return parse_number_locale(v)
 
 
 def _lines(text: str) -> List[str]:

@@ -124,15 +124,54 @@ function mapDocTypeToPrefix(docType) {
   switch ((docType || '').toUpperCase()) {
     case 'BL':
       return 'BL';
+    case 'HBL':
+      return 'HBL';
     case 'INVOICE':
       return 'INVOICE';
     case 'PACKING LIST':
     case 'PACKING_LIST':
     case 'PACKINGLIST':
       return 'PACKING LIST';
+    case 'DI':
+      return 'DI';
+    case 'LI':
+      return 'LI';
     default:
       return 'DOC';
   }
+}
+
+
+function guessDocTypeFromPath(filePath) {
+  const base = String(path.basename(filePath || '')).toUpperCase();
+  if (base.includes('HBL')) return 'HBL';
+  if (
+    base.includes('CONFERENCIA DI') ||
+    base.includes('RASCUNHO DI') ||
+    /\bDI\b/.test(base) ||
+    /\bDI[\s\-_]*\d+/.test(base)
+  ) {
+    return 'DI';
+  }
+  if (
+    base.includes('CONFERENCIA LI') ||
+    base.includes('RASCUNHO LI') ||
+    /\bLI\b/.test(base) ||
+    /\bLI[\s\-_]*\d+/.test(base)
+  ) {
+    return 'LI';
+  }
+  if (base.includes('PACKING')) return 'PACKING LIST';
+  if (base.includes('INVOICE')) return 'INVOICE';
+  if (base.startsWith('BL') || base.includes('B/L') || base.includes('LADING')) return 'BL';
+  return 'INVOICE';
+}
+
+function resolveDocType(item) {
+  const provided = String(item?.docType || '').trim();
+  const fromUi = mapDocTypeToPrefix(provided);
+  if (fromUi !== 'DOC') return fromUi;
+  return mapDocTypeToPrefix(guessDocTypeFromPath(item?.path || ''));
 }
 
 async function ensureDir(dirPath) {
@@ -202,12 +241,12 @@ async function runPipeline({ files }) {
   await ensureDir(outputBase);
 
   // Copy files into run input folder with names that help doc detection.
-  const counters = { BL: 0, INVOICE: 0, 'PACKING LIST': 0, DOC: 0 };
+  const counters = { BL: 0, HBL: 0, INVOICE: 0, 'PACKING LIST': 0, DI: 0, LI: 0, DOC: 0 };
   const copied = [];
 
   for (const item of files || []) {
     const srcPath = item.path;
-    const typePrefix = mapDocTypeToPrefix(item.docType);
+    const typePrefix = resolveDocType(item);
     counters[typePrefix] = (counters[typePrefix] || 0) + 1;
 
     const suffix = counters[typePrefix] === 1 ? '' : ` ${counters[typePrefix]}`;
@@ -215,7 +254,21 @@ async function runPipeline({ files }) {
     const destPath = path.join(rawDir, destName);
 
     await fsp.copyFile(srcPath, destPath);
-    copied.push({ from: srcPath, to: destPath, docType: item.docType || null });
+    copied.push({
+      from: srcPath,
+      to: destPath,
+      docType: item.docType || null,
+      resolvedType: typePrefix,
+    });
+  }
+
+  if (copied.length) {
+    const lines = copied
+      .map((c) => `INPUT MAP: [${c.resolvedType}] ${path.basename(c.from)} -> ${path.basename(c.to)}`)
+      .join('\n') + '\n';
+    BrowserWindow.getAllWindows().forEach((w) => {
+      w.webContents.send('pipeline:log', { stream: 'stdout', text: lines });
+    });
   }
 
   const tessEnv = getBundledTesseractEnv();

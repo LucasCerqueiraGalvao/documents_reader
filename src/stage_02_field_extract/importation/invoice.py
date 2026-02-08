@@ -31,6 +31,9 @@ RE_CURRENCY = re.compile(r"(?is)\bCURRENCY\b\s*[:\-]?\s*([A-Z]{3})\b")
 RE_PAYMENT = re.compile(r"(?is)\b(ADVANCE\s+PAYMENT|PAYMENT\s+TERMS?.{0,40})\b")
 RE_NET_WEIGHT = re.compile(r"(?is)\bNET\s*WEIGHT\b\s*[:\-]?\s*([0-9\.,]+)\s*KGS?\b")
 RE_GROSS_WEIGHT = re.compile(r"(?is)\bGROSS\s*WEIGHT\b\s*[:\-]?\s*([0-9\.,]+)\s*KGS?\b")
+RE_TOTAL_QTY = re.compile(
+    r"(?is)\b(TOTAL\s+(?:QTY|QUANTITY|UNITS))\b\s*[:\-]?\s*([0-9\.,]+)\b"
+)
 
 RE_COUNTRY_ORIGIN = re.compile(
     r"(?is)\bCOUNTRY\s+OF\s+ORIGIN\b\s*[:\-]?\s*([A-Z][A-Z ]{2,})\b"
@@ -133,6 +136,12 @@ def extract_invoice_fields(text: str):
     gw = parse_mixed_number(gw_raw) if gw_raw else None
     fields["gross_weight_kg"] = build_field(
         gw is not None, True, gw, [ev] if ev else [], "regex_number"
+    )
+
+    tq_raw, ev = find_first(RE_TOTAL_QTY, text, group=2)
+    tq = parse_mixed_number(tq_raw) if tq_raw else None
+    fields["total_quantity"] = build_field(
+        tq is not None, False, tq, [ev] if ev else [], "regex_number"
     )
 
     # “freight and other expenses” (pode estar ausente mesmo — vira “missing real”)

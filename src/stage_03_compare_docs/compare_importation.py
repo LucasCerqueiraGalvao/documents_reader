@@ -197,6 +197,41 @@ def docref_close(a: Any, b: Any) -> bool:
     return da2 == db2
 
 
+def _to_list(v: Any) -> List[str]:
+    if v is None:
+        return []
+    if isinstance(v, list):
+        return [str(x).strip() for x in v if str(x).strip()]
+    s = str(v).strip()
+    return [s] if s else []
+
+
+def docref_set_close(a: Any, b: Any) -> bool:
+    la = _to_list(a)
+    lb = _to_list(b)
+    if not la or not lb:
+        return False
+    for x in la:
+        for y in lb:
+            if docref_close(x, y):
+                return True
+    return False
+
+
+def ncm_hs_close(a: Any, b: Any) -> Tuple[bool, Optional[str]]:
+    da = digits_only(a)
+    db = digits_only(b)
+    if not da or not db:
+        return (False, None)
+    if da == db:
+        return (True, None)
+
+    short, long_ = (da, db) if len(da) <= len(db) else (db, da)
+    if len(short) in (4, 6) and long_.startswith(short):
+        return (True, f"partial_hs_{len(short)}")
+    return (False, None)
+
+
 def code_close_prefix(a: Any, b: Any) -> bool:
     """
     For NCM/HS:
@@ -299,7 +334,7 @@ def expected_freight_mode_from_incoterm(incoterm: str) -> Optional[str]:
 @dataclass
 class CheckSpec:
     name: str
-    kind: str  # "number"|"string"|"set"|"code_prefix"|"cnpj"|"docref"
+    kind: str  # "number"|"string"|"set"|"code_prefix"|"cnpj"|"docref"|"docref_set"|"ncm_hs"
     a_keys: List[str]
     b_keys: List[str]
     abs_tol: float = 0.5
@@ -398,13 +433,16 @@ INVOICE_VS_BL = [
     ),
 ]
 
-DI_LI_VS_BASE = [
+DI_LI_VS_DOCREF = [
     CheckSpec(
         name="Invoice number",
-        kind="docref",
-        a_keys=["invoice_number"],
+        kind="docref_set",
+        a_keys=["invoice_numbers", "invoice_number"],
         b_keys=["invoice_number", "packing_list_number"],
     ),
+]
+
+DI_LI_VS_BASE = [
     CheckSpec(
         name="Consignee name",
         kind="string",
@@ -420,10 +458,27 @@ DI_LI_VS_BASE = [
     CheckSpec(
         name="Gross weight (kg)",
         kind="number",
-        a_keys=["gross_weight_kg"],
-        b_keys=["gross_weight_kg", "gross_weight_kg_total_calc"],
+        a_keys=["gross_weight_kg", "gross_weight_total_kg"],
+        b_keys=["gross_weight_kg", "gross_weight_kg_total_calc", "gross_weight_total_kg"],
         abs_tol=1.0,
         rel_tol=0.01,
+    ),
+    CheckSpec(
+        name="Net weight (kg)",
+        kind="number",
+        a_keys=["net_weight_kg", "net_weight_total_kg"],
+        b_keys=["net_weight_kg", "net_weight_kg_total_calc", "net_weight_total_kg"],
+        abs_tol=1.0,
+        rel_tol=0.01,
+    ),
+]
+
+DI_LI_VS_BL_NCM = [
+    CheckSpec(
+        name="NCM/HS",
+        kind="ncm_hs",
+        a_keys=["ncm", "ncm_or_hs"],
+        b_keys=["ncm", "ncm_or_hs"],
     ),
 ]
 
@@ -545,6 +600,41 @@ def compare_pair(
                     "a_value": va,
                     "b_value": vb,
                     "note": "accepts trailing '-P' / 'P' on one side",
+                    "evidence": {"a": eva[:2], "b": evb[:2]},
+                }
+            )
+            continue
+
+        if spec.kind == "docref_set":
+            ok = docref_set_close(va, vb)
+            out.append(
+                {
+                    "pair": label,
+                    "check": spec.name,
+                    "status": "match" if ok else "divergent",
+                    "a_key_used": a_used,
+                    "b_key_used": b_used,
+                    "a_value": va,
+                    "b_value": vb,
+                    "note": "list_vs_string_docref_match",
+                    "evidence": {"a": eva[:2], "b": evb[:2]},
+                }
+            )
+            continue
+
+        if spec.kind == "ncm_hs":
+            ok, note = ncm_hs_close(va, vb)
+            out.append(
+                {
+                    "pair": label,
+                    "check": spec.name,
+                    "status": "match" if ok else "divergent",
+                    "a_key_used": a_used,
+                    "b_key_used": b_used,
+                    "a_value": va,
+                    "b_value": vb,
+                    "note": note,
+                    "warning": (note is not None),
                     "evidence": {"a": eva[:2], "b": evb[:2]},
                 }
             )
@@ -941,8 +1031,16 @@ def run_stage_03_comparison(
         + by_kind.get("hbl", [])
         + by_kind.get("bill_of_lading", [])
     )
-    dis = by_kind.get("di", []) + by_kind.get("conferencia_di", [])
-    lis = by_kind.get("li", []) + by_kind.get("conferencia_li", [])
+    dis = (
+        by_kind.get("di", [])
+        + by_kind.get("conferencia_di", [])
+        + by_kind.get("rascunho_di", [])
+    )
+    lis = (
+        by_kind.get("li", [])
+        + by_kind.get("conferencia_li", [])
+        + by_kind.get("rascunho_li", [])
+    )
 
     comparisons: List[dict] = []
     rule_checks: List[dict] = []
@@ -976,14 +1074,36 @@ def run_stage_03_comparison(
 
     bases = invoices + packings + bls
     for di in dis:
+        for inv in invoices:
+            label = f"di_vs_invoice | {doc_label(di)} <> {doc_label(inv)}"
+            comparisons.extend(compare_pair(di, inv, DI_LI_VS_DOCREF, label))
+        for pl in packings:
+            label = f"di_vs_packing | {doc_label(di)} <> {doc_label(pl)}"
+            comparisons.extend(compare_pair(di, pl, DI_LI_VS_DOCREF, label))
+
         for base in bases:
             label = f"di_vs_base | {doc_label(di)} <> {doc_label(base)}"
             comparisons.extend(compare_pair(di, base, DI_LI_VS_BASE, label))
 
+        for bl in bls:
+            label = f"di_vs_bl | {doc_label(di)} <> {doc_label(bl)}"
+            comparisons.extend(compare_pair(di, bl, DI_LI_VS_BL_NCM, label))
+
     for li in lis:
+        for inv in invoices:
+            label = f"li_vs_invoice | {doc_label(li)} <> {doc_label(inv)}"
+            comparisons.extend(compare_pair(li, inv, DI_LI_VS_DOCREF, label))
+        for pl in packings:
+            label = f"li_vs_packing | {doc_label(li)} <> {doc_label(pl)}"
+            comparisons.extend(compare_pair(li, pl, DI_LI_VS_DOCREF, label))
+
         for base in bases:
             label = f"li_vs_base | {doc_label(li)} <> {doc_label(base)}"
             comparisons.extend(compare_pair(li, base, DI_LI_VS_BASE, label))
+
+        for bl in bls:
+            label = f"li_vs_bl | {doc_label(li)} <> {doc_label(bl)}"
+            comparisons.extend(compare_pair(li, bl, DI_LI_VS_BL_NCM, label))
 
     core_docs_for_shipper = []
     core_docs_for_shipper.extend(invoices[:1] if invoices else [])

@@ -35,6 +35,12 @@ def join_pages_text(stage01_data: dict) -> str:
 
 def detect_doc_kind_from_filename(name: str) -> str:
     n = name.lower()
+    if "hbl" in n:
+        return "hbl"
+    if "conferencia di" in n or "rascunho di" in n or re.search(r"\bdi\b", n):
+        return "di"
+    if "conferencia li" in n or "rascunho li" in n or "licenca" in n or re.search(r"\bli\b", n):
+        return "li"
     if "invoice" in n:
         return "invoice"
     if "packing" in n:
@@ -60,6 +66,72 @@ def digits_only(s: str) -> str:
     return re.sub(r"\D", "", s or "")
 
 
+def parse_number_locale(s: str, prefer_thousands_sep: str = ",") -> Optional[float]:
+    """
+    Parser numérico robusto para padrões mistos pt-BR/en-US.
+
+    Regras principais:
+    - "7,980" -> 7980 (milhar por vírgula)
+    - "9,825.000" -> 9825.0
+    - "5.009,00" -> 5009.0
+    - "53.772" -> 53.772 (ponto como decimal quando único)
+    - "1.234.567" -> 1234567
+    """
+    if not s:
+        return None
+    s = str(s).strip()
+    if not s:
+        return None
+
+    s = re.sub(r"[^\d,.\-]", "", s)
+    if not s or s in {"-", ",", "."}:
+        return None
+
+    has_comma = "," in s
+    has_dot = "." in s
+
+    if has_comma and has_dot:
+        # decide o separador decimal pelo último
+        if s.rfind(",") > s.rfind("."):
+            # vírgula é decimal
+            s = s.replace(".", "").replace(",", ".")
+        else:
+            # ponto é decimal
+            s = s.replace(",", "")
+        try:
+            return float(s)
+        except ValueError:
+            return None
+
+    if has_comma and not has_dot:
+        # vírgula como milhar: 7,980
+        if re.fullmatch(r"-?\d{1,3}(,\d{3})+", s):
+            s = s.replace(",", "")
+        else:
+            # vírgula como decimal
+            s = s.replace(",", ".")
+        try:
+            return float(s)
+        except ValueError:
+            return None
+
+    if has_dot and not has_comma:
+        # múltiplos pontos -> milhar
+        if re.fullmatch(r"-?\d{1,3}(\.\d{3})+", s):
+            if s.count(".") > 1:
+                s = s.replace(".", "")
+        # ponto único: trata como decimal (ex.: 53.772)
+        try:
+            return float(s)
+        except ValueError:
+            return None
+
+    try:
+        return float(s)
+    except ValueError:
+        return None
+
+
 def parse_mixed_number(s: str) -> Optional[float]:
     """
     Converte:
@@ -67,28 +139,22 @@ def parse_mixed_number(s: str) -> Optional[float]:
       5.009,00  -> 5009.0
       7,980.00  -> 7980.0
     """
-    if not s:
-        return None
-    s = s.strip()
-    s = re.sub(r"\s+", "", s)
+    return parse_number_locale(s)
 
-    has_comma = "," in s
-    has_dot = "." in s
 
-    if has_comma and has_dot:
-        if s.rfind(",") > s.rfind("."):
-            s = s.replace(".", "").replace(",", ".")
-        else:
-            s = s.replace(",", "")
-    elif has_comma and not has_dot:
-        s = s.replace(".", "").replace(",", ".")
-    else:
-        s = s.replace(",", "")
-
-    try:
-        return float(s)
-    except ValueError:
-        return None
+def truncate_evidence(evidence: list[str], max_chars: int = 220) -> list[str]:
+    out: list[str] = []
+    for ev in evidence or []:
+        if ev is None:
+            continue
+        s = str(ev).strip()
+        if not s:
+            continue
+        s = normalize_spaces(s)
+        if len(s) > max_chars:
+            s = s[: max_chars - 3].rstrip() + "..."
+        out.append(s)
+    return out
 
 
 def build_field(
@@ -98,7 +164,7 @@ def build_field(
         "present": bool(present),
         "required": bool(required),
         "value": value,
-        "evidence": evidence or [],
+        "evidence": truncate_evidence(evidence or []),
         "method": method,
     }
 

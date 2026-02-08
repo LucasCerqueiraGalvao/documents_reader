@@ -69,6 +69,80 @@ def norm_spaces(s: str) -> str:
     return s.strip()
 
 
+def split_pair_companies(pair_text: Any) -> Tuple[str, str]:
+    """
+    Parse pair text into two document/company labels.
+    Expected format: "<rule> | A <> B" or "A <> B".
+    """
+    s = (str(pair_text) if pair_text is not None else "").strip()
+    if not s:
+        return ("", "")
+
+    rhs = s.split("|", 1)[1].strip() if "|" in s else s
+    if "<>" in rhs:
+        left, right = rhs.split("<>", 1)
+        return (left.strip(), right.strip())
+
+    m = re.match(r"(.+?)\s+(?:vs|x)\s+(.+)", rhs, flags=re.IGNORECASE)
+    if m:
+        return (m.group(1).strip(), m.group(2).strip())
+
+    return (rhs, "")
+
+
+def format_skip_reason(reason: Any, pair_text: Any) -> str:
+    r = (str(reason) if reason is not None else "").strip()
+    if not r:
+        return ""
+
+    doc_a, doc_b = split_pair_companies(pair_text)
+    rl = r.lower()
+    if rl == "missing_on_a":
+        return f'missing on "{doc_a or "Documento A"}"'
+    if rl == "missing_on_b":
+        return f'missing on "{doc_b or "Documento B"}"'
+
+    return r.replace("_", " ")
+
+
+DOC_KIND_LABELS = {
+    "invoice": "INVOICE",
+    "packing_list": "PACKING LIST",
+    "bl": "BL",
+    "hbl": "HBL",
+    "di": "DI",
+    "li": "LI",
+}
+EXPECTED_DOC_KINDS = [
+    ("invoice", "INVOICE"),
+    ("packing_list", "PACKING LIST"),
+    ("bl", "BL"),
+    ("hbl", "HBL"),
+    ("di", "DI"),
+    ("li", "LI"),
+]
+
+def doc_kind_label(kind: Any) -> str:
+    k = (str(kind) if kind is not None else "").strip().lower()
+    if k in DOC_KIND_LABELS:
+        return DOC_KIND_LABELS[k]
+    return (str(kind) if kind is not None else "").upper()
+
+def expected_docs_rows(stage02_docs: List[dict]) -> List[Tuple[str, int, str]]:
+    counts: Dict[str, int] = {}
+    for d in stage02_docs:
+        k = ((d.get("doc_kind") or "") if isinstance(d, dict) else "")
+        k = str(k).strip().lower()
+        if not k:
+            continue
+        counts[k] = counts.get(k, 0) + 1
+    rows: List[Tuple[str, int, str]] = []
+    for k, label in EXPECTED_DOC_KINDS:
+        cnt = counts.get(k, 0)
+        status = "OK" if cnt > 0 else "MISSING"
+        rows.append((label, cnt, status))
+    return rows
+
 # ------------------------
 # Load Stage01 quality info
 # ------------------------
@@ -148,6 +222,8 @@ def build_stage02_section(stage02_docs: List[dict]) -> Dict[str, Any]:
             for k, v in fields.items()
             if (v or {}).get("required") is True and (v or {}).get("present") is True
         )
+        fields_total = len(fields)
+        fields_present = sum(1 for k, v in fields.items() if (v or {}).get("present") is True)
 
         status = "OK"
         if missing:
@@ -165,7 +241,9 @@ def build_stage02_section(stage02_docs: List[dict]) -> Dict[str, Any]:
                 "warnings": warnings,
                 "required_present": required_present,
                 "required_total": required_total,
-                "fields_count": len(fields),
+                "fields_present": fields_present,
+                "fields_total": fields_total,
+                "fields_count": fields_total,
             }
         )
 
@@ -479,13 +557,20 @@ def build_markdown(report: dict) -> str:
     if not d2:
         lines.append("_Sem dados do Stage 02._")
     else:
-        lines.append("| Doc | Kind | Status | Missing | Warnings | Required |")
-        lines.append("|---|---|---|---|---|---:|")
+        lines.append("### Documentos esperados")
+        lines.append("| Tipo | Encontrados | Status |")
+        lines.append("|---|---:|---|")
+        for label, cnt, status in expected_docs_rows(d2):
+            lines.append(f"| {label} | {cnt} | {status} |")
+        lines.append("")
+
+        lines.append("| Doc | Kind | Status | Missing | Warnings | Required | Fields |")
+        lines.append("|---|---|---|---|---|---:|---:|")
         for d in d2:
             miss = ", ".join(d.get("missing_required_fields") or []) or "-"
             warn = "; ".join(d.get("warnings") or []) or "-"
             lines.append(
-                f"| {d.get('original_file','')} | {d.get('doc_kind','')} | {d.get('status','')} | {miss} | {warn} | {d.get('required_present',0)} / {d.get('required_total',0)} |"
+                f"| {d.get('original_file','')} | {doc_kind_label(d.get('doc_kind',''))} | {d.get('status','')} | {miss} | {warn} | {d.get('required_present',0)} / {d.get('required_total',0)} | {d.get('fields_present',0)} / {d.get('fields_total', d.get('fields_count', 0))} |"
             )
     lines.append("")
 
@@ -505,11 +590,12 @@ def build_markdown(report: dict) -> str:
     divs = (report.get("lists") or {}).get("divergent") or []
     if divs:
         lines.append("### Divergências (top 50)")
-        lines.append("| Bucket | Par | Campo | A | B |")
-        lines.append("|---|---|---|---|---|")
+        lines.append("| Bucket | Documento A | Documento B | Campo | A | B |")
+        lines.append("|---|---|---|---|---|---|")
         for c in divs[:50]:
+            company_a, company_b = split_pair_companies(c.get("pair"))
             lines.append(
-                f"| {c.get('bucket','')} | {tr(c.get('pair',''))} | {tr(c.get('field','?'))} | {tr(c.get('a_value'))} | {tr(c.get('b_value'))} |"
+                f"| {c.get('bucket','')} | {tr(company_a)} | {tr(company_b)} | {tr(c.get('field','?'))} | {tr(c.get('a_value'))} | {tr(c.get('b_value'))} |"
             )
         lines.append("")
     else:
@@ -521,12 +607,13 @@ def build_markdown(report: dict) -> str:
     skips = (report.get("lists") or {}).get("skipped") or []
     if skips:
         lines.append("### Skipped (top 50)")
-        lines.append("| Bucket | Par | Campo | Motivo |")
-        lines.append("|---|---|---|---|")
+        lines.append("| Bucket | Documento A | Documento B | Campo | Motivo |")
+        lines.append("|---|---|---|---|---|")
         for c in skips[:50]:
-            reason = c.get("reason") or ""
+            reason = format_skip_reason(c.get("reason"), c.get("pair"))
+            company_a, company_b = split_pair_companies(c.get("pair"))
             lines.append(
-                f"| {c.get('bucket','')} | {tr(c.get('pair',''))} | {tr(c.get('field','?'))} | {tr(reason)} |"
+                f"| {c.get('bucket','')} | {tr(company_a)} | {tr(company_b)} | {tr(c.get('field','?'))} | {tr(reason)} |"
             )
         lines.append("")
     else:
@@ -553,11 +640,12 @@ def build_stage02_table_html(stage02_docs: List[dict]) -> str:
         rows.append(
             f"""
         <tr>
-          <td><b>{tr(d.get("doc_kind",""))}</b> | {tr(d.get("original_file",""))}</td>
+          <td><b>{tr(doc_kind_label(d.get("doc_kind","")))}</b> | {tr(d.get("original_file",""))}</td>
           <td><span class="badge {badge_class}">{tr(status_badge)}</span><br><span class="muted">{tr("missing_required_fields="+str(len(d.get("missing_required_fields") or [])) if status=="FAIL" else "warnings="+str(len(d.get("warnings") or [])) if status=="ALERT" else "no_missing_no_warnings")}</span></td>
           <td>{tr(miss)}</td>
           <td>{tr(warn)}</td>
           <td style="text-align:right">{tr(d.get("required_present",0))} / {tr(d.get("required_total",0))}</td>
+          <td style="text-align:right">{tr(d.get("fields_present",0))} / {tr(d.get("fields_total", d.get("fields_count",0)))}</td>
         </tr>
         """
         )
@@ -571,6 +659,7 @@ def build_stage02_table_html(stage02_docs: List[dict]) -> str:
           <th>Missing</th>
           <th>Warnings</th>
           <th style="text-align:right">Required</th>
+          <th style="text-align:right">Fields</th>
         </tr>
       </thead>
       <tbody>
@@ -620,6 +709,21 @@ def build_html(report: dict) -> str:
         stage01_tbl = "<div class='muted'>Sem dados do Stage 01.</div>"
 
     # Stage02 table
+    expected_rows = expected_docs_rows(s02.get("documents") or [])
+    expected_tbl = ""
+    if expected_rows:
+        exp_rows_html = []
+        for label, cnt, status in expected_rows:
+            exp_rows_html.append(
+                f"<tr><td><b>{tr(label)}</b></td><td style=\"text-align:right\">{tr(cnt)}</td><td>{tr(status)}</td></tr>"
+            )
+        expected_tbl = f"""
+        <table class=\"tbl\">
+          <thead><tr><th>Tipo</th><th style=\"text-align:right\">Encontrados</th><th>Status</th></tr></thead>
+          <tbody>{''.join(exp_rows_html)}</tbody>
+        </table>
+        """
+
     stage02_tbl = build_stage02_table_html(s02.get("documents") or [])
 
     # Stage03 summary
@@ -654,11 +758,13 @@ def build_html(report: dict) -> str:
     rows_div = []
     for c in divs[:100]:
         field_label = c.get("field") or c.get("check") or "?"
+        company_a, company_b = split_pair_companies(c.get("pair"))
         rows_div.append(
             f"""
         <tr>
           <td class="muted">{tr(c.get("bucket",""))}</td>
-          <td><code>{tr(c.get("pair",""))}</code></td>
+          <td>{tr(company_a or "-")}</td>
+          <td>{tr(company_b or "-")}</td>
           <td><code title="{tr(field_label)}">{tr(field_label)}</code></td>
           <td>{tr(c.get("a_value"))}</td>
           <td>{tr(c.get("b_value"))}</td>
@@ -674,7 +780,8 @@ def build_html(report: dict) -> str:
           <thead>
             <tr>
               <th>Tipo</th>
-              <th>Par</th>
+              <th>Documento A</th>
+              <th>Documento B</th>
               <th>Campo</th>
               <th>A</th>
               <th>B</th>
@@ -695,13 +802,15 @@ def build_html(report: dict) -> str:
     rows_sk = []
     for c in skips[:100]:
         field_label = c.get("field") or c.get("check") or "?"
+        company_a, company_b = split_pair_companies(c.get("pair"))
         rows_sk.append(
             f"""
         <tr>
           <td class="muted">{tr(c.get("bucket",""))}</td>
-          <td><code>{tr(c.get("pair",""))}</code></td>
+          <td>{tr(company_a or "-")}</td>
+          <td>{tr(company_b or "-")}</td>
           <td><code title="{tr(field_label)}">{tr(field_label)}</code></td>
-          <td class="muted">{tr(c.get("reason",""))}</td>
+          <td class="muted">{tr(format_skip_reason(c.get("reason",""), c.get("pair")))}</td>
         </tr>
         """
         )
@@ -712,7 +821,8 @@ def build_html(report: dict) -> str:
           <thead>
             <tr>
               <th>Tipo</th>
-              <th>Par</th>
+              <th>Documento A</th>
+              <th>Documento B</th>
               <th>Campo</th>
               <th>Motivo</th>
             </tr>
@@ -819,6 +929,8 @@ def build_html(report: dict) -> str:
 
   <h2>Stage 02 — Campos por documento</h2>
   <div class="section">
+    <h3>Documentos esperados</h3>
+    {expected_tbl}
     {stage02_tbl}
   </div>
 
@@ -994,3 +1106,4 @@ def run_stage_04_report(
 
 if __name__ == "__main__":
     main()
+

@@ -12,6 +12,7 @@ from __future__ import annotations
 
 import argparse
 import json
+import re
 from datetime import datetime
 from pathlib import Path
 from typing import Any, Dict, List, Tuple
@@ -23,10 +24,16 @@ try:
     from .invoice import extract_invoice_fields
     from .packing_list import extract_packing_list_fields
     from .bl import extract_bl_fields
+    from .hbl import extract_hbl_fields
+    from .di import extract_di_fields
+    from .li import extract_li_fields
 except ImportError:  # pragma: no cover
     from invoice import extract_invoice_fields
     from packing_list import extract_packing_list_fields
     from bl import extract_bl_fields
+    from hbl import extract_hbl_fields
+    from di import extract_di_fields
+    from li import extract_li_fields
 
 
 def now_iso() -> str:
@@ -53,35 +60,52 @@ def join_pages(stage01_obj: dict) -> str:
     return "\n\n".join(parts).strip()
 
 
+def _match_any(text: str, patterns: list[str]) -> bool:
+    for p in patterns:
+        if re.search(p, text, flags=re.I):
+            return True
+    return False
+
+
 def detect_kind(original_file: str, full_text: str) -> str:
     name = (original_file or "").upper()
+    text = (full_text or "").upper()
 
-    if (
-        "PACKING" in name
-        or "PACKING LIST" in name
-        or re_any(name, [" PL", " P.L", "ROMANEIO"])
-    ):
+    # HBL first (to avoid BL match)
+    if _match_any(name, [r"\bHBL\b", r"HOUSE\s+BILL"]) or _match_any(text, [r"\bHBL\b", r"HOUSE\s+BILL"]):
+        return "hbl"
+
+    # DI / LI (Conferencia / Rascunho)
+    if _match_any(name, [r"CONFERENCI[AA]\s+DI", r"RASCUNHO\s+DA\s+DI", r"RASCUNHO\s+DI", r"\bDI\b", r"\bDI[\s\-_/]*\d+"]):
+        return "di"
+    if _match_any(name, [r"CONFERENCI[AA]\s+LI", r"RASCUNHO\s+LI", r"\bLI\b", r"\bLI[\s\-_/]*\d+", r"LICEN[ÇC]A\s+DE\s+IMPORTA"]):
+        return "li"
+
+    if _match_any(text, [r"CONFERENCI[AA]\s+DI", r"RASCUNHO\s+DA\s+DI", r"RASCUNHO\s+DI", r"\bDI\b", r"DECLARA[ÇC][AÃ]O\s+DE\s+IMPORTA"]):
+        return "di"
+    if _match_any(text, [r"CONFERENCI[AA]\s+LI", r"RASCUNHO\s+LI", r"\bLI\b", r"LICEN[ÇC]A\s+DE\s+IMPORTA"]):
+        return "li"
+
+    # Packing List
+    if _match_any(name, [r"PACKING\s+LIST", r"PACKING", r"\bP\.?L\.?\b", r"ROMANEIO"]):
         return "packing_list"
-    if "INVOICE" in name and "PACKING" not in name:
-        return "invoice"
-    if name.startswith("BL") or "BILL OF LADING" in name or "B/L" in name:
+    # Invoice
+    if _match_any(name, [r"COMMERCIAL\s+INVOICE", r"INVOICE", r"PRO[-\s]?FORMA", r"FATTURA"]):
+        if not _match_any(name, [r"PACKING"]):
+            return "invoice"
+    # BL
+    if _match_any(name, [r"\bBL\b", r"BILL\s+OF\s+LADING", r"B/L"]) or name.startswith("BL"):
         return "bl"
 
     # fallback por conteúdo
-    up = (full_text or "").upper()
-    if "PACKING LIST" in up:
+    if _match_any(text, [r"PACKING\s+LIST"]):
         return "packing_list"
-    if "INVOICE" in up:
+    if _match_any(text, [r"COMMERCIAL\s+INVOICE", r"INVOICE", r"PRO[-\s]?FORMA", r"FATTURA"]):
         return "invoice"
-    if "BILL OF LADING" in up or "B/L" in up:
+    if _match_any(text, [r"BILL\s+OF\s+LADING", r"\bB/L\b", r"\bBL\b"]):
         return "bl"
 
     return "unknown"
-
-
-def re_any(s: str, needles: List[str]) -> bool:
-    s = s.upper()
-    return any(n.upper() in s for n in needles)
 
 
 def unpack_extractor_result(res: Any) -> Tuple[Dict[str, Any], List[str], List[str]]:
@@ -131,6 +155,12 @@ def run_stage_02_extraction(
             res = extract_packing_list_fields(full_text)
         elif doc_kind == "bl":
             res = extract_bl_fields(full_text)
+        elif doc_kind == "hbl":
+            res = extract_hbl_fields(full_text)
+        elif doc_kind == "di":
+            res = extract_di_fields(full_text)
+        elif doc_kind == "li":
+            res = extract_li_fields(full_text)
         else:
             res = ({}, [f"doc_kind unknown: {doc_kind}"], [])
 

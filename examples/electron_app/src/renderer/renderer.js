@@ -1,4 +1,4 @@
-const DOC_TYPES = ['BL', 'INVOICE', 'PACKING LIST'];
+const DOC_TYPES = ['BL', 'HBL', 'INVOICE', 'PACKING LIST', 'DI', 'LI'];
 
 const state = {
   files: /** @type {Array<{ path: string, name: string, docType: string }>} */ ([]),
@@ -85,6 +85,9 @@ async function configureProjectRoot() {
 function normalizeDocType(v) {
   const up = String(v || '').toUpperCase();
   if (up === 'PACKING_LIST' || up === 'PACKINGLIST') return 'PACKING LIST';
+  if (up === 'HBL') return 'HBL';
+  if (up === 'DI') return 'DI';
+  if (up === 'LI') return 'LI';
   if (DOC_TYPES.includes(up)) return up;
   return 'INVOICE';
 }
@@ -168,6 +171,9 @@ function addFiles(filePaths) {
 
 function guessDocTypeFromName(name) {
   const n = String(name || '').toUpperCase();
+  if (n.includes('HBL')) return 'HBL';
+  if (n.includes('CONFERENCIA DI') || n.includes('RASCUNHO DI') || n.match(/\bDI\b/) || n.match(/\bDI[\s\-_]*\d+/)) return 'DI';
+  if (n.includes('CONFERENCIA LI') || n.includes('RASCUNHO LI') || n.match(/\bLI\b/) || n.match(/\bLI[\s\-_]*\d+/)) return 'LI';
   if (n.includes('PACKING')) return 'PACKING LIST';
   if (n.includes('INVOICE')) return 'INVOICE';
   if (n.startsWith('BL') || n.includes('B/L') || n.includes('LADING')) return 'BL';

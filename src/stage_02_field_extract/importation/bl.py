@@ -11,6 +11,11 @@ from __future__ import annotations
 import re
 from typing import Any, Dict, List, Optional, Tuple
 
+try:
+    from .common import parse_number_locale, truncate_evidence
+except ImportError:  # pragma: no cover
+    from common import parse_number_locale, truncate_evidence
+
 
 # -----------------------------
 # Helpers
@@ -44,7 +49,7 @@ def _clean_company_name(raw: str) -> str:
 
     # cortar no sufixo societário, se existir
     m = re.search(
-        r"\b(LTDA\.?|LTD\.?|S\.?A\.?|S/A|SA|INC\.?|LLC|CORPORATION|CORP\.?)\b",
+        r"\b(LTDA\.?|LTD\.?|S\.?A\.?|S/A|SA|SRL|S\.?R\.?L\.?|S\.?P\.?A\.?|SPA|INC\.?|LLC|CORPORATION|CORP\.?)\b",
         s,
         flags=re.I,
     )
@@ -69,80 +74,13 @@ def _mk_field(value: Any, required: bool, evidence: List[str], method: str) -> D
         "present": bool(_present(value)),
         "required": bool(required),
         "value": value if _present(value) else None,
-        "evidence": evidence or [],
+        "evidence": truncate_evidence(evidence or []),
         "method": method,
     }
 
 
 def _parse_number(v: str) -> Optional[float]:
-    if v is None:
-        return None
-    s = str(v).strip()
-    if not s:
-        return None
-
-    s = re.sub(r"[^\d,.\-]", "", s)
-    if not s:
-        return None
-
-    # 7,980 (milhar com vírgula)
-    if re.fullmatch(r"-?\d{1,3}(,\d{3})+", s):
-        s = s.replace(",", "")
-        try:
-            return float(s)
-        except ValueError:
-            return None
-
-    # 7,980.000 (milhar com vírgula + decimal com ponto)
-    if re.fullmatch(r"-?\d{1,3}(,\d{3})+(\.\d+)?", s):
-        s = s.replace(",", "")
-        try:
-            return float(s)
-        except ValueError:
-            return None
-
-    # 7.980,00 (milhar com ponto + decimal com vírgula)
-    if re.fullmatch(r"-?\d{1,3}(\.\d{3})+(,\d+)?", s):
-        s = s.replace(".", "").replace(",", ".")
-        try:
-            return float(s)
-        except ValueError:
-            return None
-
-    # só vírgula
-    if "," in s and "." not in s:
-        left, right = s.split(",", 1)
-        if len(right) == 3 and len(left) <= 3:
-            s = left + right  # milhar
-        else:
-            s = left + "." + right
-        try:
-            return float(s)
-        except ValueError:
-            return None
-
-    # só ponto
-    if "." in s and "," not in s:
-        left, right = s.split(".", 1)
-        if len(right) == 3 and len(left) <= 3:
-            s = left + right  # milhar
-        try:
-            return float(s)
-        except ValueError:
-            return None
-
-    # ambos: decide último separador como decimal
-    last_comma = s.rfind(",")
-    last_dot = s.rfind(".")
-    if last_dot > last_comma:
-        s = s.replace(",", "")
-    else:
-        s = s.replace(".", "").replace(",", ".")
-
-    try:
-        return float(s)
-    except ValueError:
-        return None
+    return parse_number_locale(v)
 
 
 def _lines(text: str) -> List[str]:
@@ -160,7 +98,7 @@ def _find_shipper(lines: List[str]) -> Tuple[Optional[str], List[str]]:
     stop_words = {"CONSIGNEE", "NOTIFY", "BOOKING", "B/L", "B/L NO", "B/L NO."}
 
     for i, ln in enumerate(lines):
-        if re.search(r"\bSHIPPER\b", ln, flags=re.I):
+        if re.search(r"\b(SHIPPER|CONSIGNOR|CONSIGNER)\b", ln, flags=re.I):
             # pega próximas linhas até achar uma que pareça nome
             for j in range(i + 1, min(i + 8, len(lines))):
                 cand = lines[j].strip()
@@ -173,7 +111,7 @@ def _find_shipper(lines: List[str]) -> Tuple[Optional[str], List[str]]:
                 parts = cand.split()
                 while parts and re.search(r"\d", parts[-1]) and len(parts[-1]) >= 6:
                     parts.pop()
-                name = _clean_spaces(" ".join(parts))
+                name = _clean_company_name(_clean_spaces(" ".join(parts)))
                 if name and len(name) >= 3:
                     return name, [cand]
 
@@ -183,7 +121,7 @@ def _find_shipper(lines: List[str]) -> Tuple[Optional[str], List[str]]:
     for ln in lines:
         m = re.search(r"\bSHIPPER\b\s*:?\s*(.+)$", ln, flags=re.I)
         if m:
-            name = _clean_spaces(m.group(1))
+            name = _clean_company_name(_clean_spaces(m.group(1)))
             if name:
                 return name, [ln]
 
@@ -206,9 +144,29 @@ def _find_consignee_name_cnpj(lines: List[str]) -> Tuple[Optional[str], Optional
     # acha o início do bloco
     consignee_idx = None
     for i, ln in enumerate(lines):
-        if re.search(r"\bCONSIGNEE\b", ln, flags=re.I):
+        if re.search(r"\bCONSIGNEE\b", ln, flags=re.I) or re.search(
+            r"CONSIGNED\s+TO\s+THE\s+ORDER\s+OF", ln, flags=re.I
+        ):
             consignee_idx = i
             break
+
+    # fallback: "Consigned to the order of" sem bloco CONSIGNEE
+    if consignee_idx is None:
+        for i, ln in enumerate(lines):
+            if re.search(r"CONSIGNED\s+TO\s+THE\s+ORDER\s+OF", ln, flags=re.I):
+                consignee_idx = i
+                # tenta capturar nome na próxima linha
+                for j in range(i + 1, min(i + 6, len(lines))):
+                    cand = (lines[j] or "").strip()
+                    if not cand:
+                        continue
+                    if re.search(r"\b(CNPJ|NOTIFY|TEL|PHONE)\b", cand, flags=re.I):
+                        continue
+                    name = _clean_company_name(cand)
+                    if name:
+                        evidence.append(cand)
+                        break
+                break
 
     def _find_cnpj_in_window(start: int, window: int = 20) -> Tuple[Optional[int], Optional[str], Optional[str]]:
         for k in range(start + 1, min(len(lines), start + 1 + window)):
@@ -231,7 +189,7 @@ def _find_consignee_name_cnpj(lines: List[str]) -> Tuple[Optional[str], Optional
                 cand = (lines[j] or "").strip()
                 if not cand:
                     continue
-                if re.search(r"\b(CON...|NOTIFY|CNPJ|TEL|PHONE)\b", cand, flags=re.I):
+                if re.search(r"\b(CON...|CONSIGNED|NOTIFY|CNPJ|TEL|PHONE)\b", cand, flags=re.I):
                     continue
                 name = _clean_company_name(cand)
                 evidence.append(cand)
@@ -253,45 +211,51 @@ def _find_consignee_name_cnpj(lines: List[str]) -> Tuple[Optional[str], Optional
 
 def _find_ncm(lines: List[str]) -> Tuple[Optional[str], List[str], List[str]]:
     """
-    Aceitar 4, 6 ou 8 dígitos (HS/NCM), sem warning para 4 dígitos.
-    Gera warning apenas se achar algo com tamanho "estranho".
+    Aceitar 4, 6 ou 8 dígitos (HS/NCM).
+    - 4/6 dígitos: warning (HS parcial), mas não FAIL.
+    - Outros tamanhos: warning.
     """
     warnings: List[str] = []
     for ln in lines:
         m = re.search(r"\bNCM\b\s*(?:NO\.?|Nº)?\s*([0-9]{4,8})", ln, flags=re.I)
         if m:
             code = m.group(1)
-            # 4 dígitos: OK (HS 4/6 ou NCM parcial)
             if len(code) not in (4, 6, 8):
-                warnings.append(f"NCM/HS encontrado com {len(code)} dígitos ({code}). Verificar.")
+                warnings.append(f"NCM/HS com {len(code)} digitos ({code}). Verificar.")
             return code, [ln], warnings
 
     return None, [], warnings
 
 
 def _find_gross_weight(lines: List[str]) -> Tuple[Optional[float], List[str]]:
-    """
-    Ex: "Gross Weight 'in kilo's" e logo depois "9,825.000 KG"
-    """
+    # Ex: "Gross Weight 'in kilo's" e logo depois "9,825.000 KG"
     kg_re = re.compile(r"([0-9][0-9\.,]+)\s*K\s*[G6S](?:S|M)?\b", flags=re.I)
     m3_re = re.compile(r"([0-9][0-9\.,]+)\s*[A-Z0-9]{0,3}\s*[0-9][0-9\.,]*\s*(?:M3|CBM)\b", flags=re.I)
 
     for i, ln in enumerate(lines):
         if re.search(r"\bGROSS\s+WEIGHT\b", ln, flags=re.I):
+            candidates = []
             # procura nas pr?ximas linhas um n?mero + KG
             for j in range(i, min(i + 8, len(lines))):
                 cand = lines[j]
-                m = kg_re.search(cand)
-                if m:
+                nums = []
+                for m in kg_re.finditer(cand):
                     num = _parse_number(m.group(1))
                     if num is not None:
-                        return num, [cand]
+                        nums.append(num)
+                if nums:
+                    if len(nums) > 1:
+                        return sum(nums), [cand]
+                    candidates.append((nums[0], cand))
                 # fallback: linha de tabela com M3/CBM (KG pode ter sumido no OCR)
                 m2 = m3_re.search(cand)
                 if m2:
                     num = _parse_number(m2.group(1))
                     if num is not None:
-                        return num, [cand]
+                        candidates.append((num, cand))
+            if candidates:
+                best = max(candidates, key=lambda x: x[0])
+                return best[0], [best[1]]
             break
 
     # fallback: qualquer linha com "KG" e formato do BL
@@ -305,7 +269,126 @@ def _find_gross_weight(lines: List[str]) -> Tuple[Optional[float], List[str]]:
     return None, []
 
 
+def _find_measurement_m3(lines: List[str]) -> Tuple[Optional[float], List[str]]:
+    m3_re = re.compile(r"([0-9][0-9\.,]+)\s*(M3|CBM)\b", flags=re.I)
+    for ln in lines:
+        m = m3_re.search(ln)
+        if m:
+            num = _parse_number(m.group(1))
+            if num is not None:
+                return num, [ln]
+    return None, []
 
+
+def _find_notify_party(lines: List[str]) -> Tuple[Optional[str], List[str]]:
+    for i, ln in enumerate(lines):
+        if re.search(r"\bNOTIFY\b", ln, flags=re.I):
+            for j in range(i + 1, min(i + 6, len(lines))):
+                cand = (lines[j] or "").strip()
+                if not cand:
+                    continue
+                if re.search(r"SAME\s+AS\s+CONSIGNEE", cand, flags=re.I):
+                    return "SAME AS CONSIGNEE", [cand]
+                if re.search(r"\b(CONSIGNEE|SHIPPER|BOOKING|B/L|PORT)\b", cand, flags=re.I):
+                    continue
+                return _clean_company_name(cand), [cand]
+    return None, []
+
+
+def _find_ports(lines: List[str]) -> Tuple[Optional[str], Optional[str], List[str]]:
+    pol = None
+    pod = None
+    ev: List[str] = []
+    def _is_port_candidate(s: str) -> bool:
+        up = s.upper()
+        if any(
+            kw in up
+            for kw in [
+                "EMAIL",
+                "E-MAIL",
+                "TEL",
+                "FAX",
+                "CNPJ",
+                "IVA",
+                "CAP.SOC",
+                "CAP SOC",
+                "TRIB",
+                "C.C.",
+                "PORT OF",
+                "PLACE OF",
+                "DELIVERY",
+            ]
+        ):
+            return False
+        if sum(ch.isalpha() for ch in s) < 3:
+            return False
+        return True
+
+    for ln in lines:
+        if re.search(r"\bPORT\s+OF\s+LOADING\b", ln, flags=re.I):
+            m = re.search(r"\bPORT\s+OF\s+LOADING\b\s*[:\-]?\s*(.+)$", ln, flags=re.I)
+            if m:
+                candidate = _clean_spaces(m.group(1))
+                if candidate and _is_port_candidate(candidate) and ("@" not in candidate):
+                    pol = candidate
+                    ev.append(ln)
+        if re.search(r"\bPORT\s+OF\s+DISCHARGE\b", ln, flags=re.I):
+            m = re.search(r"\bPORT\s+OF\s+DISCHARGE\b\s*[:\-]?\s*(.+)$", ln, flags=re.I)
+            if m:
+                candidate = _clean_spaces(m.group(1))
+                if candidate and _is_port_candidate(candidate) and ("@" not in candidate):
+                    pod = candidate
+                    ev.append(ln)
+
+    # fallback: se não achou valor, tenta próxima linha após o marcador
+    if not pol:
+        for i, ln in enumerate(lines):
+            if re.search(r"\bPORT\s+OF\s+LOADING\b", ln, flags=re.I):
+                for j in range(i + 1, min(i + 4, len(lines))):
+                    cand = (lines[j] or "").strip()
+                    if not cand:
+                        continue
+                    if re.search(r"\b(PORT\s+OF|PLACE\s+OF|E-MAIL|EMAIL)\b", cand, flags=re.I):
+                        continue
+                    if not _is_port_candidate(cand):
+                        continue
+                    pol = _clean_spaces(cand)
+                    ev.append(cand)
+                    break
+                break
+    if not pol:
+        for i, ln in enumerate(lines):
+            if re.search(r"\bPORT\s+OF\s+LOADING\b", ln, flags=re.I) and re.search(r"\b(OCEAN\s+VESSEL|VESSEL)\b", ln, flags=re.I):
+                for j in range(i + 1, min(i + 3, len(lines))):
+                    cand = (lines[j] or "").strip()
+                    if not cand:
+                        continue
+                    # corta partes administrativas
+                    cut = re.split(r"\b(C\.C\.|IVA|P\.?\s*IVA|CAP\.?SOC|TRIB)\b", cand, flags=re.I)[0]
+                    words = re.findall(r"\b[A-Z]{4,}\b", cut.upper())
+                    if words:
+                        pol = words[-1]
+                        ev.append(cand)
+                        break
+                if pol:
+                    break
+
+    if not pod:
+        for i, ln in enumerate(lines):
+            if re.search(r"\bPORT\s+OF\s+DISCHARGE\b", ln, flags=re.I):
+                for j in range(i + 1, min(i + 4, len(lines))):
+                    cand = (lines[j] or "").strip()
+                    if not cand:
+                        continue
+                    if re.search(r"\b(PORT\s+OF|PLACE\s+OF|E-MAIL|EMAIL)\b", cand, flags=re.I):
+                        continue
+                    if not _is_port_candidate(cand):
+                        continue
+                    pod = _clean_spaces(cand)
+                    ev.append(cand)
+                    break
+                break
+    return pol, pod, ev
 
 
 def _find_freight_terms(lines: List[str]) -> Tuple[Optional[str], List[str]]:
@@ -344,7 +427,10 @@ def extract_bl_fields(text: str) -> Tuple[Dict[str, Any], List[str], List[str]]:
     consignee_name, consignee_cnpj, consignee_ev = _find_consignee_name_cnpj(ln)
     ncm, ncm_ev, ncm_warn = _find_ncm(ln)
     gross_weight, gross_ev = _find_gross_weight(ln)
+    measurement_m3, m3_ev = _find_measurement_m3(ln)
     freight_terms, freight_ev = _find_freight_terms(ln)
+    notify_party, notify_ev = _find_notify_party(ln)
+    port_loading, port_discharge, port_ev = _find_ports(ln)
 
     warnings.extend(ncm_warn)
 
@@ -363,10 +449,18 @@ def extract_bl_fields(text: str) -> Tuple[Dict[str, Any], List[str], List[str]]:
     fields: Dict[str, Any] = {}
     fields["shipper_name"] = _mk_field(shipper_name, required["shipper_name"], shipper_ev, "line_block")
     fields["importer_name"] = _mk_field(consignee_name, required["importer_name"], consignee_ev[:1], "line_block")
+    fields["consignee_name"] = _mk_field(consignee_name, required["importer_name"], consignee_ev[:1], "alias")
     fields["importer_cnpj"] = _mk_field(consignee_cnpj, required["importer_cnpj"], consignee_ev, "regex")
+    fields["consignee_cnpj"] = _mk_field(consignee_cnpj, required["importer_cnpj"], consignee_ev, "alias")
     fields["ncm"] = _mk_field(ncm, required["ncm"], ncm_ev, "regex")
+    fields["ncm_or_hs"] = _mk_field(ncm, required["ncm"], ncm_ev, "alias")
     fields["gross_weight_kg"] = _mk_field(gross_weight, required["gross_weight_kg"], gross_ev, "regex")
     fields["freight_terms"] = _mk_field(freight_terms, False, freight_ev, "regex")
+    fields["freight_term"] = _mk_field(freight_terms, False, freight_ev, "alias")
+    fields["measurement_m3"] = _mk_field(measurement_m3, False, m3_ev, "regex")
+    fields["notify_party"] = _mk_field(notify_party, False, notify_ev, "regex")
+    fields["port_of_loading"] = _mk_field(port_loading, False, port_ev, "regex")
+    fields["port_of_discharge"] = _mk_field(port_discharge, False, port_ev, "regex")
 
     for k, meta in fields.items():
         if meta["required"] and not meta["present"]:
