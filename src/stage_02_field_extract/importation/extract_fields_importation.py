@@ -71,42 +71,74 @@ def detect_kind(original_file: str, full_text: str) -> str:
     name = (original_file or "").upper()
     text = (full_text or "").upper()
 
-    # HBL first (to avoid BL match)
-    if _match_any(name, [r"\bHBL\b", r"HOUSE\s+BILL"]) or _match_any(text, [r"\bHBL\b", r"HOUSE\s+BILL"]):
+    # Priorize filename hints first (UI choice is reflected on renamed filename).
+    # This avoids content false-positives (e.g., invoice text mentioning "DI").
+    if _match_any(name, [r"\bHBL\b", r"HOUSE\s+BILL"]):
         return "hbl"
-
-    # DI / LI (Conferencia / Rascunho)
-    if _match_any(name, [r"CONFERENCI[AA]\s+DI", r"RASCUNHO\s+DA\s+DI", r"RASCUNHO\s+DI", r"\bDI\b", r"\bDI[\s\-_/]*\d+"]):
-        return "di"
-    if _match_any(name, [r"CONFERENCI[AA]\s+LI", r"RASCUNHO\s+LI", r"\bLI\b", r"\bLI[\s\-_/]*\d+", r"LICEN[ÇC]A\s+DE\s+IMPORTA"]):
-        return "li"
-
-    if _match_any(text, [r"CONFERENCI[AA]\s+DI", r"RASCUNHO\s+DA\s+DI", r"RASCUNHO\s+DI", r"\bDI\b", r"DECLARA[ÇC][AÃ]O\s+DE\s+IMPORTA"]):
-        return "di"
-    if _match_any(text, [r"CONFERENCI[AA]\s+LI", r"RASCUNHO\s+LI", r"\bLI\b", r"LICEN[ÇC]A\s+DE\s+IMPORTA"]):
-        return "li"
-
-    # Packing List
+    if _match_any(name, [r"\bBL\b", r"BILL\s+OF\s+LADING", r"B/L"]) or name.startswith("BL"):
+        return "bl"
     if _match_any(name, [r"PACKING\s+LIST", r"PACKING", r"\bP\.?L\.?\b", r"ROMANEIO"]):
         return "packing_list"
-    # Invoice
     if _match_any(name, [r"COMMERCIAL\s+INVOICE", r"INVOICE", r"PRO[-\s]?FORMA", r"FATTURA"]):
         if not _match_any(name, [r"PACKING"]):
             return "invoice"
-    # BL
-    if _match_any(name, [r"\bBL\b", r"BILL\s+OF\s+LADING", r"B/L"]) or name.startswith("BL"):
-        return "bl"
+    if _match_any(
+        name,
+        [
+            r"CONFERENCI[AA]\s+DI",
+            r"RASCUNHO\s+DA\s+DI",
+            r"RASCUNHO\s+DI",
+            r"\bDI(?:[\s\-_/]*\d+)?(?:\.PDF)?\b",
+            r"DECLARA[??C][A??]O\s+DE\s+IMPORTA",
+        ],
+    ):
+        return "di"
+    if _match_any(
+        name,
+        [
+            r"CONFERENCI[AA]\s+LI",
+            r"RASCUNHO\s+LI",
+            r"\bLI(?:[\s\-_/]*\d+)?(?:\.PDF)?\b",
+            r"LICEN[??C]A\s+DE\s+IMPORTA",
+        ],
+    ):
+        return "li"
 
-    # fallback por conteúdo
-    if _match_any(text, [r"PACKING\s+LIST"]):
-        return "packing_list"
-    if _match_any(text, [r"COMMERCIAL\s+INVOICE", r"INVOICE", r"PRO[-\s]?FORMA", r"FATTURA"]):
-        return "invoice"
+    # Fallback by content (strong patterns only; no bare \bDI\b/\bLI\b).
+    if _match_any(text, [r"\bHBL\b", r"HOUSE\s+BILL"]):
+        return "hbl"
     if _match_any(text, [r"BILL\s+OF\s+LADING", r"\bB/L\b", r"\bBL\b"]):
         return "bl"
+    if _match_any(text, [r"PACKING\s+LIST", r"\bROMANEIO\b"]):
+        return "packing_list"
+    if _match_any(
+        text,
+        [
+            r"CONFERENCI[AA]\s+DI",
+            r"RASCUNHO\s+DA\s+DI",
+            r"RASCUNHO\s+DI",
+            r"DECLARA[??C][A??]O\s+DE\s+IMPORTA",
+            r"\bNR\.?\s*DI\b",
+            r"\bN[U?]MERO\s+DA\s+DI\b",
+        ],
+    ):
+        return "di"
+    if _match_any(
+        text,
+        [
+            r"CONFERENCI[AA]\s+LI",
+            r"RASCUNHO\s+LI",
+            r"LICEN[??C]A\s+DE\s+IMPORTA",
+            r"\bNR\.?\s*LI\b",
+            r"\bN[U?]MERO\s+DA\s+LI\b",
+            r"\bNREFERENCIA\s+LI\b",
+        ],
+    ):
+        return "li"
+    if _match_any(text, [r"COMMERCIAL\s+INVOICE", r"INVOICE", r"PRO[-\s]?FORMA", r"FATTURA"]):
+        return "invoice"
 
     return "unknown"
-
 
 def unpack_extractor_result(res: Any) -> Tuple[Dict[str, Any], List[str], List[str]]:
     """
