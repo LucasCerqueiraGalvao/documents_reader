@@ -137,7 +137,14 @@ def unpack_extractor_result(res: Any) -> Tuple[Dict[str, Any], List[str], List[s
 
     if len(res) == 2:
         fields, warnings = res
-        return fields, [], (warnings or [])
+        missing = [
+            k
+            for k, meta in (fields or {}).items()
+            if isinstance(meta, dict)
+            and bool(meta.get("required"))
+            and not bool(meta.get("present"))
+        ]
+        return fields, missing, (warnings or [])
     if len(res) == 3:
         fields, missing, warnings = res
         return fields, (missing or []), (warnings or [])
