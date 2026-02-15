@@ -3,6 +3,10 @@ name: Build Windows Installer
 on:
   workflow_dispatch:
     inputs:
+      upload_artifact:
+        description: "Upload installer artifact (consumes Actions storage)"
+        required: false
+        default: "false"
       tesseract_win_url:
         description: "Optional override for UB Mannheim Tesseract installer URL"
         required: false
@@ -85,6 +89,7 @@ jobs:
           }
 
       - name: Cleanup old installer artifacts
+        if: startsWith(github.ref, 'refs/tags/') || (github.event_name == 'workflow_dispatch' && github.event.inputs.upload_artifact == 'true')
         uses: actions/github-script@v7
         with:
           script: |
@@ -114,6 +119,7 @@ jobs:
             }
 
       - name: Upload installer artifact
+        if: startsWith(github.ref, 'refs/tags/') || (github.event_name == 'workflow_dispatch' && github.event.inputs.upload_artifact == 'true')
         continue-on-error: true
         uses: actions/upload-artifact@v4
         with:
