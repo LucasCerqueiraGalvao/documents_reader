@@ -14,6 +14,7 @@ import argparse
 import os
 import json
 import re
+import traceback
 from datetime import datetime
 from pathlib import Path
 from typing import Any, Dict, List, Optional, Tuple
@@ -336,6 +337,11 @@ def run_stage_02_extraction(
                 timeout_sec=int(os.getenv("DOCREADER_STAGE2_LLM_TIMEOUT_SEC", "240")),
             )
         except Exception as exc:
+            if verbose:
+                print(f"[Stage02-LLM] ERROR: {exc}")
+                print("[Stage02-LLM] TRACEBACK START")
+                print(traceback.format_exc())
+                print("[Stage02-LLM] TRACEBACK END")
             if not fallback_regex:
                 raise RuntimeError(
                     f"Stage 02 LLM extraction failed: {exc}. "

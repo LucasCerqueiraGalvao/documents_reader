@@ -3,7 +3,7 @@ const fs = require("fs");
 const http = require("http");
 const os = require("os");
 const path = require("path");
-const { spawn } = require("child_process");
+const { spawn, spawnSync } = require("child_process");
 
 function base64UrlEncode(input) {
   let out = Buffer.from(input)
@@ -89,6 +89,72 @@ function buildIdentity(token) {
   };
 }
 
+function uniqStrings(items) {
+  const out = [];
+  const seen = new Set();
+  for (const item of items || []) {
+    const value = String(item || "").trim();
+    if (!value) continue;
+    const key = process.platform === "win32" ? value.toLowerCase() : value;
+    if (seen.has(key)) continue;
+    seen.add(key);
+    out.push(value);
+  }
+  return out;
+}
+
+function collectCodexFromWhere() {
+  if (process.platform !== "win32") return [];
+  const result = spawnSync("where", ["codex"], {
+    encoding: "utf8",
+    windowsHide: true,
+    shell: true,
+  });
+  if (result.error || result.status !== 0) return [];
+  const lines = String(result.stdout || "")
+    .split(/\r?\n/)
+    .map((line) => line.trim())
+    .filter(Boolean)
+    .filter((line) => fs.existsSync(line));
+  return uniqStrings(lines);
+}
+
+function collectCodexFromVscodeExtensions() {
+  if (process.platform !== "win32") return [];
+  const home = os.homedir();
+  const roots = [path.join(home, ".vscode", "extensions"), path.join(home, ".vscode-insiders", "extensions")];
+  const archFolders = ["windows-x86_64", "windows-arm64", "win32-x64", "win32-arm64"];
+  const ranked = [];
+
+  for (const root of roots) {
+    if (!fs.existsSync(root)) continue;
+    let entries = [];
+    try {
+      entries = fs.readdirSync(root, { withFileTypes: true });
+    } catch {
+      continue;
+    }
+    for (const entry of entries) {
+      if (!entry || !entry.isDirectory()) continue;
+      if (!String(entry.name || "").startsWith("openai.chatgpt-")) continue;
+      for (const archFolder of archFolders) {
+        const candidate = path.join(root, entry.name, "bin", archFolder, "codex.exe");
+        if (!fs.existsSync(candidate)) continue;
+        let mtime = 0;
+        try {
+          mtime = fs.statSync(candidate).mtimeMs || 0;
+        } catch {
+          // keep default mtime=0
+        }
+        ranked.push({ candidate, mtime });
+      }
+    }
+  }
+
+  ranked.sort((a, b) => b.mtime - a.mtime);
+  return uniqStrings(ranked.map((item) => item.candidate));
+}
+
 function candidateCodexCliCommands() {
   const overridePath = String(process.env.DOCREADER_CODEX_CLI_CMD || "").trim();
   if (overridePath) {
@@ -104,16 +170,25 @@ function candidateCodexCliCommands() {
   const appData = process.env.APPDATA || path.join(home, "AppData", "Roaming");
   const localAppData = process.env.LOCALAPPDATA || path.join(home, "AppData", "Local");
   const npmPrefix = process.env.PREFIX ? String(process.env.PREFIX) : "";
+  const fromWhere = collectCodexFromWhere();
+  const fromVscode = collectCodexFromVscodeExtensions();
 
   const windowsCandidates = [
+    path.join(localAppData, "Programs", "Codex", "codex.exe"),
+    path.join(localAppData, "Programs", "codex", "codex.exe"),
+    path.join(appData, "npm", "codex.exe"),
     path.join(appData, "npm", "codex.cmd"),
+    path.join(localAppData, "npm", "codex.exe"),
     path.join(localAppData, "npm", "codex.cmd"),
+    npmPrefix ? path.join(npmPrefix, "codex.exe") : "",
     npmPrefix ? path.join(npmPrefix, "codex.cmd") : "",
+    npmPrefix ? path.join(npmPrefix, "bin", "codex.exe") : "",
     npmPrefix ? path.join(npmPrefix, "bin", "codex.cmd") : "",
+    path.join(home, ".npm-global", "bin", "codex.exe"),
     path.join(home, ".npm-global", "bin", "codex.cmd"),
   ].filter(Boolean);
 
-  return [...windowsCandidates, ...commands];
+  return uniqStrings([...fromWhere, ...fromVscode, ...windowsCandidates, ...commands]);
 }
 
 function resolveCodexCliCommand() {

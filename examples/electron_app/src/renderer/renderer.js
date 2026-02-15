@@ -586,6 +586,9 @@ async function run() {
 
   try {
     const res = await globalThis.docReader.runPipeline(payload);
+    if (res && res.runLogPath) {
+      appendLog('Log detalhado do run: ' + res.runLogPath + '\n');
+    }
 
     if (res && res.ok) {
       state.reportPath = res.reportPath;

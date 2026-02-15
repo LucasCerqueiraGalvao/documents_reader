@@ -208,6 +208,54 @@ def _to_bool_env(name: str, default: bool = False) -> bool:
     return str(raw).strip().lower() in {"1", "true", "yes", "on", "y"}
 
 
+def _stage02_trace_enabled() -> bool:
+    return _to_bool_env("DOCREADER_STAGE2_LLM_DETAILED_LOG", False)
+
+
+def _run_debug_log_file() -> str:
+    return str(os.getenv("DOCREADER_RUN_DEBUG_LOG_FILE", "")).strip()
+
+
+def _append_run_debug_log(line: str) -> None:
+    target = _run_debug_log_file()
+    if not target:
+        return
+    try:
+        with open(target, "a", encoding="utf-8") as f:
+            f.write(line + "\n")
+    except Exception:
+        # Keep extraction running even if debug file write fails.
+        pass
+
+
+def stage02_trace(step: str, details: Optional[Dict[str, Any]] = None, level: str = "INFO") -> None:
+    if not _stage02_trace_enabled():
+        return
+    ts = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
+    head = f"[{ts}] [Stage02-LLM] [{level}] {step}"
+    if details:
+        try:
+            suffix = " :: " + json.dumps(details, ensure_ascii=False, default=str)
+        except Exception:
+            suffix = " :: " + str(details)
+    else:
+        suffix = ""
+    line = head + suffix
+    print(line)
+    _append_run_debug_log(line)
+
+
+def _command_missing_text(text: str) -> bool:
+    t = str(text or "").lower()
+    return (
+        "is not recognized as an internal or external command" in t
+        or "nao e reconhecido como um comando interno" in t
+        or "command not found" in t
+        or "not found" in t
+        or "no such file or directory" in t
+    )
+
+
 def read_codex_runtime_context() -> Dict[str, Any]:
     context_file = os.getenv("DOCREADER_CODEX_AUTH_CONTEXT_FILE", "").strip()
     has_access_token = bool(os.getenv("DOCREADER_CODEX_ACCESS_TOKEN"))
@@ -243,6 +291,16 @@ def read_codex_runtime_context() -> Dict[str, Any]:
             "email": str(identity.get("email") or ""),
         }
 
+    stage02_trace(
+        "codex.context.read",
+        {
+            "context_file": context_file,
+            "connected": info.get("connected"),
+            "provider": info.get("provider"),
+            "has_access_token_env": has_access_token,
+            "has_identity": bool(info.get("identity")),
+        },
+    )
     return info
 
 
@@ -600,28 +658,65 @@ def run_codex_cli_prompt(
     if model_name:
         cmd.extend(["-m", model_name])
 
-    if _to_bool_env("DOCREADER_STAGE2_LLM_DEBUG", False):
-        print("Stage02 LLM command:", " ".join(cmd))
+    is_windows = os.name == "nt"
+    is_bare_command = not ("\\" in codex_bin or "/" in codex_bin)
+    is_cmd_script = codex_bin.lower().endswith(".cmd") or codex_bin.lower().endswith(".bat")
+    use_shell = is_windows and (is_bare_command or is_cmd_script)
+    shell_cmd = subprocess.list2cmdline(cmd) if use_shell else None
+
+    stage02_trace(
+        "codex.exec.begin",
+        {
+            "cwd": str(cwd),
+            "codex_bin": codex_bin,
+            "model": model_name or None,
+            "timeout_sec": timeout,
+            "use_shell": use_shell,
+            "is_bare_command": is_bare_command,
+            "is_cmd_script": is_cmd_script,
+            "prompt_chars": len(prompt or ""),
+            "output_file": str(output_file),
+            "command": shell_cmd if use_shell else cmd,
+        },
+    )
 
     try:
         proc = subprocess.run(
-            cmd,
+            shell_cmd if use_shell else cmd,
             input=prompt,
             text=True,
             capture_output=True,
             cwd=str(cwd),
             timeout=max(1, int(timeout)),
             encoding="utf-8",
+            shell=use_shell,
         )
     except subprocess.TimeoutExpired as exc:
+        stage02_trace("codex.exec.timeout", {"timeout_sec": timeout}, level="ERROR")
         raise Stage02LLMError(f"Codex CLI timeout after {timeout}s.") from exc
     except FileNotFoundError as exc:
+        stage02_trace("codex.exec.missing", {"codex_bin": codex_bin}, level="ERROR")
         raise Stage02LLMError(
             f"Codex CLI executable not found: '{codex_bin}'."
         ) from exc
+    except Exception as exc:
+        stage02_trace(
+            "codex.exec.exception",
+            {"codex_bin": codex_bin, "error": str(exc)},
+            level="ERROR",
+        )
+        raise
 
     stdout = (proc.stdout or "").strip()
     stderr = (proc.stderr or "").strip()
+    stage02_trace(
+        "codex.exec.completed",
+        {
+            "returncode": proc.returncode,
+            "stdout_chars": len(stdout),
+            "stderr_chars": len(stderr),
+        },
+    )
 
     try:
         response = output_file.read_text(encoding="utf-8").strip()
@@ -633,6 +728,10 @@ def run_codex_cli_prompt(
 
     if proc.returncode != 0:
         details = stderr or stdout or "no stderr/stdout from codex exec"
+        if _command_missing_text(details):
+            raise Stage02LLMError(
+                f"Codex CLI command unavailable while executing '{codex_bin}'. details={details[:600]}"
+            )
         raise Stage02LLMError(
             f"Codex CLI returned non-zero exit ({proc.returncode}). details={details[:600]}"
         )
@@ -642,6 +741,11 @@ def run_codex_cli_prompt(
             response = stdout
         else:
             raise Stage02LLMError("Codex CLI produced empty response.")
+
+    stage02_trace(
+        "codex.exec.response_ready",
+        {"response_chars": len(response)},
+    )
 
     return response
 
@@ -657,6 +761,18 @@ def extract_fields_with_llm_for_document(
     model: Optional[str] = None,
     timeout_sec: Optional[int] = None,
 ) -> Tuple[Dict[str, Any], List[str], List[str]]:
+    stage02_trace(
+        "document.extract.begin",
+        {
+            "stage01_file": stage01_file,
+            "original_file": original_file,
+            "doc_kind": doc_kind,
+            "doc_kind_hint": doc_kind_hint,
+            "llm_client_mocked": llm_client is not None,
+            "model": model or None,
+            "timeout_sec": timeout_sec,
+        },
+    )
     template = build_stage02_template(
         stage01_file=stage01_file,
         original_file=original_file,
@@ -664,6 +780,14 @@ def extract_fields_with_llm_for_document(
         doc_kind_hint=doc_kind_hint,
     )
     prompt = build_prompt(stage01_obj=stage01_obj, stage02_template=template, doc_kind=doc_kind)
+    stage02_trace(
+        "document.prompt.built",
+        {
+            "stage01_file": stage01_file,
+            "prompt_chars": len(prompt),
+            "template_field_count": len(template.get("fields", {})),
+        },
+    )
 
     if llm_client is None:
         raw = run_codex_cli_prompt(
@@ -674,16 +798,47 @@ def extract_fields_with_llm_for_document(
         )
     else:
         raw = llm_client(prompt, cwd)
+    stage02_trace(
+        "document.response.received",
+        {
+            "stage01_file": stage01_file,
+            "response_chars": len(raw or ""),
+        },
+    )
 
     try:
         payload = parse_model_json(raw)
+        stage02_trace(
+            "document.response.json_parsed",
+            {
+                "stage01_file": stage01_file,
+                "top_keys": sorted(list(payload.keys())),
+            },
+        )
         fields, missing_required_fields, warnings = normalize_llm_stage02_payload(
             payload=payload,
             template=template,
             doc_kind=doc_kind,
         )
+        stage02_trace(
+            "document.response.normalized",
+            {
+                "stage01_file": stage01_file,
+                "missing_required_count": len(missing_required_fields),
+                "warnings_count": len(warnings),
+            },
+        )
     except Stage02LLMError as exc:
         snippet = (raw or "").strip().replace("\n", " ")
+        stage02_trace(
+            "document.response.invalid",
+            {
+                "stage01_file": stage01_file,
+                "error": str(exc),
+                "snippet": snippet[:500],
+            },
+            level="ERROR",
+        )
         raise Stage02LLMError(
             f"{exc} | llm_response_snippet={snippet[:800]}"
         ) from exc
@@ -700,9 +855,20 @@ def run_stage02_llm_for_importation(
     timeout_sec: Optional[int] = None,
 ) -> Dict[str, Any]:
     out_dir.mkdir(parents=True, exist_ok=True)
+    stage02_trace(
+        "run.begin",
+        {
+            "input_dir": str(in_dir),
+            "output_dir": str(out_dir),
+            "verbose": verbose,
+            "model": model or None,
+            "timeout_sec": timeout_sec,
+        },
+    )
 
     files = sorted(in_dir.glob("*_extracted.json"))
     if not files:
+        stage02_trace("run.no_files", {"input_dir": str(in_dir)}, level="WARN")
         return {
             "processed_count": 0,
             "warnings": [f"No *_extracted.json files found in: {in_dir}"],
@@ -714,11 +880,24 @@ def run_stage02_llm_for_importation(
 
     total = len(files)
     for idx, p in enumerate(files, start=1):
+        stage02_trace(
+            "document.load.begin",
+            {"index": idx, "total": total, "stage01_file": p.name},
+        )
         obj = read_json(p)
         original_file = obj.get("file") or p.name.replace("_extracted.json", ".pdf")
         full_text = join_pages(obj)
         doc_kind_hint = normalize_doc_kind_hint(obj.get("doc_kind_hint")) or ""
         doc_kind = doc_kind_hint or detect_kind(full_text)
+        stage02_trace(
+            "document.kind.resolved",
+            {
+                "stage01_file": p.name,
+                "doc_kind": doc_kind,
+                "doc_kind_hint": doc_kind_hint,
+                "text_chars": len(full_text or ""),
+            },
+        )
 
         if verbose:
             print(f"[Stage02-LLM] {idx}/{total} processing {p.name} (kind={doc_kind})")
@@ -756,6 +935,16 @@ def run_stage02_llm_for_importation(
         out_name = p.name.replace("_extracted.json", "_fields.json").replace("__", "_")
         out_path = out_dir / out_name
         write_json(out_path, out_obj)
+        stage02_trace(
+            "document.output.written",
+            {
+                "stage01_file": p.name,
+                "stage02_file": out_name,
+                "missing_required_count": len(missing_required_fields),
+                "warnings_count": len(warnings),
+                "output_path": str(out_path),
+            },
+        )
 
         summary_docs.append(
             {
@@ -784,9 +973,18 @@ def run_stage02_llm_for_importation(
         "documents": summary_docs,
     }
     write_json(out_dir / "_stage02_summary.json", summary)
+    stage02_trace(
+        "run.summary.written",
+        {
+            "summary_path": str(out_dir / "_stage02_summary.json"),
+            "processed_count": len(summary_docs),
+            "warnings_count": len(all_warnings),
+        },
+    )
 
     if verbose:
         print("[Stage02-LLM] Completed.")
+    stage02_trace("run.completed", {"processed_count": len(summary_docs)})
 
     return {
         "processed_count": len(summary_docs),
