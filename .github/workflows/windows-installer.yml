@@ -20,8 +20,6 @@ on:
         required: false
         default: "fast"
   push:
-    branches:
-      - "**"
     tags:
       - "v*"
 
