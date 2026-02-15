@@ -89,10 +89,87 @@ function buildIdentity(token) {
   };
 }
 
+function candidateCodexCliCommands() {
+  const overridePath = String(process.env.DOCREADER_CODEX_CLI_CMD || "").trim();
+  if (overridePath) {
+    return [overridePath];
+  }
+
+  const commands = ["codex"];
+  if (process.platform !== "win32") {
+    return commands;
+  }
+
+  const home = os.homedir();
+  const appData = process.env.APPDATA || path.join(home, "AppData", "Roaming");
+  const localAppData = process.env.LOCALAPPDATA || path.join(home, "AppData", "Local");
+  const npmPrefix = process.env.PREFIX ? String(process.env.PREFIX) : "";
+
+  const windowsCandidates = [
+    path.join(appData, "npm", "codex.cmd"),
+    path.join(localAppData, "npm", "codex.cmd"),
+    npmPrefix ? path.join(npmPrefix, "codex.cmd") : "",
+    npmPrefix ? path.join(npmPrefix, "bin", "codex.cmd") : "",
+    path.join(home, ".npm-global", "bin", "codex.cmd"),
+  ].filter(Boolean);
+
+  return [...windowsCandidates, ...commands];
+}
+
+function resolveCodexCliCommand() {
+  const candidates = candidateCodexCliCommands();
+  for (const candidate of candidates) {
+    if (candidate.includes(path.sep) || candidate.includes("/")) {
+      if (fs.existsSync(candidate)) {
+        return candidate;
+      }
+      continue;
+    }
+    return candidate;
+  }
+  return "codex";
+}
+
+function detectCommandMissing(result) {
+  const combined = [result && result.error, result && result.stderr, result && result.stdout]
+    .filter(Boolean)
+    .join("\n")
+    .toLowerCase();
+  const byCode = String(result && result.errorCode || "").toUpperCase() === "ENOENT";
+  const byText =
+    combined.includes("is not recognized as an internal or external command") ||
+    combined.includes("reconhecido como um comando interno") ||
+    combined.includes("nao e reconhecido como um comando interno") ||
+    combined.includes("command not found") ||
+    combined.includes("not recognized as an internal") ||
+    combined.includes("not found");
+  return byCode || byText;
+}
+
 function resolveCodexCliAuthFile() {
   const overridePath = String(process.env.DOCREADER_CODEX_AUTH_FILE || "").trim();
   if (overridePath) return overridePath;
-  return path.join(os.homedir(), ".codex", "auth.json");
+
+  const home = os.homedir();
+  const candidates = [path.join(home, ".codex", "auth.json")];
+
+  if (process.platform === "win32") {
+    const appData = process.env.APPDATA || path.join(home, "AppData", "Roaming");
+    const localAppData = process.env.LOCALAPPDATA || path.join(home, "AppData", "Local");
+    candidates.push(path.join(appData, "Codex", "auth.json"));
+    candidates.push(path.join(appData, "codex", "auth.json"));
+    candidates.push(path.join(localAppData, "Codex", "auth.json"));
+    candidates.push(path.join(localAppData, "codex", "auth.json"));
+  }
+
+  for (const candidate of candidates) {
+    if (fs.existsSync(candidate)) {
+      return candidate;
+    }
+  }
+
+  // Keep previous default if none exists yet.
+  return candidates[0];
 }
 
 function readCodexCliAuthPayload() {
@@ -202,6 +279,7 @@ function runCommand(command, args, options) {
         stdout,
         stderr,
         error: String((error && error.message) || error),
+        errorCode: error && error.code ? String(error.code) : null,
       });
     });
 
@@ -216,27 +294,34 @@ function sleep(ms) {
   return new Promise((resolve) => setTimeout(resolve, ms));
 }
 
-async function checkCodexLoggedIn() {
-  const result = await runCommand("codex", ["login", "status"], {
+async function checkCodexLoggedIn(cliCommand) {
+  const command = cliCommand || resolveCodexCliCommand();
+  const result = await runCommand(command, ["login", "status"], {
     timeoutMs: 15000,
     windowsHide: true,
+    shell: process.platform === "win32",
   });
   const text = (result.stdout || "") + "\n" + (result.stderr || "");
   const normalized = String(text || "").trim();
+  const commandMissing = detectCommandMissing(result);
   const explicitlyNotLoggedIn = /\bnot logged in\b/i.test(normalized);
   const explicitlyLoggedIn = /\blogged in\b/i.test(normalized);
-  const loggedIn = explicitlyNotLoggedIn ? false : result.code === 0 || explicitlyLoggedIn;
+  const loggedIn = commandMissing ? false : explicitlyNotLoggedIn ? false : result.code === 0 || explicitlyLoggedIn;
 
   return {
     ok: result.ok,
     code: result.code,
     loggedIn,
+    command,
+    commandMissing,
+    errorCode: result.errorCode || null,
     output: text,
   };
 }
 
 async function waitForCodexLoginCompletion(options) {
   const opts = options || {};
+  const cliCommand = opts.cliCommand || resolveCodexCliCommand();
   const timeoutMs = Number.isFinite(opts.timeoutMs) ? opts.timeoutMs : 300000;
   const intervalMs = Number.isFinite(opts.intervalMs) ? opts.intervalMs : 1500;
   const onPoll = typeof opts.onPoll === "function" ? opts.onPoll : () => {};
@@ -246,7 +331,7 @@ async function waitForCodexLoginCompletion(options) {
 
   while (Date.now() - startedAt < timeoutMs) {
     attempt += 1;
-    const status = await checkCodexLoggedIn();
+    const status = await checkCodexLoggedIn(cliCommand);
     onPoll({ attempt, ...status });
     if (status.loggedIn) {
       return { ok: true, attempt };
@@ -257,17 +342,20 @@ async function waitForCodexLoginCompletion(options) {
   return { ok: false, error: "timeout_waiting_for_codex_login" };
 }
 
-async function launchCodexDeviceAuthInteractive() {
+async function launchCodexDeviceAuthInteractive(cliCommand) {
+  const command = cliCommand || resolveCodexCliCommand();
   if (process.platform === "win32") {
+    const safeCommand = String(command).replaceAll('"', '""');
+    const commandLine = `"${safeCommand}" login --device-auth`;
     // Open an interactive terminal window and keep it open so the user can complete/inspect auth.
-    return await runCommand("cmd.exe", ["/c", "start", "", "cmd.exe", "/k", "codex login --device-auth"], {
+    return await runCommand("cmd.exe", ["/c", "start", "", "cmd.exe", "/k", commandLine], {
       timeoutMs: 10000,
       windowsHide: false,
       shell: false,
     });
   }
 
-  return await runCommand("codex", ["login", "--device-auth"], {
+  return await runCommand(command, ["login", "--device-auth"], {
     timeoutMs: 10 * 60 * 1000,
     windowsHide: false,
   });
@@ -759,19 +847,64 @@ function createCodexAuthManager(options) {
         };
       }
 
+      const cliCommand = resolveCodexCliCommand();
+      emitLog("cli.command.resolved", { command: cliCommand });
+
+      if (!forceDeviceAuth) {
+        const importedBeforeCli = await importFromCodexCliAuth();
+        if (importedBeforeCli.ok) {
+          const status = buildStatus(importedBeforeCli.payload);
+          notifyChanged(status);
+          emitLog("start.cli_import_used", {
+            connected: status.connected,
+            provider: status.provider,
+            source: "codex-cli-auth-file",
+          });
+          return { ok: true, status, source: "codex-cli-auth-file" };
+        }
+      }
+
       let alreadyLoggedIn = false;
+      let cliCommandMissing = false;
       if (!forceDeviceAuth) {
         emitLog("cli.status.check.begin", null);
-        const cliStatus = await checkCodexLoggedIn();
+        const cliStatus = await checkCodexLoggedIn(cliCommand);
         alreadyLoggedIn = cliStatus.loggedIn;
+        cliCommandMissing = Boolean(cliStatus.commandMissing);
 
         emitLog("cli.status.check.result", {
           ok: cliStatus.ok,
           code: cliStatus.code,
           alreadyLoggedIn,
+          commandMissing: cliCommandMissing,
+          command: cliStatus.command,
         });
       } else {
         emitLog("cli.status.check.skipped", { reason: "force_device_auth" });
+        const cliProbe = await checkCodexLoggedIn(cliCommand);
+        cliCommandMissing = Boolean(cliProbe.commandMissing);
+        emitLog("cli.status.check.forced_probe", {
+          ok: cliProbe.ok,
+          code: cliProbe.code,
+          commandMissing: cliCommandMissing,
+          command: cliProbe.command,
+        });
+      }
+
+      if (cliCommandMissing) {
+        emitLog(
+          "cli.command.missing",
+          {
+            command: cliCommand,
+          },
+          "warn"
+        );
+        return {
+          ok: false,
+          error: "Codex CLI not found in this system.",
+          details:
+            "Install Codex CLI and ensure command 'codex' is available in PATH (or set DOCREADER_CODEX_CLI_CMD). If you have OAuth configured, define DOCREADER_CODEX_CLIENT_ID.",
+        };
       }
 
       let loginSource = "codex-cli-local";
@@ -781,9 +914,10 @@ function createCodexAuthManager(options) {
           await writeStoredPayload(null);
           emitLog("storage.cleared_for_force_login", null);
           emitLog("cli.logout.begin", { reason: "force_device_auth" });
-          const cliLogout = await runCommand("codex", ["logout"], {
+          const cliLogout = await runCommand(cliCommand, ["logout"], {
             timeoutMs: 15000,
             windowsHide: true,
+            shell: process.platform === "win32",
           });
           emitLog("cli.logout.result", {
             ok: cliLogout.ok,
@@ -793,12 +927,12 @@ function createCodexAuthManager(options) {
         }
 
         emitLog("cli.device_auth.begin", {
-          command: "codex login --device-auth",
+          command: String(cliCommand) + " login --device-auth",
           forced: forceDeviceAuth,
           launchMode: process.platform === "win32" ? "external_terminal" : "direct",
         });
 
-        const cliLogin = await launchCodexDeviceAuthInteractive();
+        const cliLogin = await launchCodexDeviceAuthInteractive(cliCommand);
 
         emitLog("cli.device_auth.launch_result", {
           ok: cliLogin.ok,
@@ -808,10 +942,11 @@ function createCodexAuthManager(options) {
         });
 
         if (!cliLogin.ok) {
+          const commandMissing = detectCommandMissing(cliLogin);
           const details = String(cliLogin.stderr || cliLogin.stdout || cliLogin.error || "unknown error").trim();
           return {
             ok: false,
-            error: "Codex CLI login launch failed.",
+            error: commandMissing ? "Codex CLI not found in this system." : "Codex CLI login launch failed.",
             details,
           };
         }
@@ -822,6 +957,7 @@ function createCodexAuthManager(options) {
         });
 
         const waited = await waitForCodexLoginCompletion({
+          cliCommand,
           timeoutMs: 300000,
           intervalMs: 1500,
           onPoll: (poll) => {
@@ -830,6 +966,7 @@ function createCodexAuthManager(options) {
               ok: poll.ok,
               code: poll.code,
               loggedIn: poll.loggedIn,
+              commandMissing: Boolean(poll.commandMissing),
             });
           },
         });
