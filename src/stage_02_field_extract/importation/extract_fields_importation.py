@@ -336,16 +336,13 @@ def run_stage_02_extraction(
                 timeout_sec=int(os.getenv("DOCREADER_STAGE2_LLM_TIMEOUT_SEC", "240")),
             )
         except Exception as exc:
-            details = str(exc)
-            codex_missing = "Codex CLI executable not found" in details
-            if not fallback_regex and not codex_missing:
+            if not fallback_regex:
                 raise RuntimeError(
                     f"Stage 02 LLM extraction failed: {exc}. "
                     "Set DOCREADER_STAGE2_LLM_FALLBACK_REGEX=1 to fallback to regex."
                 ) from exc
             if verbose:
-                reason = "Codex CLI missing in runtime" if codex_missing else "LLM execution error"
-                print(f"Stage 02 LLM failed ({reason}): {exc}. Falling back to regex extractor.")
+                print(f"Stage 02 LLM failed (LLM execution error): {exc}. Falling back to regex extractor.")
             return _run_stage_02_extraction_regex(
                 in_dir=in_dir,
                 out_dir=out_dir,

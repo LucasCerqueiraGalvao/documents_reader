@@ -417,10 +417,12 @@ async function runPipeline({ files, stage2Engine }) {
   const effectiveStage2Engine =
     requestedStage2Engine === 'llm' && !codexAuthStatus?.connected ? 'regex' : requestedStage2Engine;
   runnerEnv.DOCREADER_STAGE2_ENGINE = effectiveStage2Engine;
-  // Keep pipeline resilient in end-user installations: if LLM runtime is unavailable
-  // (for example codex binary missing), Stage 02 auto-falls back to regex.
+  // Keep strict behavior by default: LLM engine should stay LLM unless explicitly overridden.
   runnerEnv.DOCREADER_STAGE2_LLM_FALLBACK_REGEX =
-    process.env.DOCREADER_STAGE2_LLM_FALLBACK_REGEX || '1';
+    process.env.DOCREADER_STAGE2_LLM_FALLBACK_REGEX || '0';
+  if (codexAuthStatus && codexAuthStatus.cliCommand) {
+    runnerEnv.DOCREADER_CODEX_CLI_PATH = String(codexAuthStatus.cliCommand);
+  }
 
   const codexContext = {
     connected: Boolean(codexAuthStatus?.connected),
@@ -459,6 +461,11 @@ async function runPipeline({ files, stage2Engine }) {
     details: {
       connected: codexContext.connected,
       provider: codexAuthStatus && codexAuthStatus.provider ? codexAuthStatus.provider : null,
+      cliCommand: codexAuthStatus && codexAuthStatus.cliCommand ? codexAuthStatus.cliCommand : null,
+      cliCommandExists:
+        codexAuthStatus && Object.prototype.hasOwnProperty.call(codexAuthStatus, 'cliCommandExists')
+          ? codexAuthStatus.cliCommandExists
+          : null,
       expiresAt: codexContext.expiresAt,
       requestedStage2Engine,
       effectiveStage2Engine,

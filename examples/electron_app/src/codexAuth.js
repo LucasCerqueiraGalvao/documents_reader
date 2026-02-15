@@ -362,6 +362,10 @@ async function launchCodexDeviceAuthInteractive(cliCommand) {
 }
 
 function buildStatus(payload) {
+  const cliCommand = resolveCodexCliCommand();
+  const cliCommandLooksAbsolute = cliCommand.includes(path.sep) || cliCommand.includes("/");
+  const cliCommandExists = cliCommandLooksAbsolute ? fs.existsSync(cliCommand) : null;
+
   const token = payload && payload.token ? payload.token : null;
   const identity = payload && payload.identity ? payload.identity : null;
   const hasAccessToken = Boolean(token && token.accessToken);
@@ -385,6 +389,8 @@ function buildStatus(payload) {
     identity,
     configuredAt: payload && payload.configuredAt ? payload.configuredAt : null,
     provider: payload && payload.provider ? payload.provider : "codex-cli",
+    cliCommand,
+    cliCommandExists,
   };
 }
 async function startLoopbackServer(config, expectedState) {
