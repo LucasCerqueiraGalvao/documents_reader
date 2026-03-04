@@ -42,7 +42,6 @@ O projeto automatiza validacoes que normalmente seriam manuais em processos de i
 - Execucao via:
   - CLI (`src/pipeline.py`)
   - API HTTP Flask (`src/api.py`)
-  - Integracao Node (`examples/nodejs_client.js`)
   - Interface desktop Electron (`examples/electron_app`)
 - Stage 05 ativo para os dois fluxos no pipeline atual.
 - Stage 02 com motor selecionavel:
@@ -97,11 +96,8 @@ documents_reader/
 |  |  |- importation/raw/
 |  |  |- exportation/raw/
 |  |- output/
-|- configs/
-|- docs/
 |- examples/
 |  |- electron_app/
-|  |- nodejs_client.js
 |- scripts/
 |- README.md
 ```
@@ -284,12 +280,6 @@ Payload minimo para pipeline completo:
 ```
 
 Para `stage/<n>`, inclua `flow` no body quando necessario (default e `importation`).
-
-### Cliente Node de exemplo
-
-- Arquivo: `examples/nodejs_client.js`
-- Classe: `DocumentProcessorClient`
-- Metodos: `healthCheck`, `processDocuments`, `processSingleStage`
 
 ## Desktop app Electron
 
