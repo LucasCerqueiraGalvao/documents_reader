@@ -1,4 +1,4 @@
-﻿# -*- coding: utf-8 -*-
+# -*- coding: utf-8 -*-
 """
 Stage 04 - Exportation - Generate final report (HTML/MD/JSON)
 
@@ -15,7 +15,7 @@ Outputs:
 Goal:
 - Consolidate per-document field checks (Stage02)
 - Consolidate cross-document comparisons (Stage03)
-- Produce a clean â€œfinalâ€ report for users
+- Produce a clean “final” report for users
 """
 
 from __future__ import annotations
@@ -125,6 +125,15 @@ def doc_kind_label(kind: Any) -> str:
     if k in DOC_KIND_LABELS:
         return DOC_KIND_LABELS[k]
     return (str(kind) if kind is not None else "").upper()
+
+
+def doc_kind_with_original(kind: Any, original_file: Any) -> str:
+    label = doc_kind_label(kind)
+    original = (str(original_file) if original_file is not None else "").strip()
+    if not original:
+        return label
+    return f"{label} ({original})"
+
 
 def expected_docs_rows(stage02_docs: List[dict]) -> List[Tuple[str, int, str]]:
     counts: Dict[str, int] = {}
@@ -265,8 +274,8 @@ def build_stage02_section(stage02_docs: List[dict]) -> Dict[str, Any]:
 
 def normalize_stage03(stage03_obj: dict) -> Dict[str, Any]:
     """
-    Normaliza Stage 03 para um formato Ãºnico, porque ao longo do projeto existiram
-    2 formatos de saÃ­da:
+    Normaliza Stage 03 para um formato único, porque ao longo do projeto existiram
+    2 formatos de saída:
 
     (A) Antigo:
       {
@@ -399,7 +408,7 @@ def normalize_stage03(stage03_obj: dict) -> Dict[str, Any]:
         }
 
     # -------------
-    # Formato B (novo) - duas variaÃ§Ãµes: "pairs" ou "pair_checks"
+    # Formato B (novo) - duas variações: "pairs" ou "pair_checks"
     # -------------
     pairs = stage03_obj.get("pairs") or stage03_obj.get("pair_checks") or []
     groups = stage03_obj.get("groups") or stage03_obj.get("group_checks") or []
@@ -426,7 +435,7 @@ def normalize_stage03(stage03_obj: dict) -> Dict[str, Any]:
     t2, m2, d2, s2 = _read_counts(s.get("groups"))
     t3, m3, d3, s3 = _read_counts(s.get("rules"))
 
-    # Se o summary nÃ£o veio preenchido, calcula em cima das listas
+    # Se o summary não veio preenchido, calcula em cima das listas
     if (t1 + t2 + t3) == 0:
         all_items = pairs + groups + rules
         total = len(all_items)
@@ -479,7 +488,7 @@ def decide_overall_status(
         status = "FAIL"
         reasons.append(f"missing_required_fields={missing_total}")
     if divs_total > 0:
-        # divergÃªncia Ã© importante, mas em geral Ã© ALERT (a menos que vocÃª queira FAIL)
+        # divergência é importante, mas em geral é ALERT (a menos que você queira FAIL)
         if status != "FAIL":
             status = "ALERT"
         reasons.append(f"divergences={divs_total}")
@@ -527,7 +536,7 @@ def build_markdown(report: dict) -> str:
     s03 = report.get("stage03") or {}
 
     lines: List[str] = []
-    lines.append(f"# Report â€” Exportation")
+    lines.append(f"# Report — Exportation")
     lines.append("")
     lines.append(f"- Generated at: **{report.get('generated_at','')}**")
     lines.append(f"- Overall: **{overall.get('status','')}**")
@@ -536,12 +545,12 @@ def build_markdown(report: dict) -> str:
     lines.append("")
 
     # Stage01
-    lines.append("## Stage 01 â€” ExtraÃ§Ã£o de texto (qualidade)")
+    lines.append("## Stage 01 — Extração de texto (qualidade)")
     docs = s01.get("documents") or []
     if not docs:
         lines.append("_Sem dados do Stage 01._")
     else:
-        lines.append("| Documento | PÃ¡ginas | Direct | OCR |")
+        lines.append("| Documento | Páginas | Direct | OCR |")
         lines.append("|---|---:|---:|---:|")
         for d in docs:
             lines.append(
@@ -550,7 +559,7 @@ def build_markdown(report: dict) -> str:
     lines.append("")
 
     # Stage02
-    lines.append("## Stage 02 â€” Campos por documento")
+    lines.append("## Stage 02 — Campos por documento")
     d2 = s02.get("documents") or []
     if not d2:
         lines.append("_Sem dados do Stage 02._")
@@ -568,12 +577,12 @@ def build_markdown(report: dict) -> str:
             miss = ", ".join(d.get("missing_required_fields") or []) or "-"
             warn = "; ".join(d.get("warnings") or []) or "-"
             lines.append(
-                f"| {d.get('original_file','')} | {doc_kind_label(d.get('doc_kind',''))} | {d.get('status','')} | {miss} | {warn} | {d.get('required_present',0)} / {d.get('required_total',0)} | {d.get('fields_present',0)} / {d.get('fields_total', d.get('fields_count', 0))} |"
+                f"| {d.get('original_file','')} | {doc_kind_with_original(d.get('doc_kind',''), d.get('original_file',''))} | {d.get('status','')} | {miss} | {warn} | {d.get('required_present',0)} / {d.get('required_total',0)} | {d.get('fields_present',0)} / {d.get('fields_total', d.get('fields_count', 0))} |"
             )
     lines.append("")
 
     # Stage03
-    lines.append("## Stage 03 â€” ComparaÃ§Ãµes")
+    lines.append("## Stage 03 — Comparações")
     summ = s03.get("summary") or {}
     counts = s03.get("counts") or {}
     lines.append(
@@ -587,7 +596,7 @@ def build_markdown(report: dict) -> str:
     # Divergences list
     divs = (report.get("lists") or {}).get("divergent") or []
     if divs:
-        lines.append("### DivergÃªncias (top 50)")
+        lines.append("### Divergências (top 50)")
         lines.append("| Bucket | Documento A | Documento B | Campo | A | B |")
         lines.append("|---|---|---|---|---|---|")
         for c in divs[:50]:
@@ -597,8 +606,8 @@ def build_markdown(report: dict) -> str:
             )
         lines.append("")
     else:
-        lines.append("### DivergÃªncias")
-        lines.append("_Nenhuma divergÃªncia._")
+        lines.append("### Divergências")
+        lines.append("_Nenhuma divergência._")
         lines.append("")
 
     # Skipped list
@@ -638,7 +647,7 @@ def build_stage02_table_html(stage02_docs: List[dict]) -> str:
         rows.append(
             f"""
         <tr>
-          <td><b>{tr(doc_kind_label(d.get("doc_kind","")))}</b> | {tr(d.get("original_file",""))}</td>
+          <td><b>{tr(doc_kind_with_original(d.get("doc_kind",""), d.get("original_file","")))}</b></td>
           <td><span class="badge {badge_class}">{tr(status_badge)}</span><br><span class="muted">{tr("missing_required_fields="+str(len(d.get("missing_required_fields") or [])) if status=="FAIL" else "warnings="+str(len(d.get("warnings") or [])) if status=="ALERT" else "no_missing_no_warnings")}</span></td>
           <td>{tr(miss)}</td>
           <td>{tr(warn)}</td>
@@ -699,7 +708,7 @@ def build_html(report: dict) -> str:
     if s01_rows:
         stage01_tbl = f"""
         <table class="tbl">
-          <thead><tr><th>Documento</th><th style="text-align:right">PÃ¡ginas</th><th style="text-align:right">Direct</th><th style="text-align:right">OCR</th></tr></thead>
+          <thead><tr><th>Documento</th><th style="text-align:right">Páginas</th><th style="text-align:right">Direct</th><th style="text-align:right">OCR</th></tr></thead>
           <tbody>{''.join(s01_rows)}</tbody>
         </table>
         """
@@ -783,8 +792,8 @@ def build_html(report: dict) -> str:
               <th>Campo</th>
               <th>A</th>
               <th>B</th>
-              <th>EvidÃªncia A</th>
-              <th>EvidÃªncia B</th>
+              <th>Evidência A</th>
+              <th>Evidência B</th>
             </tr>
           </thead>
           <tbody>
@@ -793,7 +802,7 @@ def build_html(report: dict) -> str:
         </table>
         """
     else:
-        div_tbl = "<div class='muted'>Nenhuma divergÃªncia.</div>"
+        div_tbl = "<div class='muted'>Nenhuma divergência.</div>"
 
     # Skipped table
     skips = (report.get("lists") or {}).get("skipped") or []
@@ -839,7 +848,7 @@ def build_html(report: dict) -> str:
 <head>
   <meta charset="utf-8"/>
   <meta name="viewport" content="width=device-width,initial-scale=1"/>
-  <title>Report â€” Exportation</title>
+  <title>Report — Exportation</title>
   <style>
     body {{
       font-family: ui-sans-serif, system-ui, -apple-system, Segoe UI, Roboto, Helvetica, Arial;
@@ -913,31 +922,31 @@ def build_html(report: dict) -> str:
 <body>
 <div class="container">
 
-  <h1>Report â€” Exportation</h1>
+  <h1>Report — Exportation</h1>
   <div class="muted">Generated at {tr(report.get("generated_at",""))}</div>
   <div style="margin-top:10px">
     <span class="badge {badge_class}">{tr(status)}</span>
     <span class="muted" style="margin-left:10px">{tr(reasons)}</span>
   </div>
 
-  <h2>Stage 01 â€” Qualidade da extraÃ§Ã£o</h2>
+  <h2>Stage 01 — Qualidade da extração</h2>
   <div class="section">
     {stage01_tbl}
   </div>
 
-  <h2>Stage 02 â€” Campos por documento</h2>
+  <h2>Stage 02 — Campos por documento</h2>
   <div class="section">
     <h3>Documentos esperados</h3>
     {expected_tbl}
     {stage02_tbl}
   </div>
 
-  <h2>Stage 03 â€” ComparaÃ§Ãµes</h2>
+  <h2>Stage 03 — Comparações</h2>
   <div class="section">
     {stage03_box}
   </div>
 
-  <h2>DivergÃªncias</h2>
+  <h2>Divergências</h2>
   <div class="section">
     {div_tbl}
   </div>
@@ -977,7 +986,7 @@ def main() -> None:
         help="Arquivo _stage03_comparison.json (Stage 03 Exportation)",
     )
     ap.add_argument(
-        "--out", required=True, help="Pasta de saÃ­da Stage 04 report (Exportation)"
+        "--out", required=True, help="Pasta de saída Stage 04 report (Exportation)"
     )
     args = ap.parse_args()
 
@@ -1088,7 +1097,7 @@ def run_stage_04_report(
     write_text(out_html, build_html(report))
 
     if verbose:
-        print("ConcluÃ­do.")
+        print("Concluído.")
         print(f"JSON : {out_json}")
         print(f"MD   : {out_md}")
         print(f"HTML : {out_html}")
@@ -1104,5 +1113,4 @@ def run_stage_04_report(
 
 if __name__ == "__main__":
     main()
-
 

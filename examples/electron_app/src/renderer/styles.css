@@ -163,9 +163,49 @@ h1 {
   align-items: center;
 }
 
+.file-name-wrap {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  min-width: 0;
+}
+
 .file-name {
   font-size: 13px;
   line-height: 1.3;
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.file-remove-btn {
+  border: 1px solid rgba(255, 92, 92, 0.7);
+  background: rgba(255, 92, 92, 0.14);
+  color: #ffd7d7;
+  border-radius: 8px;
+  font-size: 11px;
+  line-height: 1;
+  font-weight: 700;
+  padding: 6px 8px;
+  cursor: pointer;
+  opacity: 0;
+  pointer-events: none;
+  transform: translateX(4px);
+  transition: opacity 120ms ease, transform 120ms ease;
+}
+
+.file-name-wrap:hover .file-remove-btn,
+.file-remove-btn:focus-visible {
+  opacity: 1;
+  pointer-events: auto;
+  transform: translateX(0);
+}
+
+.file-remove-btn:disabled {
+  opacity: 0.5;
+  pointer-events: none;
+  cursor: not-allowed;
 }
 
 .type-choices {

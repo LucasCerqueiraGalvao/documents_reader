@@ -128,6 +128,15 @@ def doc_kind_label(kind: Any) -> str:
         return DOC_KIND_LABELS[k]
     return (str(kind) if kind is not None else "").upper()
 
+
+def doc_kind_with_original(kind: Any, original_file: Any) -> str:
+    label = doc_kind_label(kind)
+    original = (str(original_file) if original_file is not None else "").strip()
+    if not original:
+        return label
+    return f"{label} ({original})"
+
+
 def expected_docs_rows(stage02_docs: List[dict]) -> List[Tuple[str, int, str]]:
     counts: Dict[str, int] = {}
     for d in stage02_docs:
@@ -570,7 +579,7 @@ def build_markdown(report: dict) -> str:
             miss = ", ".join(d.get("missing_required_fields") or []) or "-"
             warn = "; ".join(d.get("warnings") or []) or "-"
             lines.append(
-                f"| {d.get('original_file','')} | {doc_kind_label(d.get('doc_kind',''))} | {d.get('status','')} | {miss} | {warn} | {d.get('required_present',0)} / {d.get('required_total',0)} | {d.get('fields_present',0)} / {d.get('fields_total', d.get('fields_count', 0))} |"
+                f"| {d.get('original_file','')} | {doc_kind_with_original(d.get('doc_kind',''), d.get('original_file',''))} | {d.get('status','')} | {miss} | {warn} | {d.get('required_present',0)} / {d.get('required_total',0)} | {d.get('fields_present',0)} / {d.get('fields_total', d.get('fields_count', 0))} |"
             )
     lines.append("")
 
@@ -640,7 +649,7 @@ def build_stage02_table_html(stage02_docs: List[dict]) -> str:
         rows.append(
             f"""
         <tr>
-          <td><b>{tr(doc_kind_label(d.get("doc_kind","")))}</b> | {tr(d.get("original_file",""))}</td>
+          <td><b>{tr(doc_kind_with_original(d.get("doc_kind",""), d.get("original_file","")))}</b></td>
           <td><span class="badge {badge_class}">{tr(status_badge)}</span><br><span class="muted">{tr("missing_required_fields="+str(len(d.get("missing_required_fields") or [])) if status=="FAIL" else "warnings="+str(len(d.get("warnings") or [])) if status=="ALERT" else "no_missing_no_warnings")}</span></td>
           <td>{tr(miss)}</td>
           <td>{tr(warn)}</td>

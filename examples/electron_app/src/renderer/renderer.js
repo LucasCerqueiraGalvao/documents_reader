@@ -619,8 +619,26 @@ function renderFileList() {
     row.className = 'file-row';
 
     const left = document.createElement('div');
-    left.className = 'file-name';
-    left.textContent = f.name;
+    left.className = 'file-name-wrap';
+
+    const fileName = document.createElement('div');
+    fileName.className = 'file-name';
+    fileName.textContent = f.name;
+
+    const removeBtn = document.createElement('button');
+    removeBtn.type = 'button';
+    removeBtn.className = 'file-remove-btn';
+    removeBtn.textContent = 'Remover';
+    removeBtn.title = 'Remover da analise';
+    removeBtn.disabled = state.running;
+    removeBtn.addEventListener('click', (event) => {
+      if (event && typeof event.preventDefault === 'function') event.preventDefault();
+      if (event && typeof event.stopPropagation === 'function') event.stopPropagation();
+      removeFileByPath(f.path);
+    });
+
+    left.appendChild(fileName);
+    left.appendChild(removeBtn);
 
     const right = document.createElement('div');
     right.className = 'type-choices';
@@ -667,6 +685,14 @@ function renderFileList() {
   }
 
   updateButtons();
+}
+
+function removeFileByPath(pathValue) {
+  const before = state.files.length;
+  state.files = state.files.filter((file) => file.path !== pathValue);
+  if (state.files.length === before) return;
+  appendLog('Arquivo removido da analise: ' + baseName(pathValue) + '\n');
+  renderFileList();
 }
 
 function addFiles(filePaths) {

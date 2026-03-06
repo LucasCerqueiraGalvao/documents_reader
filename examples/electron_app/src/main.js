@@ -559,6 +559,7 @@ async function runPipeline({ files, stage2Engine, flow }) {
   const counters = createDocCounters(requestedFlow);
   const copied = [];
   const docTypeHints = {};
+  const originalFileNames = {};
 
   for (const item of files || []) {
     const srcPath = item.path;
@@ -581,25 +582,36 @@ async function runPipeline({ files, stage2Engine, flow }) {
     const destPath = path.join(rawDir, destName);
 
     await fsp.copyFile(srcPath, destPath);
+    const originalName = path.basename(srcPath || destName);
     runLog.info('pipeline.input.copy', {
       sourcePath: srcPath,
       destPath,
       resolvedType: typePrefix,
       providedDocType: item.docType || null,
+      originalName,
     });
     copied.push({
       from: srcPath,
       to: destPath,
       docType: item.docType || null,
       resolvedType: typePrefix,
+      originalName,
     });
 
     docTypeHints[destName] = toStageDocKind(typePrefix, requestedFlow);
+    originalFileNames[destName] = originalName;
   }
 
   const hintFile = path.join(rawDir, '_doc_type_hints.json');
   await fsp.writeFile(hintFile, JSON.stringify(docTypeHints, null, 2), 'utf-8');
   runLog.info('pipeline.input.hints_written', { hintFile, hints: docTypeHints });
+
+  const originalNameFile = path.join(rawDir, '_original_file_names.json');
+  await fsp.writeFile(originalNameFile, JSON.stringify(originalFileNames, null, 2), 'utf-8');
+  runLog.info('pipeline.input.original_names_written', {
+    originalNameFile,
+    names: originalFileNames,
+  });
 
   if (copied.length) {
     const lines = copied

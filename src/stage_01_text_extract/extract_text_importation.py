@@ -91,6 +91,38 @@ def load_doc_type_hints(in_dir: Path) -> Dict[str, str]:
     return out
 
 
+def load_original_file_names(in_dir: Path) -> Dict[str, str]:
+    """
+    Optional UI-provided original filename map (created by Electron app):
+      <input>/importation/raw/_original_file_names.json
+      {
+        "INVOICE.pdf": "INVOICE 25008685.pdf",
+        "PACKING LIST.pdf": "PL 22500 Middleby BR.pdf"
+      }
+    """
+    names_file = in_dir / "_original_file_names.json"
+    if not names_file.exists():
+        return {}
+    try:
+        raw = names_file.read_bytes().decode("utf-8-sig")
+        obj = json.loads(raw)
+    except Exception:
+        return {}
+    if not isinstance(obj, dict):
+        return {}
+
+    out: Dict[str, str] = {}
+    for k, v in obj.items():
+        if not isinstance(k, str) or not isinstance(v, str):
+            continue
+        key = k.strip()
+        val = v.strip()
+        if not key or not val:
+            continue
+        out[key] = val
+    return out
+
+
 def render_page_to_pil(page: fitz.Page, dpi: int) -> Image.Image:
     zoom = dpi / 72.0
     mat = fitz.Matrix(zoom, zoom)
@@ -218,7 +250,11 @@ def save_outputs(out_dir: Path, pdf_path: Path, payload: Dict[str, Any]) -> None
     out_json = out_dir / f"{pdf_path.stem}_extracted.json"
 
     parts: List[str] = []
-    parts.append(f"FILE: {pdf_path.name}\n")
+    file_name = str(payload.get("file") or pdf_path.name)
+    source_file = str(payload.get("source_file") or pdf_path.name)
+    parts.append(f"FILE: {file_name}\n")
+    if source_file and source_file != file_name:
+        parts.append(f"SOURCE FILE: {source_file}\n")
     if payload.get("tesseract"):
         parts.append(f"TESSERACT: {payload['tesseract']}\n")
     else:
@@ -270,6 +306,7 @@ def run_stage_01_extraction(
         print(f"OUT: {out_dir}")
 
     doc_type_hints = load_doc_type_hints(in_dir)
+    original_file_names = load_original_file_names(in_dir)
 
     results: List[dict] = []
     all_warnings: List[str] = []
@@ -281,6 +318,10 @@ def run_stage_01_extraction(
         payload = extract_pdf_text(
             pdf, ocr_lang=ocr_lang, ocr_dpi=ocr_dpi, min_chars=min_chars
         )
+        payload["source_file"] = pdf.name
+        mapped_original = original_file_names.get(pdf.name)
+        if mapped_original:
+            payload["file"] = mapped_original
         hint = doc_type_hints.get(pdf.name)
         if hint:
             payload["doc_kind_hint"] = hint
@@ -294,7 +335,8 @@ def run_stage_01_extraction(
         ocr_error = sum(1 for p in payload["pages"] if p["method"] == "ocr_error")
 
         file_result = {
-            "file": pdf.name,
+            "file": payload.get("file") or pdf.name,
+            "source_file": pdf.name,
             "output_txt": str(out_dir / f"{pdf.stem}_extracted.txt"),
             "output_json": str(out_dir / f"{pdf.stem}_extracted.json"),
             "doc_kind_hint": hint or "",
