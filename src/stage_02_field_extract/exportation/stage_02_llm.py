@@ -76,12 +76,12 @@ DOC_KIND_FIELD_SPEC: Dict[str, List[Tuple[str, bool]]] = {
     "certificate_of_origin": [
         ("invoice_number", True),
         ("certificate_date", True),
-        ("transport_mode", True),
+        ("transport_mode", False),
         ("exporter_name", True),
         ("importer_name", True),
-        ("net_weight_kg", True),
+        ("net_weight_kg", False),
         ("gross_weight_kg", True),
-        ("total_m2", True),
+        ("total_m2", False),
     ],
     "container_data": [
         ("invoice_number", True),
@@ -104,7 +104,10 @@ DOC_KIND_GUIDE: Dict[str, List[str]] = {
         "Extract freight mode, incoterm, NCM, DUE, RUC, carton/weight/CBM totals, exporter/importer/notify data, and containers.",
     ],
     "certificate_of_origin": [
-        "Extract invoice number, certificate date, transport mode, exporter/importer names, and weights.",
+        "Extract invoice number, certificate date, exporter/importer names, and weights.",
+        "Invoice number may be labeled as Commercial Invoice, Fatura Comercial, or Factura Comercial (EN/PT/ES variants). Do not rely on fixed digit patterns.",
+        "Transport mode is optional in this document type.",
+        "At least one of net_weight_kg or total_m2 must be present. If the document uses area (m2) instead of net weight, populate total_m2.",
     ],
     "container_data": [
         "Extract invoice number, booking number, and all container rows.",
@@ -318,6 +321,33 @@ def _normalize_field(field_name: str, expected_required: bool, field_obj: Any) -
     }
 
 
+def _meta_is_present(meta: Dict[str, Any]) -> bool:
+    if bool(meta.get("present")):
+        return True
+    value = meta.get("value")
+    if value is None:
+        return False
+    if isinstance(value, str):
+        return bool(value.strip())
+    if isinstance(value, list):
+        return len(value) > 0
+    return True
+
+
+def _apply_doc_kind_business_rules(
+    doc_kind: str,
+    normalized_fields: Dict[str, Dict[str, Any]],
+    missing_required: List[str],
+) -> List[str]:
+    missing = list(missing_required)
+    if doc_kind == "certificate_of_origin":
+        net_ok = _meta_is_present(normalized_fields.get("net_weight_kg") or {})
+        area_ok = _meta_is_present(normalized_fields.get("total_m2") or {})
+        if not net_ok and not area_ok:
+            missing.append("net_weight_kg_or_total_m2")
+    return sorted(set(missing))
+
+
 def normalize_llm_stage02_payload(
     payload: Dict[str, Any],
     template: Dict[str, Any],
@@ -360,6 +390,11 @@ def normalize_llm_stage02_payload(
         for k, meta in normalized.items()
         if bool(meta.get("required")) and not bool(meta.get("present"))
     ]
+    missing_required = _apply_doc_kind_business_rules(
+        doc_kind=doc_kind,
+        normalized_fields=normalized,
+        missing_required=missing_required,
+    )
     warnings = _normalize_warnings(warnings_payload)
     return normalized, missing_required, warnings
 

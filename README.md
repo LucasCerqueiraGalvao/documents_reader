@@ -4,6 +4,12 @@ Pipeline para leitura de documentos de comercio exterior, com OCR, extracao de c
 
 Este README e a fonte principal da documentacao do projeto.
 
+## Governanca da documentacao
+
+- Fonte unica de documentacao: este `README.md`.
+- Conteudo antes distribuido em arquivos separados foi consolidado aqui, incluindo arquitetura e visao geral, modos de execucao (CLI, API, Python, Electron), contratos de Stage 02 e Stage 03, troubleshooting, build/release e versionamento.
+- Arquivos markdown legados foram removidos para reduzir duplicacao e manter governanca documental em um unico ponto.
+
 ## Sumario
 
 1. [Objetivo e escopo](#objetivo-e-escopo)
@@ -23,8 +29,7 @@ Este README e a fonte principal da documentacao do projeto.
 15. [Manutencao e evolucao](#manutencao-e-evolucao)
 16. [Riscos operacionais](#riscos-operacionais)
 17. [Versionamento e release](#versionamento-e-release)
-18. [Documentacao extra](#documentacao-extra)
-19. [License](#license)
+18. [License](#license)
 
 ## Objetivo e escopo
 
@@ -449,7 +454,11 @@ Cada `*_fields.json` tem estrutura base:
 `certificate_of_origin`
 
 - Required:
-  - `invoice_number`, `certificate_date`, `transport_mode`, `exporter_name`, `importer_name`, `net_weight_kg`, `gross_weight_kg`, `total_m2`
+  - `invoice_number`, `certificate_date`, `exporter_name`, `importer_name`, `gross_weight_kg`
+- Conditional (at least one):
+  - `net_weight_kg` or `total_m2`
+- Optional:
+  - `transport_mode`
 
 `container_data`
 
@@ -783,10 +792,6 @@ No fluxo atual de release Windows:
 - rodape do app mostra a tag publicada (`versao: <tag>`)
 
 Isso facilita rastrear exatamente qual instalador foi baixado/instalado.
-
-## Documentacao extra
-
-Conteudo complementar/historico foi consolidado em `EXTRA_DOCUMENTATION.md`.
 
 ## License
 
